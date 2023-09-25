@@ -11,7 +11,7 @@ const getHomepage = (req, res) => {
             users = results
             console.log('result homepage = ', results);
 
-            console.log("Users : ", users);
+            console.log("User Information : ", users);
             res.send(JSON.stringify(users));
         }
     );
