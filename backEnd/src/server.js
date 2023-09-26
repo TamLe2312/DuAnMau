@@ -1,5 +1,6 @@
 // require("dotenv").config();
 const express = require("express");
+const cors = require("cors");
 var bodyParser = require("body-parser");
 const path = require("path");
 const configViewEngine = require("./config/viewEngine");
@@ -13,6 +14,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 // parse application/json
 app.use(bodyParser.json());
 
+app.use(cors());
 const port = process.env.PORT || 8888;
 const hostname = process.env.HOST_NAME;
 
