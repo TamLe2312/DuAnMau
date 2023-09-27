@@ -3,6 +3,8 @@ const bcrypt = require("bcrypt");
 const saltRounds = 10;
 const someOtherPlaintextPassword = "not_bacon";
 const mailer = require('../utils/mailer')
+const Mustache = require('mustache');
+const fs = require('fs');
 
 // api account
 const register = (req, res) => {
@@ -101,22 +103,33 @@ const forgotPassword = (req, res) => {
       }
       if (results.length > 0) {
         bcrypt.hash(email, saltRounds, function (err, hash) {
-          let htmlContent = `<a href="${process.env.APP_URL}/verifyToken?email=${email}&token=${hash}">Forgot Password</a>`
           if (!err) {
-            mailer.sendMail(email, "Test", htmlContent)
-            connection.query(
-              "UPDATE Users SET token = ? WHERE email = ?",
-              [hash, email],
-              function (err, results, fields) {
-                if (err) {
-                  console.error(err);
-                  return res.status(500).json({ error: "Lỗi máy chủ" });
-                }
-                else {
-                  return res.status(200).json({ success: "Gửi thành công" });
-                }
+            const filePath = '../backEnd/src/public/html/EmailTemplate.html'
+            fs.readFile(filePath, 'utf8', (err, content) => {
+              if (err) {
+                console.error(`Đã xảy ra lỗi khi đọc file: ${err}`);
+                return;
               }
-            );
+              let data = {
+                name: username,
+                action_url: `${process.env.APP_URL}/verifyToken?email=${email}&token=${hash}`,
+              };
+              let htmlContent = Mustache.render(content, data);
+              mailer.sendMail(email, "Forgot Password Notification", htmlContent)
+              connection.query(
+                "UPDATE Users SET token = ? WHERE email = ?",
+                [hash, email],
+                function (err, results, fields) {
+                  if (err) {
+                    console.error(err);
+                    return res.status(500).json({ error: "Lỗi máy chủ" });
+                  }
+                  else {
+                    return res.status(200).json({ success: "Gửi thành công" });
+                  }
+                }
+              );
+            });
           }
         });
       } else {
