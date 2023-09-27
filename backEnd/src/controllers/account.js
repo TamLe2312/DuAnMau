@@ -28,7 +28,7 @@ const register = (req, res) => {
               .json({ error: "Tên người dùng hoặc email đã tồn tại" });
           }
         }
-      )
+      );
       connection.query(
         "INSERT INTO Users (username, password, email) VALUES (?, ?, ?)",
         [username, hash, email],

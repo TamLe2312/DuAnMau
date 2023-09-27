@@ -1,5 +1,10 @@
 const express = require("express");
-const { login, register, forgotPassword, verifyToken } = require("../controllers/account");
+const {
+  login,
+  register,
+  forgotPassword,
+  verifyToken,
+} = require("../controllers/account");
 const Router = express.Router();
 
 // api login;
