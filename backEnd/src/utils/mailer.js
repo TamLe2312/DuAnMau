@@ -12,12 +12,11 @@ exports.sendMail = (to, subject, htmlContent) => {
       pass: mailConfig.PASSWORD,
     },
   });
-
-  const options = {
-    from: mailConfig.FROM_ADDRESS,
-    to: to,
-    subject: subject,
-    html: htmlContent,
-  };
-  return transport.sendMail(options);
-};
+    const options = {
+        from: '"FPLHub" <mailConfig.FROM_ADDRESS>',
+        to: to,
+        subject: subject,
+        html: htmlContent
+    }
+    return transport.sendMail(options);
+}

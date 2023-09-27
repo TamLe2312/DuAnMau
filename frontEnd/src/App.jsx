@@ -15,7 +15,7 @@ function App() {
         <Route path="/forgotPassword" element={<ForgotPassword />} />
         <Route path="/register" element={<Register />} />
         <Route path="/home" element={<Home />} />
-        <Route path="/verifyToken" element={<VerifyToken />} />
+        <Route path="/verifyToken" exact element={<VerifyToken />} />
       </Routes>
     </>
   );

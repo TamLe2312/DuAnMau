@@ -1,123 +1,149 @@
 import axios from "axios";
-import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import Validation from "../../component/validation/validation";
+import { useLocation, Link, useNavigate } from 'react-router-dom';
 
 
 function VerifyToken() {
+    const Navigate = useNavigate();
     const style = {
-        margin: "0 auto",
+        margin: '0 auto',
         width: 600,
     };
-    const [username, setUserName] = useState("");
-    const [password, setPassword] = useState("");
-    const [Cpassword, setCPassword] = useState("");
-    const [checkU, setCheckU] = useState(false);
-    const [checkP, setCheckP] = useState(false);
-    const [checkCP, setCheckCP] = useState(false);
+    const [values, setValues] = useState({
+        username: "",
+        password: "",
+        Cpassword: "",
+    });
+
+    const [error, setError] = useState({});
+    const [checkError, setCheckError] = useState("");
+    const [checkSuccess, setCheckSuccess] = useState("");
     const [loading, setLoading] = useState(false);
-    const [checkSendError, setCheckSendError] = useState("");
-    const [checkSendSuccess, setCheckSendSuccess] = useState("");
+
+    const [email, setEmail] = useState('');
+
+    const location = useLocation();
+    //Lấy tham số URL
+    useEffect(() => {
+        const searchParams = new URLSearchParams(location.search);
+        const emailParam = searchParams.get('email');
+
+        setEmail(emailParam);
+
+    }, [location]);
+
+    const handleChange = (e) => {
+        setValues({ ...values, [e.target.name]: e.target.value });
+        setError({ ...error, [e.target.name]: "" });
+        setCheckError("");
+    };
+
     const handleClick = async (e) => {
         e.preventDefault();
-        if (checkSendError) {
-            setCheckSendError("");
+        if (checkError) {
+            setCheckError("");
         }
-        if (checkSendSuccess) {
-            setCheckSendSuccess("");
+        if (checkSuccess) {
+            setCheckSuccess("");
         }
-        if (!username) {
-            setCheckU(true);
-            return;
-        }
-        if (!password) {
-            setCheckP(true);
-            return;
-        }
-        if (!Cpassword) {
-            setCheckCP(true);
-            return;
-        }
+        setError(Validation(values));
         try {
             setLoading(true);
-            const response = await axios.get("http://localhost:8080/account/verifyToken/", {
-                username,
-                password,
-                Cpassword,
+            const response = await axios.post("http://localhost:8080/account/verifyToken", {
+                username: values.username.trim(),
+                password: values.password,
+                Cpassword: values.Cpassword,
+                email: email,
             });
-            /* setCheckSendSuccess(response.data.success); */
-            setCheckSendSuccess("OK");
+            setCheckSuccess(response.data.success);
+            Navigate("/", { replace: true });
             setLoading(false);
         } catch (error) {
-            console.log(error);
             setLoading(false);
             if (error.response && error.response.data && error.response.data.error) {
-                setCheckSendError(error.response.data.error);
+                setCheckError(error.response.data.error);
             } else {
-                setCheckSendError('Something went wrong. Please try again.');
+                setCheckError('Something went wrong. Please try again.');
             }
         }
     };
+
     return (
         <>
             <form style={style} className="mt-4">
                 <h3>Verify Account</h3>
-                {checkSendError ? <p className="text-danger">{checkSendError}</p> : ""}
-                {checkSendSuccess ? <p className="text-success">{checkSendSuccess}</p> : ""}
+                {checkError && Object.keys(error).length === 0 ? (
+                    <p className="text-danger">{checkError}</p>
+                ) : (
+                    ""
+                )}
+                {checkSuccess && Object.keys(error).length === 0 ? (
+                    <p className="text-success">{checkSuccess}</p>
+                ) : (
+                    ""
+                )}
                 <div className="mb-3">
                     <label className="form-label">Username</label>
                     <input
                         name="username"
-                        value={username}
+                        value={values.username}
                         onChange={(e) => {
-                            setUserName(e.target.value);
-                            setCheckU(false);
+                            handleChange(e);
                         }}
                         type="text"
-                        className={checkU ? "form-control is-invalid" : "form-control"}
+                        className={error.username ? 'form-control is-invalid' : 'form-control'}
                     />
-                    <div
-                        id="validationServerUsernameFeedback"
-                        className="invalid-feedback"
-                    >
-                        Không bỏ trống thông tin
-                    </div>
+                    {error.username && (
+                        <div
+                            id="validationServerUsernameFeedback"
+                            className="invalid-feedback"
+                        >
+                            {error.username}
+                        </div>
+                    )}
                 </div>
 
                 <div className="mb-3">
                     <label className="form-label">Password</label>
                     <input
                         name="password"
-                        value={password}
+                        value={values.password}
                         onChange={(e) => {
-                            setPassword(e.target.value), setCheckP(false);
+                            handleChange(e);
                         }}
                         type="password"
-                        className={checkP ? "form-control is-invalid" : "form-control"}
+                        className={error.password ? 'form-control is-invalid' : 'form-control'}
                     />
-                    <div
-                        id="validationServerUsernameFeedback"
-                        className="invalid-feedback"
-                    >
-                        Không bỏ trống Thông tin
-                    </div>
+                    {error.password && (
+                        <div
+                            id="validationServerUsernameFeedback"
+                            className="invalid-feedback"
+                        >
+                            {error.password}
+                        </div>
+                    )}
                 </div>
                 <div className="mb-3">
                     <label className="form-label">Confirm Password</label>
                     <input
                         name="Cpassword"
-                        value={Cpassword}
+                        value={values.Cpassword}
                         onChange={(e) => {
-                            setCPassword(e.target.value), setCheckCP(false);
+                            handleChange(e);
                         }}
                         type="password"
-                        className={checkCP ? "form-control is-invalid" : "form-control"}
+                        className={error.Cpassword ? 'form-control is-invalid' : 'form-control'
+                        }
                     />
-                    <div
-                        id="validationServerUsernameFeedback"
-                        className="invalid-feedback"
-                    >
-                        Không bỏ trống Thông tin
-                    </div>
+                    {error.Cpassword && (
+                        <div
+                            id="validationServerUsernameFeedback"
+                            className="invalid-feedback"
+                        >
+                            {error.Cpassword}
+                        </div>
+                    )}
                 </div>
                 <button
                     onClick={handleClick}
