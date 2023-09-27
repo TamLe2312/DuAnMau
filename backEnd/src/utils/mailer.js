@@ -14,7 +14,7 @@ exports.sendMail = (to, subject, htmlContent) => {
     })
 
     const options = {
-        from: mailConfig.FROM_ADDRESS,
+        from: '"FPLHub" <mailConfig.FROM_ADDRESS>',
         to: to,
         subject: subject,
         html: htmlContent
