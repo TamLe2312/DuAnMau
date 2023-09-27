@@ -1,7 +1,7 @@
 const connection = require("../config/database");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
-const someOtherPlaintextPassword = "not_bacon";
+
 // api account
 const register = (req, res) => {
   const { username, password, email } = req.body;
@@ -23,16 +23,29 @@ const register = (req, res) => {
               .status(400)
               .json({ error: "Tên người dùng hoặc email đã tồn tại" });
           }
-          connection.query(
-            "INSERT INTO Users (username, password, email) VALUES (?, ?, ?)",
-            [username, hash, email],
-            function (err, results, fields) {
-              if (err) {
-                return res.status(500).json({ error: "Lỗi máy chủ" });
+          if (username.trim() === "admin") {
+            connection.query(
+              "INSERT INTO Users (username, password, email,role) VALUES (?, ?, ?,?)",
+              [username, hash, email, "admin"],
+              function (err, results, fields) {
+                if (err) {
+                  return res.status(500).json({ error: "Lỗi máy chủ amdin" });
+                }
+                res.status(200).json({ success: "Đăng ký thành công" });
               }
-              res.status(200).json({ success: "Đăng ký thành công" });
-            }
-          );
+            );
+          } else {
+            connection.query(
+              "INSERT INTO Users (username, password, email) VALUES (?, ?, ?)",
+              [username, hash, email],
+              function (err, results, fields) {
+                if (err) {
+                  return res.status(500).json({ error: "Lỗi máy chủ" });
+                }
+                res.status(200).json({ success: "Đăng ký thành công" });
+              }
+            );
+          }
         }
       );
     }
