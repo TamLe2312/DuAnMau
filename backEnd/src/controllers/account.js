@@ -2,7 +2,7 @@ const connection = require("../config/database");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 const someOtherPlaintextPassword = "not_bacon";
-const mailer = require('../utils/mailer')
+const mailer = require("../utils/mailer");
 
 // api account
 const register = (req, res) => {
@@ -26,7 +26,7 @@ const register = (req, res) => {
               .json({ error: "Tên người dùng hoặc email đã tồn tại" });
           }
         }
-      )
+      );
       connection.query(
         "INSERT INTO Users (username, password, email) VALUES (?, ?, ?)",
         [username, hash, email],
@@ -101,9 +101,9 @@ const forgotPassword = (req, res) => {
       }
       if (results.length > 0) {
         bcrypt.hash(email, saltRounds, function (err, hash) {
-          let htmlContent = `<a href="${process.env.APP_URL}/verifyToken?email=${email}&token=${hash}">Forgot Password</a>`
+          let htmlContent = `<a href="${process.env.APP_URL}/verifyToken?email=${email}&token=${hash}">Forgot Password</a>`;
           if (!err) {
-            mailer.sendMail(email, "Test", htmlContent)
+            mailer.sendMail(email, "Test", htmlContent);
           }
         });
         return res.status(200).json({ success: "Gửi thành công" });
@@ -131,13 +131,15 @@ const verifyToken = (req, res) => {
       }
       if (results.length > 0) {
         const match = await bcrypt.compare(email, results[0].email);
+        console.log(match);
       } else {
-        return res.status(400).json({ error: "Sai username.Vui lòng nhập lại" });
+        return res
+          .status(400)
+          .json({ error: "Sai username.Vui lòng nhập lại" });
       }
     }
   );
-
-}
+};
 
 module.exports = {
   login,
