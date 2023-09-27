@@ -1,8 +1,8 @@
 import axios from "axios";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import './login.css'
-
+import Validation from "../../component/validation/validation";
+import "./login.css";
 function Login() {
   const Navigate = useNavigate();
   const style = {
@@ -10,103 +10,96 @@ function Login() {
     width: 600,
   };
 
-  const [username, setUserName] = useState("");
-  const [password, setPassword] = useState("");
-  const [checkU, setCheckU] = useState(false);
-  const [checkP, setCheckP] = useState(false);
+  const [values, setValues] = useState({
+    username: "",
+    password: "",
+  });
+
+  const [error, setError] = useState({});
   const [loading, setLoading] = useState(false);
   const [checkLogin, setCheckLogin] = useState("");
-  const [checked, setChecked] = useState(true);
+
+  const handleChange = (e) => {
+    setValues({ ...values, [e.target.name]: e.target.value });
+    setError({ ...error, [e.target.name]: "" });
+    setCheckLogin("");
+  };
   const handleClick = async (e) => {
     e.preventDefault();
-    if (!username) {
-      setCheckU(true);
-      return;
-    }
-    if (!password) {
-      setCheckP(true);
-      return;
-    }
+    setError(Validation(values));
     try {
       setLoading(true);
       await axios.post("http://localhost:8080/account/login", {
-        username,
-        password,
+        username: values.username.trim(),
+        password: values.password,
       });
       setLoading(false);
-
       Navigate("/home", { replace: true });
-      // console.log(response);
     } catch (error) {
-      setCheckLogin(true);
       setLoading(false);
       setCheckLogin(error.response.data.error);
-    }
-  };
-  const handleCheckboxChange = (event) => {
-    const checkbox = event.target;
-    if (checkbox.checked) {
-      setChecked(true);
-      console.log(checkbox.checked);
-    } else {
-      setChecked(false);
-      console.log(checkbox.checked);
     }
   };
   return (
     <>
       <form style={style} className="mt-4">
-        <h3 className="Heading">Login</h3>
-        {checkLogin ? <p className="text-danger">{checkLogin}</p> : ""}
+        <h3>Login</h3>
+        {checkLogin && Object.keys(error).length === 0 ? (
+          <p className="text-danger">{checkLogin}</p>
+        ) : (
+          ""
+        )}
 
         <div className="mb-3">
           <label className="form-label">Username</label>
           <input
             name="username"
-            value={username}
+            value={values.username}
             onChange={(e) => {
-              setUserName(e.target.value);
-              setCheckU(false);
+              handleChange(e);
             }}
             type="text"
-            className={checkU ? "form-control is-invalid" : "form-control"}
+            className={
+              error.username ? "form-control is-invalid" : "form-control"
+            }
           />
           <div
             id="validationServerUsernameFeedback"
             className="invalid-feedback"
-          >
-            Không bỏ trống thông tin
-          </div>
+          ></div>
+          {error.username && (
+            <div
+              id="validationServerUsernameFeedback"
+              className="invalid-feedback"
+            >
+              {error.username}
+            </div>
+          )}
         </div>
 
         <div className="mb-3">
           <label className="form-label">Password</label>
           <input
             name="password"
-            value={password}
+            value={values.password}
             onChange={(e) => {
-              setPassword(e.target.value), setCheckP(false);
+              handleChange(e);
             }}
             type="password"
-            className={checkP ? "form-control is-invalid" : "form-control"}
+            className={
+              error.password ? "form-control is-invalid" : "form-control"
+            }
           />
-          <div
-            id="validationServerUsernameFeedback"
-            className="invalid-feedback"
-          >
-            Không bỏ trống Thông tin
-          </div>
+          {error.password && (
+            <div
+              id="validationServerUsernameFeedback"
+              className="invalid-feedback"
+            >
+              {error.password}
+            </div>
+          )}
         </div>
-        <div className="mb-3 form-check">
-          <input
-            type="checkbox"
-            className="form-check-input"
-            id="exampleCheck1"
-            onChange={(e) => handleCheckboxChange(e)}
-            checked={checked}
-          />
-          <label className="form-check-label">Check me out</label>
-        </div>
+
         <button
           onClick={handleClick}
           type="submit"
@@ -123,6 +116,7 @@ function Login() {
           )}
           Login
         </button>
+
         <div className="mt-2">
           <Link className="mt-4" to="/forgotPassword">
             Quyên mật khẩu
