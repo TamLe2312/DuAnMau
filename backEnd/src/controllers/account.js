@@ -25,13 +25,16 @@ const register = (req, res) => {
               .status(400)
               .json({ error: "Tên người dùng hoặc email đã tồn tại" });
           }
-          connection.query(
-            "INSERT INTO Users (username, password, email) VALUES (?, ?, ?)",
-            [username, hash, email],
-            function (err, results, fields) {
-              if (err) {
-                console.error(err);
-                return res.status(500).json({ error: "Lỗi máy chủ 2" });
+        }
+      )
+      connection.query(
+        "INSERT INTO Users (username, password, email) VALUES (?, ?, ?)",
+        [username, hash, email],
+        function (err, results, fields) {
+          if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Lỗi máy chủ 2" });
+          }
           if (username.trim() === "admin") {
             connection.query(
               "INSERT INTO Users (username, password, email,role) VALUES (?, ?, ?,?)",
