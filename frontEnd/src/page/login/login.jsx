@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import './login.css'
 
 function Login() {
   const Navigate = useNavigate();
@@ -55,7 +56,7 @@ function Login() {
   return (
     <>
       <form style={style} className="mt-4">
-        <h3>Login</h3>
+        <h3 className="Heading">Login</h3>
         {checkLogin ? <p className="text-danger">{checkLogin}</p> : ""}
 
         <div className="mb-3">

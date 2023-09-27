@@ -4,6 +4,7 @@ import NoMath from "./page/noMath/noMath";
 import Register from "./page/register/register";
 import ForgotPassword from "./page/forgotPassword/forgotPassword";
 import Home from "./page/home/home";
+import VerifyToken from "./page/VerifyToken/VerifyToken";
 
 function App() {
   return (
@@ -14,6 +15,7 @@ function App() {
         <Route path="/forgotPassword" element={<ForgotPassword />} />
         <Route path="/register" element={<Register />} />
         <Route path="/home" element={<Home />} />
+        <Route path="/verifyToken" element={<VerifyToken />} />
       </Routes>
     </>
   );
