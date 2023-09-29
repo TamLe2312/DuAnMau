@@ -1,0 +1,36 @@
+.tin {
+  display: flex;
+  flex-direction: row;
+  /* background-color: rgb(235, 139, 188); */
+  width: 100%;
+  overflow: hidden;
+  padding: 30px 60px;
+}
+
+.tin-group {
+  display: flex;
+  flex-direction: column;
+  margin: 12px;
+  text-align: center;
+}
+.tin-group-img {
+  width: 60px;
+  height: 60px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 1px solid white;
+  padding: 3px;
+}
+.tin-group-name {
+  font-size: 0.8rem;
+}
+@media (max-width: 1033px) {
+  .tin {
+    padding: 30px;
+  }
+}
+@media (max-width: 875px) {
+  .tin {
+    padding: 10px;
+  }
+}
