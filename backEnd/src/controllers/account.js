@@ -2,7 +2,9 @@ const connection = require("../config/database");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
 const someOtherPlaintextPassword = "not_bacon";
-const mailer = require("../utils/mailer");
+const mailer = require('../utils/mailer')
+const Mustache = require('mustache');
+const fs = require('fs');
 
 // api account
 const register = (req, res) => {
@@ -101,12 +103,35 @@ const forgotPassword = (req, res) => {
       }
       if (results.length > 0) {
         bcrypt.hash(email, saltRounds, function (err, hash) {
-          let htmlContent = `<a href="${process.env.APP_URL}/verifyToken?email=${email}&token=${hash}">Forgot Password</a>`;
           if (!err) {
-            mailer.sendMail(email, "Test", htmlContent);
+            const filePath = '../backEnd/src/public/html/EmailTemplate.html'
+            fs.readFile(filePath, 'utf8', (err, content) => {
+              if (err) {
+                console.error(`Đã xảy ra lỗi khi đọc file: ${err}`);
+                return;
+              }
+              let data = {
+                name: username,
+                action_url: `${process.env.APP_URL}/verifyToken?email=${email}&token=${hash}`,
+              };
+              let htmlContent = Mustache.render(content, data);
+              mailer.sendMail(email, "Forgot Password Notification", htmlContent)
+              connection.query(
+                "UPDATE Users SET token = ? WHERE email = ?",
+                [hash, email],
+                function (err, results, fields) {
+                  if (err) {
+                    console.error(err);
+                    return res.status(500).json({ error: "Lỗi máy chủ" });
+                  }
+                  else {
+                    return res.status(200).json({ success: "Gửi thành công" });
+                  }
+                }
+              );
+            });
           }
         });
-        return res.status(200).json({ success: "Gửi thành công" });
       } else {
         return res.status(400).json({ error: "Sai tài khoản hoặc email" });
       }
@@ -115,7 +140,7 @@ const forgotPassword = (req, res) => {
 };
 
 const verifyToken = (req, res) => {
-  const { username, password, Cpassword } = req.body;
+  const { username, password, Cpassword, email } = req.body;
   if (!username || !password || !Cpassword) {
     return res.status(400).json({ error: "Vui lòng nhập đủ thông tin" });
   }
@@ -123,19 +148,52 @@ const verifyToken = (req, res) => {
     return res.status(400).json({ error: "Mật khẩu không khớp" });
   }
   connection.query(
-    "SELECT * FROM Users WHERE username = ?",
-    [username],
+    "SELECT * FROM Users WHERE username = ? AND email = ?",
+    [username, email],
     async function (err, results, fields) {
       if (err) {
         return res.status(500).json({ error: "Lỗi máy chủ" });
       }
       if (results.length > 0) {
-        const match = await bcrypt.compare(email, results[0].email);
-        console.log(match);
+        const match = await bcrypt.compare(email, results[0].token);
+        if (match) {
+          let TokenNew = email + "tamle123123";
+          bcrypt.hash(TokenNew, saltRounds, function (err, hash) {
+            if (err) {
+              return res.status(500).json({ error: "Lỗi máy chủ" });
+            }
+            connection.query(
+              "UPDATE USERS SET token = ? WHERE username = ?",
+              [hash, username],
+              async function (err, results, fields) {
+                if (err) {
+                  return res.status(500).json({ error: "Lỗi máy chủ" });
+                }
+                const myPlaintextPassword = password;
+                bcrypt.hash(myPlaintextPassword, saltRounds, function (err, hash) {
+                  if (err) {
+                    return res.status(500).json({ error: "Lỗi máy chủ" });
+                  }
+                  connection.query(
+                    "UPDATE USERS SET password = ? WHERE username = ?",
+                    [hash, username],
+                    async function (err, results, fields) {
+                      if (err) {
+                        return res.status(500).json({ error: "Lỗi máy chủ" });
+                      }
+                      return res.status(200).json({ success: "Đổi mật khẩu thành công" });
+                    }
+                  );
+                });
+
+              }
+            );
+          });
+        } else {
+          return res.status(400).json({ error: "Có lỗi xảy ra. Vui lòng nhập lại" });
+        }
       } else {
-        return res
-          .status(400)
-          .json({ error: "Sai username.Vui lòng nhập lại" });
+        return res.status(400).json({ error: "Sai username. Vui lòng nhập lại" });
       }
     }
   );

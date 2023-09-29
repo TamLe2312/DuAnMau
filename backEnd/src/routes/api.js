@@ -8,10 +8,11 @@ const {
 const Router = express.Router();
 
 // api login;
-Router.get("/verifyToken", verifyToken);
+
 
 Router.post("/register", register);
 Router.post("/login", login);
 Router.post("/forgotPassword", forgotPassword);
+Router.post("/verifyToken", verifyToken);
 
 module.exports = Router;
