@@ -1,13 +1,17 @@
-import { Link } from "react-router-dom";
+import { Outlet } from "react-router-dom";
+import "./home.css";
+import Navigation from "../../component/navigation/Navigation";
 
 function Home() {
   return (
-    <>
-      <h2>home</h2>
-      <div>
-        <Link to="/">Longout</Link>
+    <div className="container-fluit home">
+      <div className="home-nav">
+        <Navigation />
       </div>
-    </>
+      <div className="home-timeline">
+        <Outlet />
+      </div>
+    </div>
   );
 }
 export default Home;

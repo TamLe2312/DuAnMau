@@ -1,0 +1,43 @@
+.sreach {
+  width: 100%;
+}
+.SreachSuccess {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.SreachSuccess-title-img img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.SreachSuccess-title {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.SreachSuccess-title-name {
+  font-weight: 500;
+}
+.SreachSuccess-title-name2 {
+  opacity: 0.8;
+  text-overflow: ellipsis;
+  width: 260px;
+  white-space: nowrap;
+  display: block;
+}
+.SreachSuccess-parent {
+  overflow: hidden;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}
+.SreachSuccess-parent > button {
+  background: 0;
+  border: none;
+}
