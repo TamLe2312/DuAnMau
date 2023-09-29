@@ -1,0 +1,28 @@
+.suggestions-user {
+  padding: 56px 0;
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+.suggestions-user-img {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+.suggestions-title {
+  display: flex;
+  flex-direction: column;
+}
+.suggestions-title-name {
+  font-weight: 600;
+}
+.suggestions-friend {
+  padding-right: 60px;
+}
+.suggestions-friend-title {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+}

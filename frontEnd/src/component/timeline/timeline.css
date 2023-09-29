@@ -1,0 +1,25 @@
+.timeline {
+  display: flex;
+  flex-direction: row;
+}
+.timeline-post {
+  flex: 0.7;
+  overflow: hidden;
+}
+.timeline-suggestions {
+  flex: 0.3;
+}
+@media (max-width: 875px) {
+  .timeline-suggestions {
+    display: none;
+  }
+  .timeline {
+    justify-content: center;
+  }
+}
+@media (max-width: 540px) {
+  .timeline-post {
+    flex: 1;
+    overflow: hidden;
+  }
+}

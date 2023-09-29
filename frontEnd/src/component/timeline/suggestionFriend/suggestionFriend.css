@@ -1,0 +1,25 @@
+.suggestionFriend {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  align-items: center;
+}
+.suggestionFriend-user {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+.suggestionFriend-user-img {
+  width: 48px;
+  height: 48px;
+  object-fit: cover;
+  border-radius: 50%;
+}
+.suggestionFriend-title {
+  display: flex;
+  flex-direction: column;
+}
+.suggestionFriend-title-name {
+  font-weight: 600;
+}
