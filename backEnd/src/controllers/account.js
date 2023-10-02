@@ -1,13 +1,17 @@
 const connection = require("../config/database");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
-const mailer = require("../utils/mailer");
-const Mustache = require("mustache");
-const fs = require("fs");
+const someOtherPlaintextPassword = "not_bacon";
+const mailer = require('../utils/mailer')
+const Mustache = require('mustache');
+const fs = require('fs');
+const moment = require('moment');
+const session = require('express-session');
+
 
 // api account
 const register = (req, res) => {
-  const { username, password, email, name } = req.body;
+  const { username, password, email } = req.body;
   const myPlaintextPassword = password;
   if (!username || !password || !email) {
     return res.status(400).json({ error: "Vui lòng nhập đủ thông tin" });
@@ -77,9 +81,10 @@ const login = (req, res) => {
       if (results.length > 0) {
         const match = await bcrypt.compare(password, results[0].password);
         if (match) {
+          req.session.uID = results[0].id;
           return res
             .status(200)
-            .json({ id: results[0].id, error: "Đăng nhập thành công" });
+            .json({ id: req.session.uID, error: "Đăng nhập thành công" });
         } else {
           return res.status(400).json({ error: "Sai tài khoản hoặc mật khẩu" });
         }
@@ -199,9 +204,7 @@ const verifyToken = (req, res) => {
             );
           });
         } else {
-          return res
-            .status(400)
-            .json({ error: "Có lỗi xảy ra. Vui lòng nhập lại" });
+          return res.status(400).json({ error: "Có lỗi xảy ra. Vui lòng thử lại" });
         }
       } else {
         return res
@@ -211,6 +214,47 @@ const verifyToken = (req, res) => {
     }
   );
 };
+const ChangeAvatar = (req, res) => {
+
+}
+
+const getDataUser = (req, res) => {
+  // const { id } = req.body;
+  const id = req.params.id;
+  connection.query(
+    "SELECT * FROM Users WHERE id = ?",
+    [id],
+    async function (err, results, fields) {
+      if (err) {
+        return res.status(500).json({ error: "Lỗi máy chủ" });
+      }
+      if (results.length > 0) {
+        return res.status(200).json(results);
+      } else {
+        return res.status(400).json({ error: "Người dùng không tồn tại" });
+      }
+    }
+  );
+}
+
+const UpdateInformationProfile = (req, res) => {
+  const { name, moTa, date, id } = req.body;
+  const formattedDate = moment(date).format('YYYY-MM-DD');
+  if (!name || !moTa || !date) {
+    return res.status(400).json({ error: "Vui lòng nhập đủ thông tin" });
+  }
+  connection.query(
+    "UPDATE Users SET name = ?, birddate = ?, moTa = ? WHERE id = ?",
+    [name, formattedDate, moTa, id],
+    function (err, results, fields) {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Lỗi máy chủ" });
+      }
+      return res.status(200).json({ success: "Cập nhật thông tin thành công" });
+    }
+  );
+}
 
 const detail = (req, res) => {
   // const { id } = req.body;
@@ -275,6 +319,9 @@ module.exports = {
   register,
   forgotPassword,
   verifyToken,
+  ChangeAvatar,
+  UpdateInformationProfile,
+  getDataUser,
   detail,
   listUsers,
 };

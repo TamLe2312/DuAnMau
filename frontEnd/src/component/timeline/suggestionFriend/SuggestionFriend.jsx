@@ -38,7 +38,6 @@ function SuggestionFriend() {
                 ) : (
                   <Avatar>{user.username.charAt(0)}</Avatar>
                 )}
-
                 <div className="suggestionFriend-title">
                   <span className="suggestionFriend-title-name">
                     {user.name || user.username}
