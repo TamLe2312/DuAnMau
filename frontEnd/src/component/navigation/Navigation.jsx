@@ -43,22 +43,8 @@ function Navigation() {
       document.removeEventListener("mousedown", handleOutMore);
     };
   });
-
-  const [size, setSize] = useState(window.innerWidth);
-  const [showSiteBar, setShowSiteBar] = useState(false);
-  useEffect(() => {
-    const handleSile = () => {
-      setSize(window.innerWidth);
-    };
-    window.addEventListener("resize", handleSile);
-    return () => {
-      window.removeEventListener("resize", handleSile);
-    };
-  }, []);
-
   return (
     <div className="navigation">
-      {/* <h2>{size}</h2> */}
       <a href="#">
         <img
           className="navigation-logo"
