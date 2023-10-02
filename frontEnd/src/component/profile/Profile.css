@@ -1,0 +1,140 @@
+*{
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+}
+.containerProfile{
+    padding: 30px 20px 0 !important;
+    box-sizing: content-box;
+    margin-bottom: 0;
+    flex-grow: 1;
+    margin: 0 auto;
+}
+.ProfileHeader{
+    margin-bottom: 44px;
+}
+.ProfileRow{
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+.ProfileRow span{
+    margin-right: 20px;
+}
+.ProfileRow span a {
+    text-decoration: none;
+}
+.ProfileRow span a:hover {
+   color: #9EEDEF
+}
+.ProfileTitle{
+    margin: 0;
+}
+.ProfileLinkContainer{
+    margin-left: 20px;
+}
+.ProfileLinkButton{
+    display: flex;
+    border: 0;
+}
+.ProfileLinkButton a{
+    text-decoration: none;
+    align-items: center;
+    padding: 3px 16px;
+    font-weight: 500;
+    border: 1px solid black;
+    border-radius: 8px;
+}
+.ProfileLinkButton a:hover{
+    background-color: #C6C6C6
+}
+.ProfileSettingIcon{
+    margin: 5px;
+    cursor: pointer;
+}
+.ChangeAvatar{
+    cursor: pointer;
+    height: 100%;
+    padding: 0;
+    width: 100%;
+}
+.ProfileAvatarImg{
+    height: 100%;
+    left: 0;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    top: 0;
+    vertical-align: baseline;
+    width: 100%;
+    cursor: pointer;
+    background-color: white;
+}
+.Profile_Avatar{
+    width: 150px;
+    height: 150px;
+    margin-right: auto;
+    margin-left: auto;
+    display: block;
+}
+.Profile_Avatar_Content{
+    background-color: rgb(var(--ig-secondary-background));
+    border-radius: 50%;
+    box-sizing: border-box;
+    height: 100%;
+    margin: 0 auto;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+    border: 1px solid #eceff1 !important;
+}
+.containerFeature{
+    letter-spacing: 1px;
+}
+.containerFeature .row .col-md-3 a span{
+    text-transform: uppercase;
+}
+.ColumnProfileFeature{
+    cursor: pointer;
+    display: flex!important;
+    flex-direction: row;
+    height: 52px;
+    width: auto !important;
+    justify-content: center;
+    align-items: center;
+}
+.ColumnProfileFeature a span{
+    margin-left: 6px;
+}
+.ModalBody{
+    padding: 0 !important;
+    width: 100%;
+}
+.ButtonChangeAvatarContainer{
+        align-items: center;
+        border: 0;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
+        font: inherit;
+        font-size: 100%;
+        margin: 0;
+        padding: 0;
+        position: relative;
+        vertical-align: baseline;
+}
+.ButtonUploadAvatarProfile{
+    color: #0095f6;
+}
+.ButtonDeleteAvatarProfile{
+    color: #ed4956;
+}
+.ShowImageWhenUpload{
+    width: 300px;
+}
+.ShowImageContainer{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px;
+}
