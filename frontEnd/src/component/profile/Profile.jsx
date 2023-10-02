@@ -18,7 +18,7 @@ function Profile() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState({});
   const [cookies] = useCookies(["session"]);
-  /* const [uploadedFile, setUploadedFile] = useState({}); */
+  const [uploadedFile, setUploadedFile] = useState({});
   const [isHaveAvatar, setIsHaveAvatar] = useState(true);
   const [formValues, setFormValues] = useState({
     name: '',
@@ -56,18 +56,18 @@ function Profile() {
   const handleUploadImage = async () => {
     setLoading(true);
     try {
-      /* const formData = new FormData();
+      const formData = new FormData();
       formData.append("avatar", selectedImage);
 
       // Gửi yêu cầu POST để tải lên file ảnh
       const response = await axios.post("http://localhost:8080/account/changeAvatar", formData);
 
       const imageURL = response.data.imageURL;
-      
-      console.log(imageURL) */
-      /* const { fileName, filePath } = response.data;
+
+      console.log(imageURL)
+      const { fileName, filePath } = response.data;
       setUploadedFile({ fileName, filePath });
-      console.log(uploadedFile); */
+      console.log(uploadedFile);
       handleCloseModalAvatar();
       setLoading(false);
 
