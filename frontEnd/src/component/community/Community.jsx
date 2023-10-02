@@ -1,5 +1,5 @@
 function Community() {
-  return <div>Community</div>;
+  return <div>Community (Cộng đồng)</div>;
 }
 
 export default Community;

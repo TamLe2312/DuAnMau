@@ -14,7 +14,6 @@ import Messenger from "./component/messenger/Messenger";
 function App() {
   return (
     <>
-
       <div>
         <Routes>
           <Route path="/" element={<Login />} />
@@ -23,17 +22,14 @@ function App() {
 
           <Route path="/home" element={<Home />}>
             <Route path="/home" element={<Timeline />} />
-            {/* <Route path="/home/sreach" element={<Sreach />} /> */}
             <Route path="/home/profile" element={<Profile />} />
             <Route path="/home/community" element={<Community />} />
             <Route path="/home/messenger" element={<Messenger />} />
           </Route>
-
           <Route path="/verifyToken" element={<VerifyToken />} />
           <Route path="*" element={<NoMath />} />
         </Routes>
       </div>
-
     </>
   );
 }
