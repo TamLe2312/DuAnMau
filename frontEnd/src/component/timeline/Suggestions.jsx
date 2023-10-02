@@ -1,6 +1,7 @@
+// import { useEffect } from "react";
 import SuggestionFriend from "./suggestionFriend/SuggestionFriend";
 import "./suggestions.css";
-
+// import axios from "axios";
 function Suggestions() {
   return (
     <div className="suggestions">
@@ -21,7 +22,6 @@ function Suggestions() {
           <p> Gợi ý cho bạn</p>
           <p>All</p>
         </div>
-
         <SuggestionFriend />
       </div>
     </div>

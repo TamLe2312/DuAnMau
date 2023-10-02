@@ -8,6 +8,7 @@ const fs = require('fs');
 const moment = require('moment');
 const session = require('express-session');
 
+
 // api account
 const register = (req, res) => {
   const { username, password, email } = req.body;
@@ -109,8 +110,8 @@ const forgotPassword = (req, res) => {
       if (results.length > 0) {
         bcrypt.hash(email, saltRounds, function (err, hash) {
           if (!err) {
-            const filePath = '../backEnd/src/public/html/EmailTemplate.html'
-            fs.readFile(filePath, 'utf8', (err, content) => {
+            const filePath = "../backEnd/src/public/html/EmailTemplate.html";
+            fs.readFile(filePath, "utf8", (err, content) => {
               if (err) {
                 console.error(`Đã xảy ra lỗi khi đọc file: ${err}`);
                 return;
@@ -120,7 +121,11 @@ const forgotPassword = (req, res) => {
                 action_url: `${process.env.APP_URL}/verifyToken?email=${email}&token=${hash}`,
               };
               let htmlContent = Mustache.render(content, data);
-              mailer.sendMail(email, "Forgot Password Notification", htmlContent)
+              mailer.sendMail(
+                email,
+                "Forgot Password Notification",
+                htmlContent
+              );
               connection.query(
                 "UPDATE Users SET token = ? WHERE email = ?",
                 [hash, email],
@@ -128,8 +133,7 @@ const forgotPassword = (req, res) => {
                   if (err) {
                     console.error(err);
                     return res.status(500).json({ error: "Lỗi máy chủ" });
-                  }
-                  else {
+                  } else {
                     return res.status(200).json({ success: "Gửi thành công" });
                   }
                 }
@@ -175,22 +179,27 @@ const verifyToken = (req, res) => {
                   return res.status(500).json({ error: "Lỗi máy chủ" });
                 }
                 const myPlaintextPassword = password;
-                bcrypt.hash(myPlaintextPassword, saltRounds, function (err, hash) {
-                  if (err) {
-                    return res.status(500).json({ error: "Lỗi máy chủ" });
-                  }
-                  connection.query(
-                    "UPDATE USERS SET password = ? WHERE username = ?",
-                    [hash, username],
-                    async function (err, results, fields) {
-                      if (err) {
-                        return res.status(500).json({ error: "Lỗi máy chủ" });
-                      }
-                      return res.status(200).json({ success: "Đổi mật khẩu thành công" });
+                bcrypt.hash(
+                  myPlaintextPassword,
+                  saltRounds,
+                  function (err, hash) {
+                    if (err) {
+                      return res.status(500).json({ error: "Lỗi máy chủ" });
                     }
-                  );
-                });
-
+                    connection.query(
+                      "UPDATE USERS SET password = ? WHERE username = ?",
+                      [hash, username],
+                      async function (err, results, fields) {
+                        if (err) {
+                          return res.status(500).json({ error: "Lỗi máy chủ" });
+                        }
+                        return res
+                          .status(200)
+                          .json({ success: "Đổi mật khẩu thành công" });
+                      }
+                    );
+                  }
+                );
               }
             );
           });
@@ -198,7 +207,9 @@ const verifyToken = (req, res) => {
           return res.status(400).json({ error: "Có lỗi xảy ra. Vui lòng thử lại" });
         }
       } else {
-        return res.status(400).json({ error: "Sai username. Vui lòng nhập lại" });
+        return res
+          .status(400)
+          .json({ error: "Sai username. Vui lòng nhập lại" });
       }
     }
   );
@@ -245,6 +256,64 @@ const UpdateInformationProfile = (req, res) => {
   );
 }
 
+const detail = (req, res) => {
+  // const { id } = req.body;
+  const id = req.params.id;
+  connection.query(
+    "SELECT id,username,birddate,name,avatar FROM Users WHERE id = ?",
+    [id],
+    async function (err, results, fields) {
+      if (err) {
+        return res.status(500).json({ error: "Lỗi máy chủ" });
+      }
+      if (results.length > 0) {
+        return res.status(200).json(results);
+      } else {
+        return res.status(400).json({ error: "Người dùng không tồn tại" });
+      }
+    }
+  );
+};
+
+const listUsers = (req, res) => {
+  if (req.params.slug == 0) {
+    const limit = 5; // Số lượng người dùng hiển thị trên mỗi trang
+    connection.query(
+      "SELECT id,username,birddate,name,avatar FROM Users WHERE role <> 'admin' ORDER BY RAND() LIMIT ?",
+      [limit],
+      function (err, results, fields) {
+        if (err) {
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
+        if (results.length > 0) {
+          return res.status(200).json(results);
+        } else {
+          return res.status(400).json({ error: "Không có người dùng" });
+        }
+      }
+    );
+  } else {
+    const page = parseInt(req.params.slug) || 1;
+    const limit = 5; // Số lượng người dùng hiển thị trên mỗi trang
+    const offset = (page - 1) * limit; // Vị trí bắt đầu lấy dữ liệu
+
+    connection.query(
+      "SELECT id,username,birddate,name,avatar FROM Users WHERE role <> 'admin' LIMIT ? OFFSET ?",
+      [limit, offset],
+      function (err, results, fields) {
+        if (err) {
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
+        if (results.length > 0) {
+          return res.status(200).json(results);
+        } else {
+          return res.status(400).json({ error: "Không có người dùng" });
+        }
+      }
+    );
+  }
+};
+
 module.exports = {
   login,
   register,
@@ -253,4 +322,6 @@ module.exports = {
   ChangeAvatar,
   UpdateInformationProfile,
   getDataUser,
+  detail,
+  listUsers,
 };
