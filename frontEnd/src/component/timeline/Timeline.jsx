@@ -1,6 +1,6 @@
 import { useState } from "react";
 import Post from "./post/Post";
-import Suggestions from "./suggestions";
+import Suggestions from "./Suggestions";
 import "./timeline.css";
 import Tin from "./tin/Tin";
 
