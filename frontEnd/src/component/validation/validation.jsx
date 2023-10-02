@@ -14,6 +14,16 @@ const Validation = (value) => {
   } else if (value.Cpassword.length < 5) {
     error.Cpassword = "Confirm password phải trên 5 kí tự";
   }
+  if (!value.name) {
+    error.name = "Không bỏ trống name";
+  }
+  if (!value.moTa) {
+    error.moTa = "Không bỏ trống mô tả";
+  }
+  if (!value.birthday) {
+    error.birthday = "Không bỏ trống ngày sinh nhật";
+  }
+
 
   return error;
 };

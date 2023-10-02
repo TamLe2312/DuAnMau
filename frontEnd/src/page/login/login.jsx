@@ -29,12 +29,13 @@ function Login() {
     setError(Validation(values));
     try {
       setLoading(true);
-      await axios.post("http://localhost:8080/account/login", {
+      let res = await axios.post("http://localhost:8080/account/login", {
         username: values.username.trim(),
         password: values.password,
       });
+      let uID = res.data.id;
       setLoading(false);
-      Navigate("/home", { replace: true });
+      Navigate("/home", { state: { uID } }, { replace: true });
     } catch (error) {
       setLoading(false);
       setCheckLogin(error.response.data.error);
