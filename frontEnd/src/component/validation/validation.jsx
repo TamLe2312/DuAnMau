@@ -19,14 +19,12 @@ const Validation = (value) => {
   if (!value.email){
     error.email ="không được để trống email";
   }
-  if(value.email){
-    
-    let regex = "/^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/";
-    if(!regex.test(value.email) ){
-      error.email="Email không hợp lệ";
-   }
+  if (value.email) {
+    let regex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    if (!regex.test(value.email)) {
+      error.email = "Email không hợp lệ";
+    }
   }
-
 
   return error;
 };

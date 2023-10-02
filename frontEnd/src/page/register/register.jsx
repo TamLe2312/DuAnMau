@@ -144,7 +144,7 @@ function register() {
 
         <div className="mt-2">
           <Link className="mt-4" to="/forgotPassword">
-            Quyên mật khẩu
+            Quên mật khẩu
           </Link>
         </div>
         <div>
