@@ -41,16 +41,16 @@ function Login() {
       setCheckLogin(error.response.data.error);
     }
   };
+
   return (
     <>
       <form style={style} className="mt-4">
         <h3>Login</h3>
-        {checkLogin && Object.keys(error).length === 0 ? (
+        {checkLogin && Object.keys(error).length === 1 ? (
           <p className="text-danger">{checkLogin}</p>
         ) : (
           ""
         )}
-
         <div className="mb-3">
           <label className="form-label">Username</label>
           <input
@@ -115,7 +115,7 @@ function Login() {
               <span className="visually-hidden">Loading...</span>
             </div>
           )}
-          Login
+          &nbsp;Login
         </button>
 
         <div className="mt-2">

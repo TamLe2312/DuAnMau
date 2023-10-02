@@ -1,0 +1,14 @@
+.modal-body {
+  display: flex;
+  flex-direction: row;
+  padding: 8px !important;
+  /* justify-content: space-evenly; */
+}
+.modal-body-row {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+#contained-modal-title-vcenter {
+  font-size: 1.2rem;
+}
