@@ -5,6 +5,7 @@ const {
   forgotPassword,
   verifyToken,
   detail,
+  listUsers,
 } = require("../controllers/account");
 const Router = express.Router();
 
@@ -14,6 +15,6 @@ Router.post("/register", register);
 Router.post("/login", login);
 Router.post("/forgotPassword", forgotPassword);
 Router.post("/verifyToken", verifyToken);
-Router.post("/detail/:id", detail);
-
+Router.get("/detail/:id", detail);
+Router.get("/listUsers/:slug", listUsers);
 module.exports = Router;

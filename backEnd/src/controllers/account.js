@@ -213,7 +213,8 @@ const verifyToken = (req, res) => {
 };
 
 const detail = (req, res) => {
-  const { id } = req.body;
+  // const { id } = req.body;
+  const id = req.params.id;
   connection.query(
     "SELECT id,username,birddate,name,avatar FROM Users WHERE id = ?",
     [id],
@@ -230,10 +231,50 @@ const detail = (req, res) => {
   );
 };
 
+const listUsers = (req, res) => {
+  if (req.params.slug == 0) {
+    const limit = 5; // Số lượng người dùng hiển thị trên mỗi trang
+    connection.query(
+      "SELECT id,username,birddate,name,avatar FROM Users WHERE role <> 'admin' ORDER BY RAND() LIMIT ?",
+      [limit],
+      function (err, results, fields) {
+        if (err) {
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
+        if (results.length > 0) {
+          return res.status(200).json(results);
+        } else {
+          return res.status(400).json({ error: "Không có người dùng" });
+        }
+      }
+    );
+  } else {
+    const page = parseInt(req.params.slug) || 1;
+    const limit = 5; // Số lượng người dùng hiển thị trên mỗi trang
+    const offset = (page - 1) * limit; // Vị trí bắt đầu lấy dữ liệu
+
+    connection.query(
+      "SELECT id,username,birddate,name,avatar FROM Users WHERE role <> 'admin' LIMIT ? OFFSET ?",
+      [limit, offset],
+      function (err, results, fields) {
+        if (err) {
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
+        if (results.length > 0) {
+          return res.status(200).json(results);
+        } else {
+          return res.status(400).json({ error: "Không có người dùng" });
+        }
+      }
+    );
+  }
+};
+
 module.exports = {
   login,
   register,
   forgotPassword,
   verifyToken,
   detail,
+  listUsers,
 };
