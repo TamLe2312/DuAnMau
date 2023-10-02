@@ -1,0 +1,47 @@
+:root {
+  --bg-color: white;
+  --color: black;
+
+  /* --bg-color: black;
+  --color: white; */
+}
+
+.home {
+  background-color: var(--bg-color);
+  color: var(--color);
+  display: flex;
+  flex-direction: row;
+}
+.home * {
+  color: var(--color);
+}
+.home-nav {
+  flex: 0.2;
+}
+.home-timeline {
+  flex: 0.8;
+}
+@media (max-width: 1033px) {
+  .home-nav {
+    flex: 0.1;
+  }
+  .home-timeline {
+    flex: 0.9;
+  }
+  .navigation {
+    min-width: 88px;
+  }
+}
+
+@media (max-width: 640px) {
+  .home {
+    background-color: var(--bg-color);
+    color: var(--color);
+    display: block;
+  }
+}
+@media (max-width: 540px) {
+  html {
+    font-size: 14px;
+  }
+}

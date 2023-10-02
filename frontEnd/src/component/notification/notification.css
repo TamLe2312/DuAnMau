@@ -1,0 +1,30 @@
+.notification-child {
+  display: flex;
+  flex-direction: row;
+  align-items: top;
+  gap: 10px;
+  padding: 8px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+}
+.notification-child:hover {
+  cursor: pointer;
+}
+.notification-child.doc {
+  background: rgb(220, 213, 213);
+}
+.notification-img img {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.notification-title > p span {
+  font-weight: 500;
+}
+.notification-title > p {
+  margin-bottom: 8px;
+}
+.notification-title > span {
+  font-size: 0.9rem;
+}
