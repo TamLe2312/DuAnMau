@@ -57,21 +57,23 @@
     height: 100%;
     padding: 0;
     width: 100%;
+    background-color: transparent !important;
+    border: 0 !important;
 }
 .ProfileAvatarImg{
-    height: 100%;
     left: 0;
     margin: 0;
     padding: 0;
     position: absolute;
     top: 0;
-    vertical-align: baseline;
+    vertical-align: middle;
     width: 100%;
     cursor: pointer;
     background-color: white;
 }
 .Profile_Avatar{
-    width: 150px;
+    max-width: 150px;
+    width: auto;
     height: 150px;
     margin-right: auto;
     margin-left: auto;

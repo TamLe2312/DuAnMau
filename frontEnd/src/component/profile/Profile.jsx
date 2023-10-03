@@ -10,16 +10,16 @@ import { useCookies } from "react-cookie";
 import Validation from "../../component/validation/validation";
 import "./Profile.css"
 
-function Profile() {
 
+function Profile() {
   const [showModalAvatar, setShowModalAvatar] = useState(false);
   const [showModalInformationProfile, setShowModalInformationProfile] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [ImageURL, setImageURL] = useState(null);
+  const [Images, setImages] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState({});
   const [cookies] = useCookies(["session"]);
-  const [uploadedFile, setUploadedFile] = useState({});
-  const [isHaveAvatar, setIsHaveAvatar] = useState(true);
   const [formValues, setFormValues] = useState({
     name: '',
     moTa: '',
@@ -49,28 +49,49 @@ function Profile() {
     setShowModalInformationProfile(true);
   };
 
-  const handleInputChange = (event) => {
-    setSelectedImage(event.target.files[0]);
+  const handleInputChange = async (event) => {
+    const selectedFile = event.target.files[0];
+    if (!selectedFile) {
+      console.log("Chưa có ảnh");
+      return; // Dừng việc xử lý nếu không có file được chọn
+    }
+    // Kiểm tra nếu selectedFile không phải là file ảnh
+    if (!selectedFile.type.startsWith("image/")) {
+      console.log("Không phải ảnh");
+      event.target.value = null;
+      return;
+    }
+
+    // Kiểm tra kích thước của file ảnh
+    const maxSizeInBytes = 10 * 1024 * 1024; // 10MB
+    if (selectedFile.size > maxSizeInBytes) {
+      console.log("File ảnh quá lớn");
+      event.target.value = null;
+      return;
+    }
+    const imageUrl = URL.createObjectURL(selectedFile);
+    setSelectedImage(imageUrl);
+    setImages(selectedFile)
   };
 
   const handleUploadImage = async () => {
     setLoading(true);
     try {
       const formData = new FormData();
-      formData.append("avatar", selectedImage);
-
-      // Gửi yêu cầu POST để tải lên file ảnh
-      const response = await axios.post("http://localhost:8080/account/changeAvatar", formData);
-
-      const imageURL = response.data.imageURL;
-
-      console.log(imageURL)
-      const { fileName, filePath } = response.data;
-      setUploadedFile({ fileName, filePath });
-      console.log(uploadedFile);
+      formData.append("avatar", Images);
+      formData.append("id", id);
+      const response = await axios.post("http://localhost:8080/account/changeAvatar", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      const newAvatar = response.data.avatar;
+      setUserData(prevUserData => ({
+        ...prevUserData,
+        avatar: newAvatar,
+      }));
       handleCloseModalAvatar();
       setLoading(false);
-
     } catch (error) {
       setLoading(false);
       console.error(error);
@@ -96,7 +117,13 @@ function Profile() {
         id: id,
       });
       setLoading(false);
-      setUserData(JSON.parse(response.config.data));
+      const nameUser = response.data.name;
+      const moTaUser = response.data.moTa;
+      setUserData(prevUserData => ({
+        ...prevUserData,
+        name: nameUser,
+        moTa: moTaUser,
+      }));
       handleCloseModalInformationProfile();
     } catch (error) {
       setLoading(false);
@@ -125,11 +152,17 @@ function Profile() {
                 <div className="Profile_Avatar">
                   <div className="Profile_Avatar_Content">
                     <Button className='ChangeAvatar' variant="primary" onClick={handleShowModalAvatar} title='ChangeAvatar'>
-                      {selectedImage ? (
-                        <img className="ProfileAvatarImg" src={URL.createObjectURL(selectedImage)} alt="Avatar" />
-                      ) : (
-                        <img className="ProfileAvatarImg" src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg" alt="Avatar" />
-                      )}
+                      {loading ? (
+                        <div>Loading....</div>
+                      ) :
+                        (
+                          userData && !userData.avatar ? (
+                            <img className="ProfileAvatarImg" src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg" alt="Avatar" />
+                          ) : (
+                            <img className="ProfileAvatarImg" src={userData.avatar} alt="Avatar" />
+                          )
+                        )
+                      }
                     </Button>
                     <Modal show={showModalAvatar} onHide={handleCloseModalAvatar}>
                       <Modal.Header closeButton>
@@ -138,11 +171,11 @@ function Profile() {
                       <Modal.Body>
                         <div className="ShowImageContainer">
                           {selectedImage ? (
-                            <img className="ShowImageWhenUpload" src={URL.createObjectURL(selectedImage)} alt="Avatar" />)
+                            <img className="ShowImageWhenUpload" src={(selectedImage)} alt="Avatar" />)
                             : (<div></div>)
                           }
                         </div>
-                        <Form>
+                        <Form encType="multipart/form-data">
                           <Form.Group controlId="avatar">
                             <Form.Label>Tải ảnh đại diện</Form.Label>
                             <Form.Control
@@ -159,16 +192,16 @@ function Profile() {
                         <Button variant="secondary" onClick={handleCloseModalAvatar}>
                           Close
                         </Button>
-                        {!isHaveAvatar ? (
+                        {userData.avatar ? (
                           <Button variant="danger" disabled={selectedImage || loading} onClick={handleUploadImage}>
-                            {loading ? "Remove..." : "Remove Image"}
+                            {loading ? "Remove..." : "Remove Avatar"}
                           </Button>
                         ) : (
                           <div></div>
                         )
                         }
                         <Button variant="primary" disabled={!selectedImage || loading} onClick={handleUploadImage}>
-                          {loading ? "Uploading..." : "Upload Image"}
+                          {loading ? "Uploading..." : "Upload Avatar"}
                         </Button>
                       </Modal.Footer>
                     </Modal>
