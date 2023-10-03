@@ -57,12 +57,10 @@ function Navigation() {
           alt=""
         />
       </a>
-
       <NavLink className="navigation-button" to={"/home"} end>
         <HomeIcon />
         <span>Trang chủ</span>
       </NavLink>
-
       <button
         className="navigation-button"
         onClick={(e) => toggleShow(e)}
@@ -71,7 +69,6 @@ function Navigation() {
         <SearchIcon />
         <span>Tìm kiếm</span>
       </button>
-
       <NavLink className="navigation-button" to={"/home/community"}>
         <PeopleIcon />
         <span>Cộng đồng</span>
@@ -80,7 +77,6 @@ function Navigation() {
         <ChatBubbleIcon />
         <span>Tin nhắn</span>
       </NavLink>
-
       <button
         className="navigation-button"
         onClick={(e) => toggleShow(e)}
@@ -89,12 +85,15 @@ function Navigation() {
         <FavoriteIcon />
         <span>Thông báo</span>
       </button>
-
-      <button className="navigation-button" onClick={() => setModalShow(true)}>
+      <button
+        className="navigation-button"
+        onClick={() => {
+          setModalShow(true);
+        }}
+      >
         <AddToPhotosIcon />
         <span>Tạo</span>
       </button>
-
       <NavLink className="navigation-button" to={"/home/profile"}>
         <img
           className="navigation-button-img"
@@ -103,7 +102,6 @@ function Navigation() {
         />
         <span>Trang cá nhân</span>
       </NavLink>
-
       <div ref={menuRef} className="navigation-button-father">
         <button
           className="navigation-button navigation-button-more"
@@ -146,7 +144,7 @@ function Navigation() {
       <MyModal
         show={modalShow}
         onHide={() => setModalShow(false)}
-        childrens={[<ImgNews />, <ContentNews />]}
+        childrens={[<ImgNews />]}
       />
     </div>
   );

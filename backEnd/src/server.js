@@ -6,8 +6,9 @@ const path = require("path");
 const configViewEngine = require("./config/viewEngine");
 const webRoutes = require("./routes/web");
 const api = require("./routes/api");
+const postApi = require("./routes/postApi");
 const connection = require("./config/database");
-const session = require('express-session');
+const session = require("express-session");
 
 const app = express();
 
@@ -15,21 +16,26 @@ const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 // parse application/json
 app.use(bodyParser.json());
-
+app.use(express.static("public"));
 app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:5173", // Thay đổi thành nguồn gốc của bạn
+  })
+);
 const port = process.env.PORT || 8888;
 const hostname = process.env.HOST_NAME;
 
 app.use(
-    session({
-        secret: 'tamle23122004bmT!@#',
-        resave: false,
-        saveUninitialized: true,
-        cookie: {
-            secure: false,
-            httpOnly: true,
-        }, // Nếu sử dụng HTTPS, đặt secure: true
-    })
+  session({
+    secret: "tamle23122004bmT!@#",
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+      secure: false,
+      httpOnly: true,
+    }, // Nếu sử dụng HTTPS, đặt secure: true
+  })
 );
 
 configViewEngine(app);
@@ -38,7 +44,9 @@ app.use("/", webRoutes);
 
 // api account
 app.use("/account", api);
+// api post
+app.use("/post", postApi);
 
 app.listen(port, () => {
-    console.log(`Example app listening on port ${port}`);
+  console.log(`Example app listening on port ${port}`);
 });

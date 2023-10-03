@@ -9,15 +9,16 @@ function Suggestions() {
   const [userData, setUserData] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const id = cookies.userId;
-
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/account/getDataUser/${id}`); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
+        const response = await axios.get(
+          `http://localhost:8080/account/getDataUser/${id}`
+        ); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
         setUserData(response.data[0]);
         setIsLoading(false);
       } catch (error) {
-        console.error('Error fetching user data:', error);
+        console.error("Error fetching user data:", error);
       }
     };
     fetchData();
@@ -27,29 +28,22 @@ function Suggestions() {
       <div className="suggestions-user">
         {isLoading ? (
           <div>Loading...</div>
+        ) : userData && userData.avatar ? (
+          <img
+            className="suggestionFriend-user-img"
+            src={userData.avatar}
+            alt=""
+          />
         ) : (
-          userData && userData.avatar ? (
-            <img className="suggestionFriend-user-img" src={userData.avatar} alt="" />
-          ) : (
-            <Avatar>{userData.username.charAt(0)}</Avatar>
-          )
+          <Avatar>{userData.username.charAt(0)}</Avatar>
         )}
         <div className="suggestions-title">
           {userData.name ? (
             <span className="suggestions-title-name">{userData.name}</span>
-          ) :
-            (
-              <span className="suggestions-title-name">{userData.username}</span>
-            )
-          }
-          {userData.moTa ? (
-            <span>{userData.moTa}</span>
-          ) :
-            (
-              <span></span>
-            )
-          }
-
+          ) : (
+            <span className="suggestions-title-name">{userData.username}</span>
+          )}
+          {userData.moTa ? <span>{userData.moTa}</span> : <span></span>}
         </div>
       </div>
 

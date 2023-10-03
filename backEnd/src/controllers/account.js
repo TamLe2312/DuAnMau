@@ -1,13 +1,11 @@
 const connection = require("../config/database");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
-const someOtherPlaintextPassword = "not_bacon";
-const mailer = require('../utils/mailer')
-const Mustache = require('mustache');
-const fs = require('fs');
-const moment = require('moment');
-const session = require('express-session');
-
+const mailer = require("../utils/mailer");
+const Mustache = require("mustache");
+const fs = require("fs");
+const moment = require("moment");
+const session = require("express-session");
 
 // api account
 const register = (req, res) => {
@@ -204,7 +202,9 @@ const verifyToken = (req, res) => {
             );
           });
         } else {
-          return res.status(400).json({ error: "Có lỗi xảy ra. Vui lòng thử lại" });
+          return res
+            .status(400)
+            .json({ error: "Có lỗi xảy ra. Vui lòng thử lại" });
         }
       } else {
         return res
@@ -214,9 +214,7 @@ const verifyToken = (req, res) => {
     }
   );
 };
-const ChangeAvatar = (req, res) => {
-
-}
+const ChangeAvatar = (req, res) => {};
 
 const getDataUser = (req, res) => {
   // const { id } = req.body;
@@ -235,11 +233,11 @@ const getDataUser = (req, res) => {
       }
     }
   );
-}
+};
 
 const UpdateInformationProfile = (req, res) => {
   const { name, moTa, date, id } = req.body;
-  const formattedDate = moment(date).format('YYYY-MM-DD');
+  const formattedDate = moment(date).format("YYYY-MM-DD");
   if (!name || !moTa || !date) {
     return res.status(400).json({ error: "Vui lòng nhập đủ thông tin" });
   }
@@ -254,7 +252,7 @@ const UpdateInformationProfile = (req, res) => {
       return res.status(200).json({ success: "Cập nhật thông tin thành công" });
     }
   );
-}
+};
 
 const detail = (req, res) => {
   // const { id } = req.body;
