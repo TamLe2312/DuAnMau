@@ -10,8 +10,8 @@ function Home() {
   if (state) {
     setCookie("userId", state.uID);
   }
-  return (
 
+  return (
     <div className="container-fluit home">
       <div className="home-nav">
         <Navigation />
