@@ -1,11 +1,14 @@
 const connection = require("../config/database");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
-const mailer = require("../utils/mailer");
-const Mustache = require("mustache");
-const fs = require("fs");
-const moment = require("moment");
-const session = require("express-session");
+
+const someOtherPlaintextPassword = "not_bacon";
+const mailer = require('../utils/mailer')
+const Mustache = require('mustache');
+const fs = require('fs');
+const moment = require('moment');
+
+
 
 // api account
 const register = (req, res) => {
@@ -214,7 +217,31 @@ const verifyToken = (req, res) => {
     }
   );
 };
-const ChangeAvatar = (req, res) => {};
+
+
+const changeAvatar = (req, res) => {
+  const id = req.body.id;
+  const fileName = req.file.filename; // Sửa thành fileName thay vì filename
+  const filePath = "/uploads/" + fileName;
+  const baseURL = "http://localhost:5173/";
+  const imageURL = `${baseURL.slice(0, -1)}${filePath}`;
+  connection.query(
+    "UPDATE Users SET avatar = ? WHERE id = ?",
+    [imageURL, id],
+    function (err, results, fields) {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Lỗi máy chủ" });
+      }
+      return res.status(200).json({
+        success: "Cập nhật avatar thành công", avatar: imageURL,
+        fileName: fileName,
+        filePath: filePath,
+        id: id
+      });
+    }
+  );
+};
 
 const getDataUser = (req, res) => {
   // const { id } = req.body;
@@ -249,7 +276,7 @@ const UpdateInformationProfile = (req, res) => {
         console.error(err);
         return res.status(500).json({ error: "Lỗi máy chủ" });
       }
-      return res.status(200).json({ success: "Cập nhật thông tin thành công" });
+      return res.status(200).json({ name: name, moTa: moTa, success: "Cập nhật thông tin thành công" });
     }
   );
 };
@@ -317,7 +344,7 @@ module.exports = {
   register,
   forgotPassword,
   verifyToken,
-  ChangeAvatar,
+  changeAvatar,
   UpdateInformationProfile,
   getDataUser,
   detail,
