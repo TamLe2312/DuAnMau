@@ -5,6 +5,7 @@ const someOtherPlaintextPassword = "not_bacon";
 const mailer = require('../utils/mailer')
 const Mustache = require('mustache');
 const fs = require('fs');
+const path = require('path');
 const moment = require('moment');
 
 
@@ -215,11 +216,13 @@ const verifyToken = (req, res) => {
 };
 
 const changeAvatar = (req, res) => {
-  const id = req.body.id;
-  const fileName = req.file.filename; // Sửa thành fileName thay vì filename
+  const { hasAvatar, id } = req.body;
+  const fileName = req.file.filename;
   const filePath = "/uploads/" + fileName;
   const baseURL = "http://localhost:5173/";
   const imageURL = `${baseURL.slice(0, -1)}${filePath}`;
+  const uploadDir = path.join(__dirname, '../../../frontEnd/uploads');
+  const filePathOldAvatar = path.join(uploadDir, hasAvatar);
   connection.query(
     "UPDATE Users SET avatar = ? WHERE id = ?",
     [imageURL, id],
@@ -228,11 +231,52 @@ const changeAvatar = (req, res) => {
         console.error(err);
         return res.status(500).json({ error: "Lỗi máy chủ" });
       }
+      if (fs.existsSync(filePathOldAvatar)) {
+        // Xóa tệp tin cũ
+        try {
+          fs.unlinkSync(filePathOldAvatar);
+        } catch (error) {
+          return res.status(500).json({ error: "Lỗi khi cập nhật avatar" });
+        }
+      }
       return res.status(200).json({
         success: "Cập nhật avatar thành công", avatar: imageURL,
         fileName: fileName,
         filePath: filePath,
         id: id
+      });
+    }
+  );
+};
+const RemoveAvatar = (req, res) => {
+  const { imagePath, id } = req.body;
+  const uploadDir = path.join(__dirname, '../../../frontEnd/uploads');
+  const filePath = path.join(uploadDir, imagePath);
+  connection.query(
+    "UPDATE users SET avatar = NULL WHERE id = ?",
+    [id],
+    async function (err, results, fields) {
+      if (err) {
+        return res.status(500).json({ error: "Lỗi máy chủ" });
+      }
+      // Kiểm tra xem tệp tin có tồn tại hay không
+      fs.access(filePath, fs.constants.F_OK, (err) => {
+        if (err) {
+          // Tệp tin không tồn tại, trả về lỗi hoặc thông báo không tìm thấy tệp tin
+          return res.status(404).json({ error: "Tệp tin không tồn tại" });
+        }
+        // Xóa tệp tin
+        fs.unlink(filePath, (error) => {
+          if (error) {
+            // Lỗi khi xóa tệp tin, trả về lỗi hoặc thông báo lỗi xóa tệp tin
+            return res.status(500).json({ error: "Lỗi khi xóa tệp tin" });
+          }
+
+          // Xóa thành công, trả về thông báo thành công hoặc mã thành công
+          return res
+            .status(200)
+            .json({ success: "Xóa ảnh thành công" });
+        });
       });
     }
   );
@@ -259,10 +303,10 @@ const getDataUser = (req, res) => {
 
 const UpdateInformationProfile = (req, res) => {
   const { name, moTa, date, id } = req.body;
-  const formattedDate = moment(date).format('YYYY-MM-DD');
   if (!name || !moTa || !date) {
     return res.status(400).json({ error: "Vui lòng nhập đủ thông tin" });
   }
+  const formattedDate = moment(date).format('YYYY-MM-DD');
   connection.query(
     "UPDATE Users SET name = ?, birddate = ?, moTa = ? WHERE id = ?",
     [name, formattedDate, moTa, id],
@@ -333,6 +377,48 @@ const listUsers = (req, res) => {
     );
   }
 };
+const ChangePassword = (req, res) => {
+  const { OldPassword, NewPassword, NewConfirmPassword, id } = req.body;
+  if (!OldPassword || !NewPassword || !NewConfirmPassword) {
+    return res.status(400).json({ error: "Không được bỏ trống trường thông tin" });
+  }
+  if (NewPassword !== NewConfirmPassword) {
+    return res.status(400).json({ error: "Mật khẩu mới và mật khẩu xác nhận phải giống nhau" });
+  }
+  connection.query(
+    "SELECT * FROM Users WHERE id = ?",
+    [id],
+    async function (err, results, fields) {
+      if (err) {
+        return res.status(500).json({ error: "Lỗi máy chủ" });
+      }
+      if (results.length > 0) {
+        const match = await bcrypt.compare(OldPassword, results[0].password);
+        if (match) {
+          const myPlaintextPassword = NewPassword;
+          bcrypt.hash(myPlaintextPassword, saltRounds, function (err, hash) {
+            if (!err) {
+              connection.query(
+                "UPDATE Users SET password = ? WHERE id = ?",
+                [hash, id],
+                function (err, results, fields) {
+                  if (err) {
+                    return res.status(500).json({ error: "Lỗi máy chủ" });
+                  }
+                  return res.status(200).json({ success: "Cập nhật mật khẩu thành công" });
+                }
+              );
+            }
+          });
+        } else {
+          return res.status(400).json({ error: "Sai mật khẩu đăng nhập" });
+        }
+      } else {
+        return res.status(400).json({ error: "Lỗi máy chủ" });
+      }
+    }
+  );
+}
 
 module.exports = {
   login,
@@ -344,4 +430,6 @@ module.exports = {
   getDataUser,
   detail,
   listUsers,
+  RemoveAvatar,
+  ChangePassword,
 };
