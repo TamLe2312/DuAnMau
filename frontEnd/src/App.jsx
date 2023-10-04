@@ -15,6 +15,7 @@ import Messenger from "./component/messenger/Messenger";
 //React Toastify
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Admin from "./component/ADMIN/Admin";
 function App() {
   return (
     <>
@@ -29,6 +30,7 @@ function App() {
             <Route path="/home/profile" element={<Profile />} />
             <Route path="/home/community" element={<Community />} />
             <Route path="/home/messenger" element={<Messenger />} />
+            <Route path="/home/admin" element={<Admin />} />
           </Route>
           <Route path="/verifyToken" element={<VerifyToken />} />
           <Route path="*" element={<NoMath />} />

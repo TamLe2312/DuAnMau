@@ -1,5 +1,5 @@
 import "./navigation.css";
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import Offcanvas from "react-bootstrap/Offcanvas";
 import HomeIcon from "@mui/icons-material/Home";
@@ -14,7 +14,10 @@ import Notification from "../notification/Notification";
 import LogoutIcon from "@mui/icons-material/Logout";
 import WbSunnyIcon from "@mui/icons-material/WbSunny";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
-
+import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
+import MyModal from "../modal/Modal";
+import ImgNews from "../createNews/ImgNews";
+import ContentNews from "../createNews/ContentNews";
 function Navigation() {
   const [show, setShow] = useState(false);
   const [checkS, setCheckS] = useState("");
@@ -43,6 +46,8 @@ function Navigation() {
       document.removeEventListener("mousedown", handleOutMore);
     };
   });
+  const [modalShow, setModalShow] = useState(false);
+
   return (
     <div className="navigation">
       <a href="#">
@@ -64,7 +69,6 @@ function Navigation() {
         <SearchIcon />
         <span>Tìm kiếm</span>
       </button>
-
       <NavLink className="navigation-button" to={"/home/community"}>
         <PeopleIcon />
         <span>Cộng đồng</span>
@@ -73,7 +77,6 @@ function Navigation() {
         <ChatBubbleIcon />
         <span>Tin nhắn</span>
       </NavLink>
-
       <button
         className="navigation-button"
         onClick={(e) => toggleShow(e)}
@@ -82,8 +85,12 @@ function Navigation() {
         <FavoriteIcon />
         <span>Thông báo</span>
       </button>
-
-      <button className="navigation-button">
+      <button
+        className="navigation-button"
+        onClick={() => {
+          setModalShow(true);
+        }}
+      >
         <AddToPhotosIcon />
         <span>Tạo</span>
       </button>
@@ -95,8 +102,7 @@ function Navigation() {
         />
         <span>Trang cá nhân</span>
       </NavLink>
-
-      <div ref={menuRef}>
+      <div ref={menuRef} className="navigation-button-father">
         <button
           className="navigation-button navigation-button-more"
           onClick={handleShowMore}
@@ -107,6 +113,11 @@ function Navigation() {
         {/* {showMore && ( */}
         <div className={`dropdown-more ${showMore ? "active" : "inactive"}`}>
           <ul className="dropdown-more-ul">
+            <Drop
+              text={"ADMIN"}
+              path={"home/admin"}
+              icon={<AdminPanelSettingsIcon />}
+            />
             <div onClick={handleMode}>
               <Drop
                 Title={"Chuyển chế độ"}
@@ -130,6 +141,11 @@ function Navigation() {
           {checkS === "tim-kiem" ? <Search /> : <Notification />}
         </Offcanvas.Body>
       </Offcanvas>
+      <MyModal
+        show={modalShow}
+        onHide={() => setModalShow(false)}
+        childrens={[<ImgNews />]}
+      />
     </div>
   );
 }
@@ -140,7 +156,7 @@ function Drop(props) {
   return (
     <li className="dopItem">
       {props.Title}
-      <a href={"/" + props.path}>{props.text}</a>
+      <Link to={"/" + props.path}>{props.text}</Link>
       {props.icon}
     </li>
   );
