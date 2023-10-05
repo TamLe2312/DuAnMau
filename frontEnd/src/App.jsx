@@ -25,6 +25,7 @@ function App() {
 
         <Route path="/home" element={<Home />}>
           <Route path="/home" element={<Timeline />} />
+          <Route path="/home/profile/user/:userID" element={<Profile />} />
           <Route path="/home/profile" element={<Profile />} />
           <Route path="/home/community" element={<Community />} />
           <Route path="/home/messenger" element={<Messenger />} />
