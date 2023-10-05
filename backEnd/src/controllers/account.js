@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt");
 const saltRounds = 10;
 
 const someOtherPlaintextPassword = "not_bacon";
+
 const mailer = require('../utils/mailer')
 const Mustache = require('mustache');
 const fs = require('fs');
@@ -219,7 +220,6 @@ const verifyToken = (req, res) => {
   );
 };
 
-
 const changeAvatar = (req, res) => {
   const { hasAvatar, id } = req.body;
   const fileName = req.file.filename;
@@ -245,10 +245,11 @@ const changeAvatar = (req, res) => {
         }
       }
       return res.status(200).json({
-        success: "Cập nhật avatar thành công", avatar: imageURL,
+        success: "Cập nhật avatar thành công",
+        avatar: imageURL,
         fileName: fileName,
         filePath: filePath,
-        id: id
+        id: id,
       });
     }
   );
@@ -320,7 +321,11 @@ const UpdateInformationProfile = (req, res) => {
         console.error(err);
         return res.status(500).json({ error: "Lỗi máy chủ" });
       }
-      return res.status(200).json({ name: name, moTa: moTa, success: "Cập nhật thông tin thành công" });
+      return res.status(200).json({
+        name: name,
+        moTa: moTa,
+        success: "Cập nhật thông tin thành công",
+      });
     }
   );
 };
@@ -367,7 +372,7 @@ const listUsers = (req, res) => {
     const offset = (page - 1) * limit; // Vị trí bắt đầu lấy dữ liệu
 
     connection.query(
-      "SELECT id,username,birddate,name,avatar FROM Users WHERE role <> 'admin' LIMIT ? OFFSET ?",
+      "SELECT id,username,birddate,name,avatar FROM Users WHERE role <> 'admin' ORDER BY id DESC LIMIT ? OFFSET ?",
       [limit, offset],
       function (err, results, fields) {
         if (err) {

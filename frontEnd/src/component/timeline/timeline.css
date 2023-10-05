@@ -9,6 +9,9 @@
 .timeline-suggestions {
   flex: 0.3;
 }
+.timeline-post-end {
+  text-align: center;
+}
 @media (max-width: 875px) {
   .timeline-suggestions {
     display: none;

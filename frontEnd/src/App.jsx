@@ -7,7 +7,6 @@ import Home from "./page/home/home";
 import VerifyToken from "./page/VerifyToken/VerifyToken";
 import "../style.scss";
 import Timeline from "./component/timeline/Timeline";
-// import Sreach from "./component/sreach/Sreach";
 import Profile from "./component/profile/Profile";
 import Community from "./component/community/Community";
 import Messenger from "./component/messenger/Messenger";
@@ -18,12 +17,12 @@ import 'react-toastify/dist/ReactToastify.css';
 import Admin from "./component/ADMIN/Admin";
 function App() {
   return (
-    <>
-      <div>
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/forgotPassword" element={<ForgotPassword />} />
-          <Route path="/register" element={<Register />} />
+    <div>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/forgotPassword" element={<ForgotPassword />} />
+        <Route path="/register" element={<Register />} />
+
 
           <Route path="/home" element={<Home />}>
             <Route path="/home" element={<Timeline />} />
@@ -51,6 +50,7 @@ function App() {
         <ToastContainer />
       </div>
     </>
+
   );
 }
 

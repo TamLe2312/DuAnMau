@@ -4,7 +4,11 @@ import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import axios from "axios";
+import { Context } from "../../page/home/home";
+import { useContext } from "react";
 function ContextNews(props) {
+  const dataa = useContext(Context);
+
   const location = useLocation();
   const [cookies, setCookie] = useCookies(["session"]);
   const state = location.state;
@@ -34,6 +38,7 @@ function ContextNews(props) {
       setContent(contentNews.textContent);
     });
   }, []);
+
   const handleShow = () => {
     setShow(false);
   };
@@ -134,10 +139,12 @@ function ContextNews(props) {
                 type="button"
                 className="btn btn-primary"
                 onClick={handlePost}
+                onMouseDown={dataa}
               >
                 Bài viết
               </button>
               <button
+                // onClick={dataa}
                 disabled={!content}
                 type="button"
                 className="btn btn-primary"
