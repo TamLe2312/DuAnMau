@@ -12,8 +12,8 @@ import Community from "./component/community/Community";
 import Messenger from "./component/messenger/Messenger";
 
 //React Toastify
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import Admin from "./component/ADMIN/Admin";
 function App() {
   return (
@@ -23,34 +23,31 @@ function App() {
         <Route path="/forgotPassword" element={<ForgotPassword />} />
         <Route path="/register" element={<Register />} />
 
-
-          <Route path="/home" element={<Home />}>
-            <Route path="/home" element={<Timeline />} />
-            <Route path="/home/profile" element={<Profile />} />
-            <Route path="/home/community" element={<Community />} />
-            <Route path="/home/messenger" element={<Messenger />} />
-            <Route path="/home/admin" element={<Admin />} />
-          </Route>
-          <Route path="/verifyToken" element={<VerifyToken />} />
-          <Route path="*" element={<NoMath />} />
-        </Routes>
-        <ToastContainer
-          position="top-right"
-          autoClose={5000}
-          hideProgressBar={false}
-          newestOnTop={false}
-          closeOnClick
-          rtl={false}
-          pauseOnFocusLoss
-          draggable
-          pauseOnHover
-          theme="light"
-        />
-        {/* Same as */}
-        <ToastContainer />
-      </div>
-    </>
-
+        <Route path="/home" element={<Home />}>
+          <Route path="/home" element={<Timeline />} />
+          <Route path="/home/profile" element={<Profile />} />
+          <Route path="/home/community" element={<Community />} />
+          <Route path="/home/messenger" element={<Messenger />} />
+          <Route path="/home/admin" element={<Admin />} />
+        </Route>
+        <Route path="/verifyToken" element={<VerifyToken />} />
+        <Route path="*" element={<NoMath />} />
+      </Routes>
+      <ToastContainer
+        position="top-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
+      {/* Same as */}
+      <ToastContainer />
+    </div>
   );
 }
 
