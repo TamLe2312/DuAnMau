@@ -162,7 +162,12 @@ function Navigation() {
           {checkS === "tim-kiem" ? <Search /> : <Notification />}
         </Offcanvas.Body>
       </Offcanvas>
-      <MyModal show={modalShow} onHide={handleHide} childrens={[<ImgNews />]} />
+      <MyModal
+        text={"Tạo bài viết"}
+        show={modalShow}
+        onHide={handleHide}
+        childrens={<ImgNews />}
+      />
     </div>
   );
 }

@@ -92,5 +92,4 @@ function ImgNews() {
     </>
   );
 }
-
 export default ImgNews;

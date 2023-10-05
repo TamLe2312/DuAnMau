@@ -9,9 +9,13 @@ import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import MyModal from "../../modal/Modal";
+import MorePost from "./MorePost";
 // import { Context } from "../../../page/home/home";
 // import { useContext } from "react";
 function Post({ user, time, like, avatar, title, name, id, userid }) {
+  const [modalShow, setModalShow] = useState(false);
+
   const [expanded, setExpanded] = useState(false);
   const postFooterRef = useRef(null);
   const [them, setThem] = useState(false);
@@ -68,6 +72,12 @@ function Post({ user, time, like, avatar, title, name, id, userid }) {
       }
     }
   };
+  const handleDELETE = (e) => {
+    setModalShow((s) => !s);
+  };
+  const handleHide = () => {
+    setModalShow(false);
+  };
   return (
     <>
       <div className="post" key={id}>
@@ -80,7 +90,7 @@ function Post({ user, time, like, avatar, title, name, id, userid }) {
               {avatar ? (
                 <img className="post-avatar" src={avatar} />
               ) : (
-                <Avatar> {name.charAt(0) || username.charAt(0)}</Avatar>
+                <Avatar> {name.charAt(0) || user.charAt(0)}</Avatar>
               )}
               &nbsp;<span>{name || user}</span>
             </Link>
@@ -93,7 +103,10 @@ function Post({ user, time, like, avatar, title, name, id, userid }) {
                 : Math.floor(minute / 60) + " Giờ"}
             </span>
           </div>
-          {/* <MoreHorizIcon /> */}
+          {/* -------------more------------ */}
+          <span className="post-more-delete">
+            <MoreHorizIcon onClick={() => handleDELETE(id)} />
+          </span>
         </div>
         <div className="post-img">
           {img && img.length > 0 ? (
@@ -159,6 +172,12 @@ function Post({ user, time, like, avatar, title, name, id, userid }) {
         </div>
         <hr />
       </div>
+      <MyModal
+        text={""}
+        show={modalShow}
+        onHide={handleHide}
+        childrens={<MorePost id={id} />}
+      />
     </>
   );
 }
