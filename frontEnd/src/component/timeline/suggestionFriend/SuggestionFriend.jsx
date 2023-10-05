@@ -8,7 +8,7 @@ function SuggestionFriend() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        let res = await axios.get("http://localhost:8080/account/listUsers/2");
+        let res = await axios.get("http://localhost:8080/account/listUsers/1");
         // console.log(res.data);
         setListU(res.data);
       } catch (error) {

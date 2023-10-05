@@ -21,7 +21,7 @@ app.use(express.static("public"));
 app.use(cors());
 app.use(
   cors({
-    origin: "http://localhost:5173", // Thay đổi thành nguồn gốc của bạn
+    origin: "http://localhost:5173", // Thay đổi thành nguồn gốc của you
   })
 );
 const port = process.env.PORT || 8888;

@@ -10,8 +10,6 @@ import { useCookies } from "react-cookie";
 import Validation from "../../component/validation/validation";
 import "./Profile.css";
 
-
-
 function Profile() {
   const [showModalAvatar, setShowModalAvatar] = useState(false);
   const [showModalInformationProfile, setShowModalInformationProfile] =
@@ -73,7 +71,7 @@ function Profile() {
     }
     const imageUrl = URL.createObjectURL(selectedFile);
     setSelectedImage(imageUrl);
-    setImages(selectedFile)
+    setImages(selectedFile);
   };
 
   const handleUploadImage = async () => {
@@ -83,13 +81,17 @@ function Profile() {
 
       formData.append("avatar", Images);
       formData.append("id", id);
-      const response = await axios.post("http://localhost:8080/account/changeAvatar", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await axios.post(
+        "http://localhost:8080/account/changeAvatar",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
       const newAvatar = response.data.avatar;
-      setUserData(prevUserData => ({
+      setUserData((prevUserData) => ({
         ...prevUserData,
         avatar: newAvatar,
       }));
@@ -126,7 +128,7 @@ function Profile() {
       setLoading(false);
       const nameUser = response.data.name;
       const moTaUser = response.data.moTa;
-      setUserData(prevUserData => ({
+      setUserData((prevUserData) => ({
         ...prevUserData,
         name: nameUser,
         moTa: moTaUser,
@@ -167,20 +169,27 @@ function Profile() {
               <div className="col-md-3" style={{ padding: 0, marginRight: 30 }}>
                 <div className="Profile_Avatar">
                   <div className="Profile_Avatar_Content">
-
-                    <Button className='ChangeAvatar' variant="primary" onClick={handleShowModalAvatar} title='ChangeAvatar'>
+                    <Button
+                      className="ChangeAvatar"
+                      variant="primary"
+                      onClick={handleShowModalAvatar}
+                      title="ChangeAvatar"
+                    >
                       {loading ? (
                         <div>Loading....</div>
-                      ) :
-                        (
-                          userData && !userData.avatar ? (
-                            <img className="ProfileAvatarImg" src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg" alt="Avatar" />
-                          ) : (
-                            <img className="ProfileAvatarImg" src={userData.avatar} alt="Avatar" />
-                          )
-                        )
-                      }
-
+                      ) : userData && !userData.avatar ? (
+                        <img
+                          className="ProfileAvatarImg"
+                          src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg"
+                          alt="Avatar"
+                        />
+                      ) : (
+                        <img
+                          className="ProfileAvatarImg"
+                          src={userData.avatar}
+                          alt="Avatar"
+                        />
+                      )}
                     </Button>
                     <Modal
                       show={showModalAvatar}
@@ -192,11 +201,14 @@ function Profile() {
                       <Modal.Body>
                         <div className="ShowImageContainer">
                           {selectedImage ? (
-
-                            <img className="ShowImageWhenUpload" src={(selectedImage)} alt="Avatar" />)
-                            : (<div></div>)
-                          }
-
+                            <img
+                              className="ShowImageWhenUpload"
+                              src={selectedImage}
+                              alt="Avatar"
+                            />
+                          ) : (
+                            <div></div>
+                          )}
                         </div>
                         <Form encType="multipart/form-data">
                           <Form.Group controlId="avatar">
@@ -220,16 +232,22 @@ function Profile() {
                         </Button>
 
                         {userData.avatar ? (
-                          <Button variant="danger" disabled={selectedImage || loading} onClick={handleUploadImage}>
+                          <Button
+                            variant="danger"
+                            disabled={selectedImage || loading}
+                            onClick={handleUploadImage}
+                          >
                             {loading ? "Remove..." : "Remove Avatar"}
                           </Button>
                         ) : (
                           <div></div>
-                        )
-                        }
-                        <Button variant="primary" disabled={!selectedImage || loading} onClick={handleUploadImage}>
+                        )}
+                        <Button
+                          variant="primary"
+                          disabled={!selectedImage || loading}
+                          onClick={handleUploadImage}
+                        >
                           {loading ? "Uploading..." : "Upload Avatar"}
-
                         </Button>
                       </Modal.Footer>
                     </Modal>
