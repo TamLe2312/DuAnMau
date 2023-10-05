@@ -1,3 +1,5 @@
+import React from "react";
+
 const Validation = (value) => {
   let error = {};
   if (!value.username) {
@@ -13,6 +15,15 @@ const Validation = (value) => {
     error.Cpassword = "Không bỏ trống confirm password";
   } else if (value.Cpassword.length < 5) {
     error.Cpassword = "Confirm password phải trên 5 kí tự";
+  }
+  if (!value.email){
+    error.email ="không được để trống email";
+  }
+  if (value.email) {
+    let regex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    if (!regex.test(value.email)) {
+      error.email = "Email không hợp lệ";
+    }
   }
   if (!value.name) {
     error.name = "Không bỏ trống name";
