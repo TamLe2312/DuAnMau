@@ -33,7 +33,7 @@ function register() {
       await axios.post("http://localhost:8080/account/register", {
         username: values.username.trim(),
         password: values.password,
-        email : values.email,
+        email: values.email,
 
       });
       setLoading(false);
@@ -139,7 +139,7 @@ function register() {
               <span className="visually-hidden">Loading...</span>
             </div>
           )}
-          Login
+          Đăng ký
         </button>
 
         <div className="mt-2">
@@ -148,8 +148,8 @@ function register() {
           </Link>
         </div>
         <div>
-          <Link className="mt-4" to="/login">
-            Đăng kí
+          <Link className="mt-4" to="/">
+            Login
           </Link>
         </div>
       </form>
