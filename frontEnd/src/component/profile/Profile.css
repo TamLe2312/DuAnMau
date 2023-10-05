@@ -134,9 +134,15 @@
 .ShowImageWhenUpload{
     width: 300px;
 }
-.ShowImageContainer{
+.ProfileShowImageContainer{
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 10px;
+}
+.ProfileAvatarModalBody{
+    display: block;
+}
+.ProfileInformationModalBody{
+    display: block;
 }

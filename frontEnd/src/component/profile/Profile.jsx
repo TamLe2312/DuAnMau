@@ -225,16 +225,15 @@ function Profile() {
                       <Modal.Header closeButton>
                         <Modal.Title>Thay đổi ảnh đại diện</Modal.Title>
                       </Modal.Header>
-                      <Modal.Body>
-                        <div className="ShowImageContainer">
+                      <Modal.Body className="ProfileAvatarModalBody">
+                        <div className="ProfileShowImageContainer">
                           {selectedImage ? (
-
                             <img className="ShowImageWhenUpload" src={(selectedImage)} alt="Avatar" />)
                             : (<div></div>)
                           }
 
                         </div>
-                        <Form encType="multipart/form-data">
+                        <Form encType="multipart/form-data" style={{ paddingLeft: 10 }}>
                           <Form.Group controlId="avatar">
                             <Form.Label>Tải ảnh đại diện</Form.Label>
                             <Form.Control
@@ -294,7 +293,7 @@ function Profile() {
                       <Modal.Header closeButton>
                         <Modal.Title>Chỉnh sửa thông tin cá nhân</Modal.Title>
                       </Modal.Header>
-                      <Modal.Body>
+                      <Modal.Body className="ProfileInformationModalBody">
                         <Form onSubmit={handleSubmit}>
                           <Form.Group controlId="formName">
                             <Form.Label>Name</Form.Label>
