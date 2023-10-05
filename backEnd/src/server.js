@@ -12,7 +12,6 @@ const connection = require("./config/database");
 const session = require("express-session");
 
 const app = express();
-
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
 // parse application/json
@@ -21,7 +20,7 @@ app.use(express.static("public"));
 app.use(cors());
 app.use(
   cors({
-    origin: "http://localhost:5173", // Thay đổi thành nguồn gốc của bạn
+    origin: "http://localhost:5173", // Thay đổi thành nguồn gốc của you
   })
 );
 const port = process.env.PORT || 8888;

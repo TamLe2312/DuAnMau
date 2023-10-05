@@ -18,7 +18,13 @@ import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import MyModal from "../modal/Modal";
 import ImgNews from "../createNews/ImgNews";
 import ContentNews from "../createNews/ContentNews";
+import { useCookies } from "react-cookie";
+
 function Navigation() {
+  const [cookies] = useCookies(["session"]);
+  const id = cookies.userId;
+  // console.log("chủ: " + id);
+
   const [show, setShow] = useState(false);
   const [checkS, setCheckS] = useState("");
   const [showMore, setShowMore] = useState(false);
@@ -45,18 +51,39 @@ function Navigation() {
     return () => {
       document.removeEventListener("mousedown", handleOutMore);
     };
-  });
+  }, []);
   const [modalShow, setModalShow] = useState(false);
 
+  const handleHide = () => {
+    setModalShow(false);
+  };
+  const logout = (
+    <>
+      <span className="dropdown-span"> Đăng xuất </span>&nbsp;
+      <LogoutIcon />
+    </>
+  );
+  const admin = (
+    <>
+      <span className="dropdown-span"> ADMIN</span> &nbsp;
+      <AdminPanelSettingsIcon />
+    </>
+  );
+  const theme = (
+    <>
+      <span className="dropdown-span">Giao diện</span>&nbsp;{" "}
+      {mode ? <WbSunnyIcon /> : <DarkModeIcon />}
+    </>
+  );
   return (
     <div className="navigation">
-      <a href="#">
+      <Link to="/home">
         <img
           className="navigation-logo"
           src="https://www.docschmidt.org/uploads/1/4/3/0/143018339/print-204012274_orig.jpg"
           alt=""
         />
-      </a>
+      </Link>
       <NavLink className="navigation-button" to={"/home"} end>
         <HomeIcon />
         <span>Trang chủ</span>
@@ -94,7 +121,7 @@ function Navigation() {
         <AddToPhotosIcon />
         <span>Tạo</span>
       </button>
-      <NavLink className="navigation-button" to={"/home/profile"}>
+      <NavLink className="navigation-button" to={`/home/profile`} end>
         <img
           className="navigation-button-img"
           src="https://i.pinimg.com/564x/85/ac/d4/85acd43486608fa7f3edc5df40e9f268.jpg"
@@ -110,21 +137,15 @@ function Navigation() {
           <MenuIcon />
           <span>Xem thêm</span>
         </button>
+
         {/* {showMore && ( */}
         <div className={`dropdown-more ${showMore ? "active" : "inactive"}`}>
           <ul className="dropdown-more-ul">
-            <Drop
-              text={"ADMIN"}
-              path={"home/admin"}
-              icon={<AdminPanelSettingsIcon />}
-            />
-            <div onClick={handleMode}>
-              <Drop
-                Title={"Chuyển chế độ"}
-                icon={mode ? <WbSunnyIcon /> : <DarkModeIcon />}
-              />
+            <Drop text={admin} path={"home/admin"} />
+            <div onClick={handleMode} className="dropdown-more-title">
+              <Drop Title={theme} />
             </div>
-            <Drop text={"Đăng xuất"} path={""} icon={<LogoutIcon />} />
+            <Drop text={logout} path={""} />
           </ul>
         </div>
       </div>
@@ -141,17 +162,13 @@ function Navigation() {
           {checkS === "tim-kiem" ? <Search /> : <Notification />}
         </Offcanvas.Body>
       </Offcanvas>
-      <MyModal
-        show={modalShow}
-        onHide={() => setModalShow(false)}
-        childrens={[<ImgNews />]}
-      />
+      <MyModal show={modalShow} onHide={handleHide} childrens={[<ImgNews />]} />
     </div>
   );
 }
 
 export default Navigation;
-
+// &nbsp;
 function Drop(props) {
   return (
     <li className="dopItem">
