@@ -8,22 +8,21 @@ import { useState, useRef, useEffect } from "react";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import axios from "axios";
-import { Context } from "../../../page/home/home";
-import { useContext } from "react";
-function Post({ user, time, like, avatar, title, name, id }) {
+import { Link } from "react-router-dom";
+// import { Context } from "../../../page/home/home";
+// import { useContext } from "react";
+function Post({ user, time, like, avatar, title, name, id, userid }) {
   const [expanded, setExpanded] = useState(false);
   const postFooterRef = useRef(null);
   const [them, setThem] = useState(false);
   const [run, setRun] = useState(0);
   const [img, setImg] = useState([]);
-  const d = useContext(Context);
   // set time
-  // const now = new Date();
-  // const targetDate = new Date(time);
-  // const timeDiff = now - targetDate;
-  // const hoursDiff = Math.floor(timeDiff / (1000 * 60 * 60));
-  // console.log(hoursDiff);
-
+  const now = new Date();
+  const targetDate = new Date(time);
+  const milliseconds = now - targetDate;
+  const minute = Math.floor(milliseconds / (1000 * 60));
+  // const minute = (minutes);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -74,12 +73,25 @@ function Post({ user, time, like, avatar, title, name, id }) {
       <div className="post" key={id}>
         <div className="post-header">
           <div className="post-header-aut">
-            {avatar ? (
-              <img className="post-avatar" src={avatar} />
-            ) : (
-              <Avatar>s</Avatar>
-            )}
-            {name || user} • <span>{time}</span>
+            <Link
+              to={`/home/profile/user/${userid}`}
+              className="post-header-aut-profile"
+            >
+              {avatar ? (
+                <img className="post-avatar" src={avatar} />
+              ) : (
+                <Avatar> {name.charAt(0) || username.charAt(0)}</Avatar>
+              )}
+              &nbsp;<span>{name || user}</span>
+            </Link>
+            •
+            <span className="post-time">
+              {minute < 61
+                ? minute + " phút"
+                : minute / 60 > 24
+                ? Math.floor(minute / 60 / 24) + " Ngày"
+                : Math.floor(minute / 60) + " Giờ"}
+            </span>
           </div>
           {/* <MoreHorizIcon /> */}
         </div>

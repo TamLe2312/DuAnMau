@@ -113,6 +113,20 @@
   top: 8px;
   left: 8px;
 }
+.post-time {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+.post-header-aut-profile {
+  text-decoration: none;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+}
+.post-header-aut-profile > span {
+  font-weight: 500;
+}
 @media (max-width: 875px) {
   .post {
     width: 400px;

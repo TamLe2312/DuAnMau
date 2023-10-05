@@ -18,7 +18,13 @@ import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import MyModal from "../modal/Modal";
 import ImgNews from "../createNews/ImgNews";
 import ContentNews from "../createNews/ContentNews";
+import { useCookies } from "react-cookie";
+
 function Navigation() {
+  const [cookies] = useCookies(["session"]);
+  const id = cookies.userId;
+  // console.log("chủ: " + id);
+
   const [show, setShow] = useState(false);
   const [checkS, setCheckS] = useState("");
   const [showMore, setShowMore] = useState(false);
@@ -115,7 +121,7 @@ function Navigation() {
         <AddToPhotosIcon />
         <span>Tạo</span>
       </button>
-      <NavLink className="navigation-button" to={"/home/profile"}>
+      <NavLink className="navigation-button" to={`/home/profile`} end>
         <img
           className="navigation-button-img"
           src="https://i.pinimg.com/564x/85/ac/d4/85acd43486608fa7f3edc5df40e9f268.jpg"

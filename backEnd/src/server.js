@@ -12,7 +12,6 @@ const connection = require("./config/database");
 const session = require("express-session");
 
 const app = express();
-
 // parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
 // parse application/json

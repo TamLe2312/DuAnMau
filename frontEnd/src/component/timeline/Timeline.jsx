@@ -86,6 +86,7 @@ function Timeline() {
                 <Post
                   key={index}
                   id={post.id}
+                  userid={post.userid}
                   user={post.username}
                   name={post.name}
                   time={post.created_at}

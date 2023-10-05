@@ -87,7 +87,7 @@ const dataPost = (req, res) => {
   const limit = 4; // Số lượng người dùng hiển thị trên mỗi trang
   const offset = (page - 1) * limit; // Vị trí bắt đầu lấy dữ liệu
   connection.query(
-    `SELECT posts.id,posts.content,posts.created_at, users.username,users.avatar,users.name
+    `SELECT posts.id,posts.content,posts.created_at,users.id as userid, users.username,users.avatar,users.name
     FROM posts  
     JOIN users ON posts.user_id = users.id
     ORDER BY posts.id DESC
