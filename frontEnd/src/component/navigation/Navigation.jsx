@@ -1,5 +1,6 @@
 import "./navigation.css";
-import { Link, NavLink } from "react-router-dom";
+import axios from "axios";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import Offcanvas from "react-bootstrap/Offcanvas";
 import HomeIcon from "@mui/icons-material/Home";
@@ -19,11 +20,14 @@ import MyModal from "../modal/Modal";
 import ImgNews from "../createNews/ImgNews";
 import ContentNews from "../createNews/ContentNews";
 import { useCookies } from "react-cookie";
+import imageLogo from "../../../uploads/Logo1.png"
 
 function Navigation() {
-  const [cookies] = useCookies(["session"]);
+  const Navigate = useNavigate();
+  const [userData, setUserData] = useState("");
+  const [cookies, removeCookie] = useCookies(["session"]);
   const id = cookies.userId;
-  // console.log("chủ: " + id);
+  console.log("chủ: " + id);
 
   const [show, setShow] = useState(false);
   const [checkS, setCheckS] = useState("");
@@ -75,12 +79,29 @@ function Navigation() {
       {mode ? <WbSunnyIcon /> : <DarkModeIcon />}
     </>
   );
+  const handleLogout = () => {
+    removeCookie('userId')
+    Navigate("/", { replace: true });
+  }
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8080/account/getDataUser/${id}`
+        ); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
+        setUserData(response.data[0]);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+    fetchData();
+  }, [id]);
   return (
     <div className="navigation">
       <Link to="/home">
         <img
           className="navigation-logo"
-          src="https://www.docschmidt.org/uploads/1/4/3/0/143018339/print-204012274_orig.jpg"
+          src={imageLogo}
           alt=""
         />
       </Link>
@@ -122,11 +143,19 @@ function Navigation() {
         <span>Tạo</span>
       </button>
       <NavLink className="navigation-button" to={`/home/profile`} end>
-        <img
-          className="navigation-button-img"
-          src="https://i.pinimg.com/564x/85/ac/d4/85acd43486608fa7f3edc5df40e9f268.jpg"
-          alt=""
-        />
+        {userData && !userData.avatar ? (
+          <img
+            className="navigation-button-img"
+            src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg"
+            alt="Avatar"
+          />
+        ) : (
+          <img
+            className="navigation-button-img"
+            src={userData.avatar}
+            alt="Avatar"
+          />
+        )}
         <span>Trang cá nhân</span>
       </NavLink>
       <div ref={menuRef} className="navigation-button-father">
@@ -145,7 +174,10 @@ function Navigation() {
             <div onClick={handleMode} className="dropdown-more-title">
               <Drop Title={theme} />
             </div>
-            <Drop text={logout} path={""} />
+            <div onClick={handleLogout} className="dropdown-more-title">
+              <Drop Title={logout} path={""} />
+            </div>
+
           </ul>
         </div>
       </div>
