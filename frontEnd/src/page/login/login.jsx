@@ -29,27 +29,28 @@ function Login() {
     setError(Validation(values));
     try {
       setLoading(true);
-      await axios.post("http://localhost:8080/account/login", {
+      let res = await axios.post("http://localhost:8080/account/login", {
         username: values.username.trim(),
         password: values.password,
       });
+      let uID = res.data.id;
       setLoading(false);
-      Navigate("/home", { replace: true });
+      Navigate("/home", { state: { uID } }, { replace: true });
     } catch (error) {
       setLoading(false);
       setCheckLogin(error.response.data.error);
     }
   };
+
   return (
     <>
       <form style={style} className="mt-4">
         <h3>Login</h3>
-        {checkLogin && Object.keys(error).length === 0 ? (
+        {checkLogin && Object.keys(error).length === 1 ? (
           <p className="text-danger">{checkLogin}</p>
         ) : (
           ""
         )}
-
         <div className="mb-3">
           <label className="form-label">Username</label>
           <input
@@ -114,7 +115,7 @@ function Login() {
               <span className="visually-hidden">Loading...</span>
             </div>
           )}
-          Login
+          &nbsp;Login
         </button>
 
         <div className="mt-2">

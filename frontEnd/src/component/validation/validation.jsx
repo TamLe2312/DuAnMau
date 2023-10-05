@@ -25,6 +25,16 @@ const Validation = (value) => {
       error.email = "Email không hợp lệ";
     }
   }
+  if (!value.name) {
+    error.name = "Không bỏ trống name";
+  }
+  if (!value.moTa) {
+    error.moTa = "Không bỏ trống mô tả";
+  }
+  if (!value.birthday) {
+    error.birthday = "Không bỏ trống ngày sinh nhật";
+  }
+
 
   return error;
 };

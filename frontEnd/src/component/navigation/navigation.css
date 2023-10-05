@@ -8,11 +8,12 @@
   padding: 8px 12px;
 }
 .navigation-logo {
-  width: 60%;
+  width: 100%;
+  max-width: 200px;
   margin: 0 auto;
 }
 .navigation-button {
-  text-align: left;
+  /* justify-content: left; */
   padding: 16px 12px;
   display: flex;
   background: none;
@@ -22,6 +23,8 @@
   gap: 10px;
   border-radius: 12px;
   text-decoration: none;
+  width: 100%;
+  max-width: 200px;
 }
 .navigation-button:hover {
   cursor: pointer;
@@ -38,8 +41,8 @@
   font-weight: 500;
 }
 .navigation-button-img {
-  width: 40px;
-  height: 40px;
+  width: 36px;
+  height: 36px;
   object-fit: cover;
   border-radius: 50%;
 }

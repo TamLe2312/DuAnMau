@@ -11,10 +11,14 @@ import Timeline from "./component/timeline/Timeline";
 import Profile from "./component/profile/Profile";
 import Community from "./component/community/Community";
 import Messenger from "./component/messenger/Messenger";
+
+//React Toastify
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import Admin from "./component/ADMIN/Admin";
 function App() {
   return (
     <>
-
       <div>
         <Routes>
           <Route path="/" element={<Login />} />
@@ -23,17 +27,29 @@ function App() {
 
           <Route path="/home" element={<Home />}>
             <Route path="/home" element={<Timeline />} />
-            {/* <Route path="/home/sreach" element={<Sreach />} /> */}
             <Route path="/home/profile" element={<Profile />} />
             <Route path="/home/community" element={<Community />} />
             <Route path="/home/messenger" element={<Messenger />} />
+            <Route path="/home/admin" element={<Admin />} />
           </Route>
-
           <Route path="/verifyToken" element={<VerifyToken />} />
           <Route path="*" element={<NoMath />} />
         </Routes>
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
+        {/* Same as */}
+        <ToastContainer />
       </div>
-
     </>
   );
 }
