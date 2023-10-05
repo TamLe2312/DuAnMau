@@ -22,6 +22,7 @@ function ContextNews(props) {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(true);
   const [e, setE] = useState(false);
+  const [userData, setUserData] = useState("");
 
   useEffect(() => {
     setId(cookies.userId);
@@ -38,6 +39,19 @@ function ContextNews(props) {
       setContent(contentNews.textContent);
     });
   }, []);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8080/account/getDataUser/${id}`
+        ); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
+        setUserData(response.data[0]);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+    fetchData();
+  }, [id]);
 
   const handleShow = () => {
     setShow(false);
@@ -83,11 +97,22 @@ function ContextNews(props) {
   return (
     <div className="contentNews">
       <div className="contentNews-user">
-        <img
-          src="https://i.pinimg.com/564x/e5/40/df/e540df1eb306d103a3fd3be7e4fe2568.jpg"
-          alt=""
-        />
-        <span className="contentNews-user-name">name space</span>
+        {userData && !userData.avatar ? (
+          <img
+            src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg"
+            alt="Avatar"
+          />
+        ) : (
+          <img
+            src={userData.avatar}
+            alt="Avatar"
+          />
+        )}
+        {userData && userData.name ? (
+          <span className="contentNews-user-name">{userData.name}</span>
+        ) : (
+          <span className="contentNews-user-name">{userData.username}</span>
+        )}
       </div>
       {/* content */}
       <div
