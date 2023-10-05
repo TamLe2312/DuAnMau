@@ -1,9 +1,6 @@
 const connection = require("../config/database");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
-
-const someOtherPlaintextPassword = "not_bacon";
-
 const mailer = require("../utils/mailer");
 const Mustache = require("mustache");
 const fs = require("fs");
@@ -226,12 +223,13 @@ const changeAvatar = (req, res) => {
   const imageURL = `${baseURL.slice(0, -1)}${filePath}`;
   const uploadDir = path.join(__dirname, "../../../frontEnd/uploads");
   const filePathOldAvatar = path.join(uploadDir, hasAvatar);
+  console.log(hasAvatar);
+  console.log(id);
   connection.query(
     "UPDATE Users SET avatar = ? WHERE id = ?",
     [imageURL, id],
     function (err, results, fields) {
       if (err) {
-        console.error(err);
         return res.status(500).json({ error: "Lỗi máy chủ" });
       }
       if (fs.existsSync(filePathOldAvatar)) {
@@ -252,6 +250,7 @@ const changeAvatar = (req, res) => {
     }
   );
 };
+
 const RemoveAvatar = (req, res) => {
   const { imagePath, id } = req.body;
   const uploadDir = path.join(__dirname, "../../../frontEnd/uploads");

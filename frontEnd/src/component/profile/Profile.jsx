@@ -38,12 +38,10 @@ function Profile() {
 
   // id account
   const id = userID ? userID : cookies.userId;
-
   const handleCloseModalAvatar = () => {
     setSelectedImage(null);
     setShowModalAvatar(false);
   };
-
   const handleShowModalAvatar = () => {
     setShowModalAvatar(true);
   };
@@ -112,14 +110,18 @@ function Profile() {
       console.error(error);
     }
   };
+
   const handleUploadImage = async () => {
     setLoading(true);
+    console.log(Images);
+    console.log(id);
+
     try {
       const formData = new FormData();
-
       formData.append("avatar", Images);
       formData.append("id", id);
       formData.append("hasAvatar", hasAvatar);
+
 
       const response = await axios.post("http://localhost:8080/account/changeAvatar", formData, {
         headers: {

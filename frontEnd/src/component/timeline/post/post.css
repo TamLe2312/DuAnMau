@@ -140,3 +140,6 @@
     margin-bottom: 30px;
   }
 }
+.post-more-delete:hover {
+  cursor: pointer;
+}
