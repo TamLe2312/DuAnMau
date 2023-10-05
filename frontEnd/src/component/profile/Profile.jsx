@@ -8,15 +8,16 @@ import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import { useCookies } from "react-cookie";
 import Validation from "../../component/validation/validation";
-import "./Profile.css";
+import { toast } from 'react-toastify';
+import "./Profile.css"
 
 function Profile() {
   const [showModalAvatar, setShowModalAvatar] = useState(false);
   const [showModalInformationProfile, setShowModalInformationProfile] =
     useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
-  const [ImageURL, setImageURL] = useState(null);
   const [Images, setImages] = useState(null);
+  const [hasAvatar, setHasAvatar] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState({});
   const [cookies] = useCookies(["session"]);
@@ -52,12 +53,12 @@ function Profile() {
   const handleInputChange = async (event) => {
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
-      console.log("Chưa có ảnh");
+      toast.error("Chưa có ảnh");
       return; // Dừng việc xử lý nếu không có file được chọn
     }
     // Kiểm tra nếu selectedFile không phải là file ảnh
     if (!selectedFile.type.startsWith("image/")) {
-      console.log("Không phải ảnh");
+      toast.error("Bạn đã up sai định dạng ảnh");
       event.target.value = null;
       return;
     }
@@ -65,7 +66,7 @@ function Profile() {
     // Kiểm tra kích thước của file ảnh
     const maxSizeInBytes = 10 * 1024 * 1024; // 10MB
     if (selectedFile.size > maxSizeInBytes) {
-      console.log("File ảnh quá lớn");
+      toast.error("File ảnh quá lớn");
       event.target.value = null;
       return;
     }
@@ -73,7 +74,31 @@ function Profile() {
     setSelectedImage(imageUrl);
     setImages(selectedFile);
   };
+  const handleRemoveImage = async () => {
+    setLoading(true);
+    const imageUrl = userData.avatar;
+    const url = new URL(imageUrl);
+    const imagePath = url.pathname.substring('/uploads/'.length);
 
+    try {
+      const response = await axios.post("http://localhost:8080/account/removeAvatar", {
+        id,
+        imagePath,
+      })
+      if (response.data.success) {
+        setUserData(prevUserData => ({
+          ...prevUserData,
+          avatar: "",
+        }))
+      }
+      toast.success(response.data.success);
+      handleCloseModalAvatar();
+      setLoading(false);
+    } catch (error) {
+      setLoading(false);
+      console.error(error);
+    }
+  }
   const handleUploadImage = async () => {
     setLoading(true);
     try {
@@ -81,6 +106,7 @@ function Profile() {
 
       formData.append("avatar", Images);
       formData.append("id", id);
+
       const response = await axios.post(
         "http://localhost:8080/account/changeAvatar",
         formData,
@@ -90,12 +116,13 @@ function Profile() {
           },
         }
       );
+
       const newAvatar = response.data.avatar;
       setUserData((prevUserData) => ({
         ...prevUserData,
         avatar: newAvatar,
       }));
-
+      toast.success(response.data.success);
       handleCloseModalAvatar();
       setLoading(false);
     } catch (error) {
@@ -116,15 +143,15 @@ function Profile() {
     setError(Validation(formValues));
     try {
       setLoading(true);
-      const response = await axios.post(
-        "http://localhost:8080/account/UpdateInformationProfile",
-        {
-          name: formValues.name.trim(),
-          moTa: formValues.moTa.trim(),
-          date: moment(formValues.birthday).toISOString(),
-          id: id,
-        }
-      );
+      const response = await axios.post("http://localhost:8080/account/UpdateInformationProfile", {
+        name: formValues.name.trim(),
+        moTa: formValues.moTa.trim(),
+        date: moment(formValues.birthday).toISOString(),
+        id: id,
+      });
+      if (response.data.success) {
+        toast.success(response.data.success);
+      }
       setLoading(false);
       const nameUser = response.data.name;
       const moTaUser = response.data.moTa;
@@ -152,6 +179,16 @@ function Profile() {
     };
     fetchData();
   }, [id]);
+  useEffect(() => {
+    if (userData.avatar) {
+      const imageUrl = userData.avatar;
+      const url = new URL(imageUrl);
+      const imagePath = url.pathname.substring("/uploads/".length);
+      if (imagePath) {
+        setHasAvatar(imagePath);
+      }
+    }
+  }, [userData]);
 
   return (
     <>
@@ -198,19 +235,17 @@ function Profile() {
                       <Modal.Header closeButton>
                         <Modal.Title>Thay đổi ảnh đại diện</Modal.Title>
                       </Modal.Header>
-                      <Modal.Body>
-                        <div className="ShowImageContainer">
+                      <Modal.Body className="ProfileAvatarModalBody">
+                        <div className="ProfileShowImageContainer">
                           {selectedImage ? (
-                            <img
-                              className="ShowImageWhenUpload"
-                              src={selectedImage}
-                              alt="Avatar"
-                            />
-                          ) : (
-                            <div></div>
-                          )}
+
+                            <img className="ShowImageWhenUpload" src={(selectedImage)} alt="Avatar" />)
+                            : (<div></div>)
+                          }
+
+
                         </div>
-                        <Form encType="multipart/form-data">
+                        <Form encType="multipart/form-data" style={{ paddingLeft: 10 }}>
                           <Form.Group controlId="avatar">
                             <Form.Label>Tải ảnh đại diện</Form.Label>
                             <Form.Control
@@ -232,11 +267,9 @@ function Profile() {
                         </Button>
 
                         {userData.avatar ? (
-                          <Button
-                            variant="danger"
-                            disabled={selectedImage || loading}
-                            onClick={handleUploadImage}
-                          >
+
+                          <Button variant="danger" disabled={selectedImage || loading} onClick={handleRemoveImage}>
+
                             {loading ? "Remove..." : "Remove Avatar"}
                           </Button>
                         ) : (
@@ -276,7 +309,7 @@ function Profile() {
                       <Modal.Header closeButton>
                         <Modal.Title>Chỉnh sửa thông tin cá nhân</Modal.Title>
                       </Modal.Header>
-                      <Modal.Body>
+                      <Modal.Body className="ProfileInformationModalBody">
                         <Form onSubmit={handleSubmit}>
                           <Form.Group controlId="formName">
                             <Form.Label>Name</Form.Label>
@@ -388,12 +421,12 @@ function Profile() {
                   <span>bài viết</span>
                 </a>
               </div>
-              <div className="col-md-3 ColumnProfileFeature">
+              {/*   <div className="col-md-3 ColumnProfileFeature">
                 <a>
                   <BookmarkIcon />
                   <span>đã lưu</span>
                 </a>
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
