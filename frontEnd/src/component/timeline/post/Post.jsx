@@ -60,7 +60,9 @@ function Post({ user, time, like, avatar, title, name, id, userid }) {
   const handleToggleExpand = () => {
     setExpanded(!expanded);
   };
-
+  const handleDataFromChild = (data) => {
+    setModalShow(data);
+  };
   const handleRun = (e) => {
     if (img) {
       const id = e.currentTarget.id;
@@ -176,7 +178,7 @@ function Post({ user, time, like, avatar, title, name, id, userid }) {
         text={""}
         show={modalShow}
         onHide={handleHide}
-        childrens={<MorePost id={id} />}
+        childrens={<MorePost id={id} show={handleDataFromChild} />}
       />
     </>
   );

@@ -11,18 +11,20 @@ function Suggestions() {
   const [isLoading, setIsLoading] = useState(true);
   const id = cookies.userId;
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:8080/account/getDataUser/${id}`
-        ); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
-        setUserData(response.data[0]);
-        setIsLoading(false);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    };
-    fetchData();
+    if (id) {
+      const fetchData = async () => {
+        try {
+          const response = await axios.get(
+            `http://localhost:8080/account/getDataUser/${id}`
+          ); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
+          setUserData(response.data[0]);
+          setIsLoading(false);
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      };
+      fetchData();
+    }
   }, [id]);
   return (
     <div className="suggestions">
@@ -38,7 +40,9 @@ function Suggestions() {
             />
           ) : (
             <Avatar>
-              {userData.name.charAt(0) || userData.username.charAt(0)}
+              {userData.name
+                ? userData.name.charAt(0)
+                : userData.username.charAt(0)}
             </Avatar>
           )}
         </Link>
