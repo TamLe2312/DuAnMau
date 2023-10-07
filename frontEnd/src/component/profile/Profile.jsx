@@ -122,12 +122,15 @@ function Profile() {
       formData.append("id", id);
       formData.append("hasAvatar", hasAvatar);
 
-
-      const response = await axios.post("http://localhost:8080/account/changeAvatar", formData, {
-        headers: {
-          "Content-Type": "multipart/form-data",
-        },
-      });
+      const response = await axios.post(
+        "http://localhost:8080/account/changeAvatar",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
 
       const newAvatar = response.data.avatar;
       setUserData((prevUserData) => ({

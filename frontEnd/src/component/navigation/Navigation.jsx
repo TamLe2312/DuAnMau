@@ -20,14 +20,14 @@ import MyModal from "../modal/Modal";
 import ImgNews from "../createNews/ImgNews";
 import ContentNews from "../createNews/ContentNews";
 import { useCookies } from "react-cookie";
-import imageLogo from "../../../uploads/Logo1.png"
+import imageLogo from "../../../uploads/Logo1.png";
 
 function Navigation() {
   const Navigate = useNavigate();
   const [userData, setUserData] = useState("");
   const [cookies, removeCookie] = useCookies(["session"]);
   const id = cookies.userId;
-  console.log("chủ: " + id);
+  // console.log("chủ: " + id);
 
   const [show, setShow] = useState(false);
   const [checkS, setCheckS] = useState("");
@@ -80,9 +80,9 @@ function Navigation() {
     </>
   );
   const handleLogout = () => {
-    removeCookie('userId')
+    removeCookie("userId");
     Navigate("/", { replace: true });
-  }
+  };
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -99,11 +99,7 @@ function Navigation() {
   return (
     <div className="navigation">
       <Link to="/home">
-        <img
-          className="navigation-logo"
-          src={imageLogo}
-          alt=""
-        />
+        <img className="navigation-logo" src={imageLogo} alt="" />
       </Link>
       <NavLink className="navigation-button" to={"/home"} end>
         <HomeIcon />
@@ -177,7 +173,6 @@ function Navigation() {
             <div onClick={handleLogout} className="dropdown-more-title">
               <Drop Title={logout} path={""} />
             </div>
-
           </ul>
         </div>
       </div>

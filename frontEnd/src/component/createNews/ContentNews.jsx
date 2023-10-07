@@ -40,17 +40,20 @@ function ContextNews(props) {
     });
   }, []);
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(
-          `http://localhost:8080/account/getDataUser/${id}`
-        ); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
-        setUserData(response.data[0]);
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    };
-    fetchData();
+    if (id) {
+      const fetchData = async () => {
+        // console.log(id);
+        try {
+          const response = await axios.get(
+            `http://localhost:8080/account/getDataUser/${id}`
+          ); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
+          setUserData(response.data[0]);
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      };
+      fetchData();
+    }
   }, [id]);
 
   const handleShow = () => {
@@ -103,10 +106,7 @@ function ContextNews(props) {
             alt="Avatar"
           />
         ) : (
-          <img
-            src={userData.avatar}
-            alt="Avatar"
-          />
+          <img src={userData.avatar} alt="Avatar" />
         )}
         {userData && userData.name ? (
           <span className="contentNews-user-name">{userData.name}</span>
@@ -165,6 +165,11 @@ function ContextNews(props) {
                 className="btn btn-primary"
                 onClick={handlePost}
                 onMouseDown={dataa}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    dataa();
+                  }
+                }}
               >
                 Bài viết
               </button>
