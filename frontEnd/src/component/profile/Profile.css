@@ -36,6 +36,7 @@
 .ProfileLinkButton{
     display: flex;
     border: 0;
+    background-color: transparent;
 }
 .ProfileLinkButton a{
     text-decoration: none;
@@ -46,7 +47,7 @@
     border-radius: 8px;
 }
 .ProfileLinkButton a:hover{
-    background-color: #C6C6C6
+    background-color: rgb(128, 128, 128, 0.5);
 }
 .ProfileSettingIcon{
     margin: 5px;
@@ -132,7 +133,8 @@
     color: #ed4956;
 }
 .ShowImageWhenUpload{
-    width: 300px;
+    max-width: 400px;
+    max-height: 400px;
 }
 .ProfileShowImageContainer{
     display: flex;
