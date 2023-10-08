@@ -21,8 +21,7 @@ function Profile() {
   // }, []);
 
   const [showModalAvatar, setShowModalAvatar] = useState(false);
-  const [showModalInformationProfile, setShowModalInformationProfile] =
-    useState(false);
+  const [showModalInformationProfile, setShowModalInformationProfile] = useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [Images, setImages] = useState(null);
   const [hasAvatar, setHasAvatar] = useState(null);
@@ -61,6 +60,8 @@ function Profile() {
   const handleInputChange = async (event) => {
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
+      setImages(null);
+      setSelectedImage(null);
       toast.error("Chưa có ảnh");
       return; // Dừng việc xử lý nếu không có file được chọn
     }
@@ -407,17 +408,17 @@ function Profile() {
                             )}
                           </Form.Group>
                           <br />
-                          <Modal.Footer>
-                            <Button
-                              variant="primary"
-                              type="submit"
-                              onClick={handleSubmit}
-                            >
-                              {loading ? "Submit..." : "Submit"}
-                            </Button>
-                          </Modal.Footer>
                         </Form>
                       </Modal.Body>
+                      <Modal.Footer>
+                        <Button
+                          variant="primary"
+                          type="submit"
+                          onClick={handleSubmit}
+                        >
+                          {loading ? "Submit..." : "Submit"}
+                        </Button>
+                      </Modal.Footer>
                     </Modal>
                   </div>
                   <div className="ProfileSettingIcon">

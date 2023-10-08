@@ -34,7 +34,9 @@ const Validation = (value) => {
   if (!value.birthday) {
     error.birthday = "Không bỏ trống ngày sinh nhật";
   }
-
+  if (!value.moTaNhom) {
+    error.moTaNhom = "Không bỏ trống mô tả";
+  }
 
   return error;
 };
