@@ -7,6 +7,7 @@ const configViewEngine = require("./config/viewEngine");
 const webRoutes = require("./routes/web");
 const api = require("./routes/api");
 const postApi = require("./routes/postApi");
+const groups = require("./routes/groupApi")
 const connection = require("./config/database");
 
 const session = require("express-session");
@@ -46,6 +47,8 @@ app.use("/", webRoutes);
 app.use("/account", api);
 // api post
 app.use("/post", postApi);
+
+app.use("/groups", groups);
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`);

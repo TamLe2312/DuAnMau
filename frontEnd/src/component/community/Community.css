@@ -1,0 +1,77 @@
+.containerCommunity{
+    padding: 30px 20px 0 !important;
+    box-sizing: content-box;
+    margin-bottom: 0;
+    flex-grow: 1;
+    margin: 0 auto;
+}
+.containerCreateContentCommunity{
+    display: flex;
+    border: 1px solid silver;
+    height: 150px;
+    padding: 0 !important;
+    margin-bottom: 16px;
+    border-radius: 15px;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+.containerGroupContentCommunity{
+    border: 1px solid silver;
+    height: auto;
+    padding: 0 !important;
+    margin-bottom: 16px;
+    border-radius: 15px;
+}
+.containerCreateContentCommunity:hover{
+    background-color: rgb(128, 128, 128, 0.5);
+}
+.containerCreateContentCommunity .CommunityCreateIconGroup{
+    font-size: 2rem !important;
+}
+.containerCreateContentCommunity span{
+    font-size: 1.2rem !important;
+    font-weight: 600;
+    padding-left: 20px;
+    text-transform: uppercase;
+}
+.ImgGroupAvatar{
+    width: 80px;
+    height: 80px;
+    border: 1px solid silver;
+    border-radius: 50%;
+}
+.CommunityGroupRow{
+    display: flex;
+    align-items: center;
+    
+    padding: 20px;
+}
+.CommunityInformationGroup{
+   padding-left: 25px;
+}
+.CommunityInformationGroup span{
+    display: block;
+}
+.CommunityInformationGroup .CommunityInformationTitle{
+    text-decoration: none;
+    font-weight: 600;
+}
+.CommunityInformationGroup .CommunityInformationTitle:hover{
+    text-decoration: underline;
+}
+.CommunityInformationButton{
+    margin-left: auto;
+}
+.CommunityInformationButton button{
+    padding: 5px 10px;
+    border: 1px solid silver;
+    border-radius: 8px;
+    background-color: transparent;
+}
+.CommunityInformationButton button:hover{
+    background-color: rgb(128, 128, 128, 0.5);
+}
+.CreateGroupModalBody{
+    display: block;
+}
