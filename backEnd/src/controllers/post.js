@@ -1,5 +1,6 @@
 const multer = require("multer");
 const path = require("path");
+const fs = require("fs");
 const connection = require("../config/database");
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
@@ -18,6 +19,50 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage: storage,
 });
+
+const deletePostImgs = async (req, res) => {
+  const uploadDir = path.join(__dirname, "../public/images/");
+  const { postID } = req.body;
+  const listImg = await new Promise((resolve, reject) => {
+    connection.query(
+      "SELECT * FROM listdata WHERE post_id = ?",
+      [postID],
+      (err, results, fields) => {
+        if (err) {
+          reject(err);
+        } else {
+          const imgPaths = results.map((re) => path.join(uploadDir, re.img));
+          resolve(imgPaths);
+        }
+      }
+    );
+  });
+
+  if (listImg.length === 0) {
+    return res.status(200).json({ success: "Bài viết không có hình ảnh" });
+  }
+
+  try {
+    await Promise.all(
+      listImg.map((imgdel) => {
+        return new Promise((resolve, reject) => {
+          fs.unlink(imgdel, (err) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve();
+            }
+          });
+        });
+      })
+    );
+    return res.status(200).json({ success: "Xóa hình ảnh thành công" });
+  } catch (err) {
+    console.log(err);
+    return res.status(400).json({ error: "Lỗi xóa hình ảnh" });
+  }
+};
+
 const upImgs = (req, res) => {
   const uploadMiddleware = upload.any();
   uploadMiddleware(req, res, function (err) {
@@ -28,7 +73,6 @@ const upImgs = (req, res) => {
       console.log(err);
       return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau 1" });
     }
-
     if (req.files) {
       // console.log(req.files);
       const postID = req.body.post_id;
@@ -77,6 +121,22 @@ const createPost = (req, res) => {
         return res
           .status(200)
           .json({ lastID: lastID, success: "Bạn đã tải bài viết lên" });
+      }
+    }
+  );
+};
+
+const deletePost = (req, res) => {
+  const { postID } = req.body;
+  connection.query(
+    "DELETE FROM posts WHERE id = ?",
+    [postID],
+    function (err, results, fields) {
+      if (err) {
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+      }
+      if (results) {
+        return res.status(200).json({ error: "Bạn đã xóa bài viết" });
       }
     }
   );
@@ -132,4 +192,6 @@ module.exports = {
   upImgs,
   dataPost,
   postimgs,
+  deletePost,
+  deletePostImgs,
 };

@@ -1,0 +1,20 @@
+.morepost {
+  flex: 1;
+  text-align: center;
+}
+.morepost-list {
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+.morepost-list-item {
+  padding: 8px 0;
+  border-bottom: 0.5px solid rgba(128, 128, 128, 0.1);
+}
+.morepost-list-item-child:hover {
+  cursor: pointer;
+  color: rgb(12, 179, 123);
+}
+.morepost-list-item-child {
+  padding: 8px;
+}
