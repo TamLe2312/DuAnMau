@@ -88,13 +88,18 @@ function Navigation() {
       try {
         const response = await axios.get(
           `http://localhost:8080/account/getDataUser/${id}`
-        ); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
+        );
         setUserData(response.data[0]);
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
     };
-    fetchData();
+
+    const interval = setInterval(fetchData, 2000); // Chạy hàm fetchData() mỗi 2 giây
+
+    return () => {
+      clearInterval(interval); // Xóa bỏ interval khi component bị unmount
+    };
   }, [id]);
   return (
     <div className="navigation">
@@ -139,7 +144,20 @@ function Navigation() {
         <span>Tạo</span>
       </button>
       <NavLink className="navigation-button" to={`/home/profile`} end>
-        {userData && !userData.avatar ? (
+        {userData && userData.avatar ? (
+          <img
+            className="navigation-button-img"
+            src={userData.avatar}
+            alt={userData.username}
+          />
+        ) : (
+          <img
+            className="navigation-button-img"
+            src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg"
+            alt="Avatar"
+          />
+        )}
+        {/* {userData && !userData.avatar ? (
           <img
             className="navigation-button-img"
             src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg"
@@ -151,7 +169,7 @@ function Navigation() {
             src={userData.avatar}
             alt="Avatar"
           />
-        )}
+        )} */}
         <span>Trang cá nhân</span>
       </NavLink>
       <div ref={menuRef} className="navigation-button-father">

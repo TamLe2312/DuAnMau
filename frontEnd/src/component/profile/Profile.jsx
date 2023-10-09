@@ -266,8 +266,8 @@ function Profile() {
                         <Form
                           encType="multipart/form-data"
                         >
-                          <Form.Group controlId="avatar">
-                            <Form.Label className="HandleButtonProfile ProfileUploadColor" for="ProfileUploadFile">Tải ảnh đại diện</Form.Label>
+                          <Form.Group>
+                            <Form.Label className="HandleButtonProfile ProfileUploadColor" htmlFor="ProfileUploadFile">Tải ảnh đại diện</Form.Label>
                             <Form.Control
                               type="file"
                               name="avatar"
@@ -283,7 +283,7 @@ function Profile() {
                             className="HandleButtonProfile ProfileRemoveColor"
                             onClick={handleRemoveImage}
                           >
-                            {loading ? "Remove..." : "Remove Avatar"}
+                            {loading ? "Remove..." : "Xóa ảnh đại diện"}
                           </label>
                         ) : (
                           <div></div>
