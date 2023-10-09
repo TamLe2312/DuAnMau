@@ -143,3 +143,21 @@
 .post-more-delete:hover {
   cursor: pointer;
 }
+.post-footer-icon-like-comment {
+  margin: 0 !important;
+}
+.post-footer-icon-like-comment:hover {
+  cursor: pointer;
+}
+.post-footer-user-user {
+  text-decoration: none;
+  font-weight: 500;
+}
+.post-footer-list-comment {
+  opacity: 0.7;
+  font-size: 0.9rem;
+}
+.post-comment {
+  color: rgb(1, 114, 116);
+  font-weight: 500;
+}
