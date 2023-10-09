@@ -18,3 +18,16 @@
 .morepost-list-item-child {
   padding: 8px;
 }
+.morepost-list-item-child-red:hover {
+  cursor: pointer;
+  color: rgb(237, 36, 36);
+}
+.edit-content-post {
+  margin-top: 8px;
+  min-height: 160px;
+  width: 100%;
+  border: none;
+}
+.edit-content-post:focus {
+  outline: none !important;
+}

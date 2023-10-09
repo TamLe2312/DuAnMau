@@ -92,7 +92,7 @@ function Timeline() {
                   time={post.created_at}
                   avatar={post.avatar}
                   title={post.content}
-                  like={100}
+                  // like={100}
                 />
               ))
             : "loading..."}

@@ -6,6 +6,16 @@ const {
   postimgs,
   deletePost,
   deletePostImgs,
+  editPost,
+  likePost,
+  unLikePost,
+  likedPost,
+  CountLikedPost,
+  commentPost,
+  onCommentPostLast,
+  listCommentPost,
+  deleteCommentPost,
+  editCommentPost,
 } = require("../controllers/post");
 const Router = express.Router();
 
@@ -16,4 +26,15 @@ Router.get("/datapost/:page", dataPost);
 Router.get("/postimg/:postID", postimgs);
 Router.post("/deldete", deletePost);
 Router.post("/deletePostImgs", deletePostImgs);
+Router.post("/editPost", editPost);
+Router.post("/likePost", likePost);
+Router.post("/unLikePost", unLikePost);
+Router.get("/likedPost", likedPost);
+Router.post("/countLikedPost", CountLikedPost);
+
+Router.post("/commentPost", commentPost);
+Router.post("/deleteCommentPost", deleteCommentPost);
+Router.post("/editCommentPost", editCommentPost);
+Router.post("/onCommentPostLast", onCommentPostLast);
+Router.get("/listCommentPost/:postID", listCommentPost);
 module.exports = Router;

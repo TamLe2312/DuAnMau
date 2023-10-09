@@ -8,7 +8,6 @@ import { Context } from "../../page/home/home";
 import { useContext } from "react";
 function ContextNews(props) {
   const dataa = useContext(Context);
-
   const location = useLocation();
   const [cookies, setCookie] = useCookies(["session"]);
   const state = location.state;

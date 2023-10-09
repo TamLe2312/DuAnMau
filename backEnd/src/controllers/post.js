@@ -142,6 +142,96 @@ const deletePost = (req, res) => {
   );
 };
 
+const editPost = (req, res) => {
+  const { postID, content } = req.body;
+  connection.query(
+    "UPDATE posts SET content = ? WHERE id = ?",
+    [content, postID],
+    function (err, results, fields) {
+      if (err) {
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+      }
+      if (results) {
+        return res.status(200).json({ success: "Bạn đã thay đổi thông tin" });
+      }
+    }
+  );
+};
+
+const likePost = (req, res) => {
+  const { postID, otherUserID } = req.body;
+  connection.query(
+    "INSERT INTO likes (post_id,user_id) VALUES (?,?)",
+    [postID, otherUserID],
+    function (err, results, fields) {
+      if (err) {
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+      }
+      if (results) {
+        return res.status(200).json({ success: "Bạn đã thích bài viết" });
+      }
+    }
+  );
+};
+
+const unLikePost = (req, res) => {
+  const { postID, otherUserID } = req.body;
+  connection.query(
+    "DELETE FROM likes WHERE post_id = ? AND user_id = ?",
+    [postID, otherUserID],
+    function (err, results, fields) {
+      if (err) {
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+      }
+      if (results) {
+        return res.status(200).json({ success: "Bạn đã bỏ thích bài viết" });
+      }
+    }
+  );
+};
+
+const likedPost = (req, res) => {
+  // const { postID, otherUserID } = req.body;
+  const { postID, otherUserID } = req.query;
+  connection.query(
+    "SELECT * FROM likes WHERE post_id =? AND user_id=?",
+    [postID, otherUserID],
+    function (err, results, fields) {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+      }
+      if (results.length > 0) {
+        return res.status(200).json({ success: "Bạn đã thích bài viết này" });
+      } else {
+        return res.status(200).json(results);
+      }
+    }
+  );
+};
+
+const CountLikedPost = (req, res) => {
+  // const { postID, otherUserID } = req.body;
+  // const { postID } = req.body;
+  const { postID } = req.body;
+  //
+  connection.query(
+    "SELECT COUNT(post_id) as countlike FROM likes WHERE post_id =?",
+    [postID],
+    function (err, results, fields) {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+      }
+      if (results.length > 0) {
+        return res.status(200).json(results);
+      } else {
+        return res.status(200).json({ error: "Không có lượt thích" });
+      }
+    }
+  );
+};
+
 const dataPost = (req, res) => {
   const page = parseInt(req.params.page) || 1;
   const limit = 4; // Số lượng người dùng hiển thị trên mỗi trang
@@ -187,6 +277,100 @@ const postimgs = (req, res) => {
   );
 };
 
+// comment
+const commentPost = (req, res) => {
+  const { postID, userID, content } = req.body;
+  connection.query(
+    "INSERT INTO comments (post_id,user_id,content) VALUE (?,?,?)",
+    [postID, userID, content],
+    function (err, results, fields) {
+      if (err) {
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+      }
+      if (results) {
+        // console.log(results);
+        return res.status(200).json({ success: "Bạn đã comment thành công" });
+      }
+    }
+  );
+};
+const onCommentPostLast = (req, res) => {
+  const { postID } = req.body;
+  connection.query(
+    "SELECT * FROM comments WHERE post_id = ? ORDER BY id DESC LIMIT 1",
+    [postID],
+    function (err, results, fields) {
+      if (err) {
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+      }
+      if (results) {
+        // console.log(results);
+        return res.status(200).json(results);
+      }
+    }
+  );
+};
+
+const listCommentPost = (req, res) => {
+  // const { postID } = req.body;
+  const postID = parseInt(req.params.postID);
+  connection.query(
+    "SELECT * FROM comments WHERE post_id = ? ",
+    [postID],
+    function (err, results, fields) {
+      if (err) {
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+      }
+      if (results) {
+        // console.log(results);
+        return res.status(200).json(results);
+      }
+    }
+  );
+};
+
+const deleteCommentPost = (req, res) => {
+  const { commentID } = req.body;
+  connection.query(
+    "DELETE FROM comments WHERE id = ? ",
+    [commentID],
+    function (err, results, fields) {
+      if (err) {
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+      }
+      if (results.affectedRows > 0) {
+        // console.log(results);
+        // return res.status(200).json();
+        return res.status(200).json({ success: "bạn đã xóa comment" });
+      } else {
+        return res.status(200).json({ success: "comment không tồn tại" });
+      }
+    }
+  );
+};
+
+const editCommentPost = (req, res) => {
+  const { commentID, userID, content } = req.body;
+  connection.query(
+    "UPDATE comments SET content = ? WHERE id = ? AND user_id =? ",
+    [content, commentID, userID],
+    function (err, results, fields) {
+      if (err) {
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+      }
+      if (results.affectedRows > 0) {
+        // console.log(results);
+        // return res.status(200).json();
+        return res.status(200).json({ success: "bạn đã sửa comment" });
+      } else {
+        return res
+          .status(200)
+          .json({ success: "Bạn không phải người bình luận" });
+      }
+    }
+  );
+};
+
 module.exports = {
   createPost,
   upImgs,
@@ -194,4 +378,14 @@ module.exports = {
   postimgs,
   deletePost,
   deletePostImgs,
+  editPost,
+  likePost,
+  unLikePost,
+  likedPost,
+  CountLikedPost,
+  commentPost,
+  onCommentPostLast,
+  listCommentPost,
+  deleteCommentPost,
+  editCommentPost,
 };
