@@ -246,8 +246,8 @@ function Groups() {
                                                 <Form
                                                     encType="multipart/form-data"
                                                 >
-                                                    <Form.Group controlId="avatar">
-                                                        <Form.Label className="HandleButtonProfile ProfileUploadColor" for="ProfileUploadFile">Tải ảnh đại diện</Form.Label>
+                                                    <Form.Group>
+                                                        <Form.Label className="HandleButtonProfile ProfileUploadColor" htmlFor="ProfileUploadFile">Tải ảnh đại diện</Form.Label>
                                                         <Form.Control
                                                             type="file"
                                                             name="avatarGroup"
