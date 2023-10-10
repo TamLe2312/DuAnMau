@@ -21,7 +21,8 @@ function Profile() {
   // }, []);
 
   const [showModalAvatar, setShowModalAvatar] = useState(false);
-  const [showModalInformationProfile, setShowModalInformationProfile] = useState(false);
+  const [showModalInformationProfile, setShowModalInformationProfile] =
+    useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
   const [Images, setImages] = useState(null);
   const [hasAvatar, setHasAvatar] = useState(null);
@@ -228,7 +229,7 @@ function Profile() {
                     <Button
                       className="ChangeAvatar"
                       variant="primary"
-                      onClick={handleShowModalAvatar}
+                      onClick={!userID ? handleShowModalAvatar : undefined}
                       title="ChangeAvatar"
                     >
                       {loading ? (

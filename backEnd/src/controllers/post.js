@@ -303,9 +303,10 @@ const onCommentPostLast = (req, res) => {
       if (err) {
         return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
       }
-      if (results) {
-        // console.log(results);
-        return res.status(200).json(results);
+      if (results.length > 0) {
+        return res.status(200).json(results[0]);
+      } else {
+        return res.status(200).json(results[0]);
       }
     }
   );
@@ -321,9 +322,32 @@ const listCommentPost = (req, res) => {
       if (err) {
         return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
       }
-      if (results) {
-        // console.log(results);
+      if (results.length > 0) {
         return res.status(200).json(results);
+      } else {
+        return res
+          .status(200)
+          .json({ success: "không tồn tại bài viết hoặc comment" });
+      }
+    }
+  );
+};
+
+const oneCommentPost = (req, res) => {
+  const commentID = parseInt(req.params.commentID);
+  connection.query(
+    "SELECT * FROM comments WHERE id = ? ",
+    [commentID],
+    function (err, results, fields) {
+      if (err) {
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+      }
+      if (results.length > 0) {
+        return res.status(200).json(results);
+      } else {
+        return res
+          .status(200)
+          .json({ success: "không tồn tại bài viết hoặc comment" });
       }
     }
   );
@@ -370,6 +394,22 @@ const editCommentPost = (req, res) => {
     }
   );
 };
+const countCommentPost = (req, res) => {
+  // const { commentID } = req.body;
+  const postID = parseInt(req.params.postID);
+  connection.query(
+    "SELECT COUNT(*) as countcomment FROM comments WHERE post_id = ? ",
+    [postID],
+    function (err, results, fields) {
+      if (err) {
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+      }
+      if (results) {
+        return res.status(200).json(results);
+      }
+    }
+  );
+};
 
 module.exports = {
   createPost,
@@ -388,4 +428,6 @@ module.exports = {
   listCommentPost,
   deleteCommentPost,
   editCommentPost,
+  countCommentPost,
+  oneCommentPost,
 };
