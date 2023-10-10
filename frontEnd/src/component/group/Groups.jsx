@@ -232,32 +232,42 @@ function Groups() {
                                                 <Modal.Title>Thay đổi ảnh đại diện của nhóm</Modal.Title>
                                             </Modal.Header>
                                             <Modal.Body className="ProfileAvatarModalBody">
-                                                <div className="ProfileShowImageContainer">
-                                                    {selectedImage ? (
+                                                {selectedImage ? (
+                                                    <div className="ProfileShowImageContainer">
                                                         <img
                                                             className="ShowImageWhenUpload"
                                                             src={selectedImage}
                                                             alt="Avatar"
                                                         />
-                                                    ) : (
-                                                        <div></div>
-                                                    )}
-                                                </div>
+                                                    </div>
+                                                ) : (
+                                                    <div></div>
+                                                )}
                                                 <Form
                                                     encType="multipart/form-data"
-                                                    style={{ paddingLeft: 10 }}
                                                 >
-                                                    <Form.Group controlId="avatar">
-                                                        <Form.Label>Tải ảnh đại diện</Form.Label>
+                                                    <Form.Group>
+                                                        <Form.Label className="HandleButtonProfile ProfileUploadColor" htmlFor="ProfileUploadFile">Tải ảnh đại diện</Form.Label>
                                                         <Form.Control
                                                             type="file"
                                                             name="avatarGroup"
                                                             accept="image/*"
+                                                            id="ProfileUploadFile"
                                                             onChange={handleInputChange}
                                                             required
                                                         />
                                                     </Form.Group>
                                                 </Form>
+                                                {groupDataProfile.avatarGroup ? (
+                                                    <label
+                                                        className="HandleButtonProfile ProfileRemoveColor"
+                                                        onClick={handleRemoveImage}
+                                                    >
+                                                        {loading ? "Remove..." : "Remove Avatar"}
+                                                    </label>
+                                                ) : (
+                                                    <div></div>
+                                                )}
                                             </Modal.Body>
                                             <Modal.Footer>
                                                 <Button
@@ -266,18 +276,6 @@ function Groups() {
                                                 >
                                                     Close
                                                 </Button>
-
-                                                {groupDataProfile.avatarGroup ? (
-                                                    <Button
-                                                        variant="danger"
-                                                        disabled={selectedImage || loading}
-                                                        onClick={handleRemoveImage}
-                                                    >
-                                                        {loading ? "Remove..." : "Remove Avatar"}
-                                                    </Button>
-                                                ) : (
-                                                    <div></div>
-                                                )}
                                                 <Button
                                                     variant="primary"
                                                     disabled={!selectedImage || loading}

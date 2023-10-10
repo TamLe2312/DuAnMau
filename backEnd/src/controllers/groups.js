@@ -52,7 +52,7 @@ const createGroup = (req, res) => {
 }
 const getDataGroup = (req, res) => {
     connection.query(
-        "SELECT * FROM groupsTable",
+        "SELECT * FROM groupsTable ORDER BY RAND() LIMIT 10",
         async function (err, results, fields) {
             if (err) {
                 return res.status(500).json({ error: "Lỗi máy chủ" });
@@ -70,7 +70,7 @@ const searchGroup = (req, res) => {
     const searchValue = req.body.searchGroup;
     if (!searchValue) {
         connection.query(
-            "SELECT * FROM groupsTable",
+            "SELECT * FROM groupsTable ORDER BY RAND() LIMIT 10",
             async function (err, results, fields) {
                 if (err) {
                     return res.status(500).json({ error: "Lỗi máy chủ" });

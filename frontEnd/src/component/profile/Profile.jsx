@@ -35,7 +35,6 @@ function Profile() {
     birthday: "",
   });
   const [userData, setUserData] = useState("");
-
   // id account
   const id = userID ? userID : cookies.userId;
   const handleCloseModalAvatar = () => {
@@ -115,9 +114,6 @@ function Profile() {
 
   const handleUploadImage = async () => {
     setLoading(true);
-    console.log(Images);
-    console.log(id);
-
     try {
       const formData = new FormData();
       formData.append("avatar", Images);
@@ -256,32 +252,43 @@ function Profile() {
                         <Modal.Title>Thay đổi ảnh đại diện</Modal.Title>
                       </Modal.Header>
                       <Modal.Body className="ProfileAvatarModalBody">
-                        <div className="ProfileShowImageContainer">
-                          {selectedImage ? (
+                        {selectedImage ? (
+                          <div className="ProfileShowImageContainer">
                             <img
                               className="ShowImageWhenUpload"
                               src={selectedImage}
                               alt="Avatar"
                             />
-                          ) : (
+                          </div>
+                        )
+                          : (
                             <div></div>
                           )}
-                        </div>
                         <Form
                           encType="multipart/form-data"
-                          style={{ paddingLeft: 10 }}
                         >
-                          <Form.Group controlId="avatar">
-                            <Form.Label>Tải ảnh đại diện</Form.Label>
+                          <Form.Group>
+                            <Form.Label className="HandleButtonProfile ProfileUploadColor" htmlFor="ProfileUploadFile">Tải ảnh đại diện</Form.Label>
                             <Form.Control
                               type="file"
                               name="avatar"
                               accept="image/*"
+                              id="ProfileUploadFile"
                               onChange={handleInputChange}
                               required
                             />
                           </Form.Group>
                         </Form>
+                        {userData.avatar ? (
+                          <label
+                            className="HandleButtonProfile ProfileRemoveColor"
+                            onClick={handleRemoveImage}
+                          >
+                            {loading ? "Remove..." : "Xóa ảnh đại diện"}
+                          </label>
+                        ) : (
+                          <div></div>
+                        )}
                       </Modal.Body>
                       <Modal.Footer>
                         <Button
@@ -290,18 +297,6 @@ function Profile() {
                         >
                           Close
                         </Button>
-
-                        {userData.avatar ? (
-                          <Button
-                            variant="danger"
-                            disabled={selectedImage || loading}
-                            onClick={handleRemoveImage}
-                          >
-                            {loading ? "Remove..." : "Remove Avatar"}
-                          </Button>
-                        ) : (
-                          <div></div>
-                        )}
                         <Button
                           variant="primary"
                           disabled={!selectedImage || loading}
