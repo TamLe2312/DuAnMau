@@ -41,12 +41,12 @@ function Login() {
       setCheckLogin(error.response.data.error);
     }
   };
-
+  // console.log(error);
   return (
     <>
       <form style={style} className="mt-4">
         <h3>Login</h3>
-        {checkLogin && Object.keys(error).length === 1 ? (
+        {checkLogin && Object.keys(error).length === 6 ? (
           <p className="text-danger">{checkLogin}</p>
         ) : (
           ""
