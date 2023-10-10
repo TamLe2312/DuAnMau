@@ -87,7 +87,7 @@ function MorePost(props) {
         >
           Sửa tiêu đề
         </li>
-        <li className="morepost-list-item">Hết</li>
+        {/* <li className="morepost-list-item">Hết</li> */}
         <li></li>
       </ul>
 

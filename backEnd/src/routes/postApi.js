@@ -16,6 +16,8 @@ const {
   listCommentPost,
   deleteCommentPost,
   editCommentPost,
+  countCommentPost,
+  oneCommentPost,
 } = require("../controllers/post");
 const Router = express.Router();
 
@@ -37,4 +39,6 @@ Router.post("/deleteCommentPost", deleteCommentPost);
 Router.post("/editCommentPost", editCommentPost);
 Router.post("/onCommentPostLast", onCommentPostLast);
 Router.get("/listCommentPost/:postID", listCommentPost);
+Router.get("/oneCommentPost/:commentID", oneCommentPost);
+Router.get("/countCommentPost/:postID", countCommentPost);
 module.exports = Router;
