@@ -1,15 +1,11 @@
 const connection = require("../config/database");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
-
-const someOtherPlaintextPassword = "not_bacon";
-const mailer = require('../utils/mailer')
-const Mustache = require('mustache');
-const fs = require('fs');
-const path = require('path');
-const moment = require('moment');
-
-
+const mailer = require("../utils/mailer");
+const Mustache = require("mustache");
+const fs = require("fs");
+const path = require("path");
+const moment = require("moment");
 
 // api account
 const register = (req, res) => {
@@ -219,21 +215,21 @@ const verifyToken = (req, res) => {
   );
 };
 
-
 const changeAvatar = (req, res) => {
   const { hasAvatar, id } = req.body;
   const fileName = req.file.filename;
   const filePath = "/uploads/" + fileName;
   const baseURL = "http://localhost:5173/";
   const imageURL = `${baseURL.slice(0, -1)}${filePath}`;
-  const uploadDir = path.join(__dirname, '../../../frontEnd/uploads');
+  const uploadDir = path.join(__dirname, "../../../frontEnd/uploads");
   const filePathOldAvatar = path.join(uploadDir, hasAvatar);
+  console.log(hasAvatar);
+  console.log(id);
   connection.query(
     "UPDATE Users SET avatar = ? WHERE id = ?",
     [imageURL, id],
     function (err, results, fields) {
       if (err) {
-        console.error(err);
         return res.status(500).json({ error: "Lỗi máy chủ" });
       }
       if (fs.existsSync(filePathOldAvatar)) {
@@ -245,17 +241,19 @@ const changeAvatar = (req, res) => {
         }
       }
       return res.status(200).json({
-        success: "Cập nhật avatar thành công", avatar: imageURL,
+        success: "Cập nhật avatar thành công",
+        avatar: imageURL,
         fileName: fileName,
         filePath: filePath,
-        id: id
+        id: id,
       });
     }
   );
 };
+
 const RemoveAvatar = (req, res) => {
   const { imagePath, id } = req.body;
-  const uploadDir = path.join(__dirname, '../../../frontEnd/uploads');
+  const uploadDir = path.join(__dirname, "../../../frontEnd/uploads");
   const filePath = path.join(uploadDir, imagePath);
   connection.query(
     "UPDATE users SET avatar = NULL WHERE id = ?",
@@ -278,9 +276,7 @@ const RemoveAvatar = (req, res) => {
           }
 
           // Xóa thành công, trả về thông báo thành công hoặc mã thành công
-          return res
-            .status(200)
-            .json({ success: "Xóa ảnh thành công" });
+          return res.status(200).json({ success: "Xóa ảnh thành công" });
         });
       });
     }
@@ -311,7 +307,7 @@ const UpdateInformationProfile = (req, res) => {
   if (!name || !moTa || !date) {
     return res.status(400).json({ error: "Vui lòng nhập đủ thông tin" });
   }
-  const formattedDate = moment(date).format('YYYY-MM-DD');
+  const formattedDate = moment(date).format("YYYY-MM-DD");
   connection.query(
     "UPDATE Users SET name = ?, birddate = ?, moTa = ? WHERE id = ?",
     [name, formattedDate, moTa, id],
@@ -320,7 +316,11 @@ const UpdateInformationProfile = (req, res) => {
         console.error(err);
         return res.status(500).json({ error: "Lỗi máy chủ" });
       }
-      return res.status(200).json({ name: name, moTa: moTa, success: "Cập nhật thông tin thành công" });
+      return res.status(200).json({
+        name: name,
+        moTa: moTa,
+        success: "Cập nhật thông tin thành công",
+      });
     }
   );
 };
@@ -348,7 +348,7 @@ const listUsers = (req, res) => {
   if (req.params.slug == 0) {
     const limit = 5; // Số lượng người dùng hiển thị trên mỗi trang
     connection.query(
-      "SELECT id,username,birddate,name,avatar FROM Users WHERE role <> 'admin' ORDER BY RAND() LIMIT ?",
+      "SELECT id,username,birddate,name,avatar,moTa FROM Users WHERE role <> 'admin' ORDER BY RAND() LIMIT ?",
       [limit],
       function (err, results, fields) {
         if (err) {
@@ -367,7 +367,7 @@ const listUsers = (req, res) => {
     const offset = (page - 1) * limit; // Vị trí bắt đầu lấy dữ liệu
 
     connection.query(
-      "SELECT id,username,birddate,name,avatar FROM Users WHERE role <> 'admin' LIMIT ? OFFSET ?",
+      "SELECT id,username,birddate,name,avatar,moTa FROM Users WHERE role <> 'admin' ORDER BY id DESC LIMIT ? OFFSET ?",
       [limit, offset],
       function (err, results, fields) {
         if (err) {
@@ -385,10 +385,14 @@ const listUsers = (req, res) => {
 const ChangePassword = (req, res) => {
   const { OldPassword, NewPassword, NewConfirmPassword, id } = req.body;
   if (!OldPassword || !NewPassword || !NewConfirmPassword) {
-    return res.status(400).json({ error: "Không được bỏ trống trường thông tin" });
+    return res
+      .status(400)
+      .json({ error: "Không được bỏ trống trường thông tin" });
   }
   if (NewPassword !== NewConfirmPassword) {
-    return res.status(400).json({ error: "Mật khẩu mới và mật khẩu xác nhận phải giống nhau" });
+    return res
+      .status(400)
+      .json({ error: "Mật khẩu mới và mật khẩu xác nhận phải giống nhau" });
   }
   connection.query(
     "SELECT * FROM Users WHERE id = ?",
@@ -410,7 +414,9 @@ const ChangePassword = (req, res) => {
                   if (err) {
                     return res.status(500).json({ error: "Lỗi máy chủ" });
                   }
-                  return res.status(200).json({ success: "Cập nhật mật khẩu thành công" });
+                  return res
+                    .status(200)
+                    .json({ success: "Cập nhật mật khẩu thành công" });
                 }
               );
             }
@@ -423,7 +429,7 @@ const ChangePassword = (req, res) => {
       }
     }
   );
-}
+};
 
 module.exports = {
   login,

@@ -1,5 +1,6 @@
 import "./navigation.css";
-import { Link, NavLink } from "react-router-dom";
+import axios from "axios";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 import { useEffect, useRef, useState } from "react";
 import Offcanvas from "react-bootstrap/Offcanvas";
 import HomeIcon from "@mui/icons-material/Home";
@@ -18,7 +19,16 @@ import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import MyModal from "../modal/Modal";
 import ImgNews from "../createNews/ImgNews";
 import ContentNews from "../createNews/ContentNews";
+import { useCookies } from "react-cookie";
+import imageLogo from "../../../uploads/Logo1.png";
+
 function Navigation() {
+  const Navigate = useNavigate();
+  const [userData, setUserData] = useState("");
+  const [cookies, removeCookie] = useCookies(["session"]);
+  const id = cookies.userId;
+  // console.log("chủ: " + id);
+
   const [show, setShow] = useState(false);
   const [checkS, setCheckS] = useState("");
   const [showMore, setShowMore] = useState(false);
@@ -45,18 +55,57 @@ function Navigation() {
     return () => {
       document.removeEventListener("mousedown", handleOutMore);
     };
-  });
+  }, []);
   const [modalShow, setModalShow] = useState(false);
 
+  const handleHide = () => {
+    setModalShow(false);
+  };
+  const logout = (
+    <>
+      <span className="dropdown-span"> Đăng xuất </span>&nbsp;
+      <LogoutIcon />
+    </>
+  );
+  const admin = (
+    <>
+      <span className="dropdown-span"> ADMIN</span> &nbsp;
+      <AdminPanelSettingsIcon />
+    </>
+  );
+  const theme = (
+    <>
+      <span className="dropdown-span">Giao diện</span>&nbsp;{" "}
+      {mode ? <WbSunnyIcon /> : <DarkModeIcon />}
+    </>
+  );
+  const handleLogout = () => {
+    removeCookie("userId");
+    Navigate("/", { replace: true });
+  };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8080/account/getDataUser/${id}`
+        );
+        setUserData(response.data[0]);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    const interval = setInterval(fetchData, 2000); // Chạy hàm fetchData() mỗi 2 giây
+
+    return () => {
+      clearInterval(interval); // Xóa bỏ interval khi component bị unmount
+    };
+  }, [id]);
   return (
     <div className="navigation">
-      <a href="#">
-        <img
-          className="navigation-logo"
-          src="https://www.docschmidt.org/uploads/1/4/3/0/143018339/print-204012274_orig.jpg"
-          alt=""
-        />
-      </a>
+      <Link to="/home">
+        <img className="navigation-logo" src={imageLogo} alt="" />
+      </Link>
       <NavLink className="navigation-button" to={"/home"} end>
         <HomeIcon />
         <span>Trang chủ</span>
@@ -94,12 +143,33 @@ function Navigation() {
         <AddToPhotosIcon />
         <span>Tạo</span>
       </button>
-      <NavLink className="navigation-button" to={"/home/profile"}>
-        <img
-          className="navigation-button-img"
-          src="https://i.pinimg.com/564x/85/ac/d4/85acd43486608fa7f3edc5df40e9f268.jpg"
-          alt=""
-        />
+      <NavLink className="navigation-button" to={`/home/profile`} end>
+        {userData && userData.avatar ? (
+          <img
+            className="navigation-button-img"
+            src={userData.avatar}
+            alt={userData.username}
+          />
+        ) : (
+          <img
+            className="navigation-button-img"
+            src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg"
+            alt="Avatar"
+          />
+        )}
+        {/* {userData && !userData.avatar ? (
+          <img
+            className="navigation-button-img"
+            src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg"
+            alt="Avatar"
+          />
+        ) : (
+          <img
+            className="navigation-button-img"
+            src={userData.avatar}
+            alt="Avatar"
+          />
+        )} */}
         <span>Trang cá nhân</span>
       </NavLink>
       <div ref={menuRef} className="navigation-button-father">
@@ -110,21 +180,17 @@ function Navigation() {
           <MenuIcon />
           <span>Xem thêm</span>
         </button>
+
         {/* {showMore && ( */}
         <div className={`dropdown-more ${showMore ? "active" : "inactive"}`}>
           <ul className="dropdown-more-ul">
-            <Drop
-              text={"ADMIN"}
-              path={"home/admin"}
-              icon={<AdminPanelSettingsIcon />}
-            />
-            <div onClick={handleMode}>
-              <Drop
-                Title={"Chuyển chế độ"}
-                icon={mode ? <WbSunnyIcon /> : <DarkModeIcon />}
-              />
+            <Drop text={admin} path={"home/admin"} />
+            <div onClick={handleMode} className="dropdown-more-title">
+              <Drop Title={theme} />
             </div>
-            <Drop text={"Đăng xuất"} path={""} icon={<LogoutIcon />} />
+            <div onClick={handleLogout} className="dropdown-more-title">
+              <Drop Title={logout} path={""} />
+            </div>
           </ul>
         </div>
       </div>
@@ -142,16 +208,17 @@ function Navigation() {
         </Offcanvas.Body>
       </Offcanvas>
       <MyModal
+        text={"Tạo bài viết"}
         show={modalShow}
-        onHide={() => setModalShow(false)}
-        childrens={[<ImgNews />]}
+        onHide={handleHide}
+        childrens={<ImgNews />}
       />
     </div>
   );
 }
 
 export default Navigation;
-
+// &nbsp;
 function Drop(props) {
   return (
     <li className="dopItem">

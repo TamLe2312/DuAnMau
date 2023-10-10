@@ -36,6 +36,7 @@
 .ProfileLinkButton{
     display: flex;
     border: 0;
+    background-color: transparent;
 }
 .ProfileLinkButton a{
     text-decoration: none;
@@ -46,7 +47,7 @@
     border-radius: 8px;
 }
 .ProfileLinkButton a:hover{
-    background-color: #C6C6C6
+    background-color: rgb(128, 128, 128, 0.5);
 }
 .ProfileSettingIcon{
     margin: 5px;
@@ -132,11 +133,49 @@
     color: #ed4956;
 }
 .ShowImageWhenUpload{
-    width: 300px;
+    max-width: 400px;
+    max-height: 400px;
 }
-.ShowImageContainer{
+.ProfileShowImageContainer{
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 10px;
+}
+.ProfileAvatarModalBody{
+    display: block;
+    padding: 0 !important;
+}
+.ProfileInformationModalBody{
+    display: block;
+}
+#ProfileUploadFile{
+    display: none;
+}
+.HandleButtonProfile{
+    width: 100%;
+    height: 50px;
+    margin: 0 !important;
+    font-weight: 600;
+    font-size: 18px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+.HandleButtonProfile:not(:first-child){
+    border-top: 1px solid silver;
+}
+.HandleButtonProfile:hover{
+    background-color: rgb(128, 128, 128, 0.5);
+}
+.ProfileUploadColor{
+    color: #00BDFF;
+}
+.ProfileRemoveColor{
+    color: #ed4956;
+}
+.HandleButtonProfileWhileEmpty{
+    width: 100%;
+    height: 100% !important;
 }

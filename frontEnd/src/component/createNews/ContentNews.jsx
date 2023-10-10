@@ -4,7 +4,10 @@ import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import axios from "axios";
+import { Context } from "../../page/home/home";
+import { useContext } from "react";
 function ContextNews(props) {
+  const dataa = useContext(Context);
   const location = useLocation();
   const [cookies, setCookie] = useCookies(["session"]);
   const state = location.state;
@@ -18,6 +21,7 @@ function ContextNews(props) {
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(true);
   const [e, setE] = useState(false);
+  const [userData, setUserData] = useState("");
 
   useEffect(() => {
     setId(cookies.userId);
@@ -34,6 +38,23 @@ function ContextNews(props) {
       setContent(contentNews.textContent);
     });
   }, []);
+  useEffect(() => {
+    if (id) {
+      const fetchData = async () => {
+        // console.log(id);
+        try {
+          const response = await axios.get(
+            `http://localhost:8080/account/getDataUser/${id}`
+          ); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
+          setUserData(response.data[0]);
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      };
+      fetchData();
+    }
+  }, [id]);
+
   const handleShow = () => {
     setShow(false);
   };
@@ -78,11 +99,19 @@ function ContextNews(props) {
   return (
     <div className="contentNews">
       <div className="contentNews-user">
-        <img
-          src="https://i.pinimg.com/564x/e5/40/df/e540df1eb306d103a3fd3be7e4fe2568.jpg"
-          alt=""
-        />
-        <span className="contentNews-user-name">name space</span>
+        {userData && !userData.avatar ? (
+          <img
+            src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg"
+            alt="Avatar"
+          />
+        ) : (
+          <img src={userData.avatar} alt="Avatar" />
+        )}
+        {userData && userData.name ? (
+          <span className="contentNews-user-name">{userData.name}</span>
+        ) : (
+          <span className="contentNews-user-name">{userData.username}</span>
+        )}
       </div>
       {/* content */}
       <div
@@ -134,10 +163,17 @@ function ContextNews(props) {
                 type="button"
                 className="btn btn-primary"
                 onClick={handlePost}
+                onMouseDown={dataa}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    dataa();
+                  }
+                }}
               >
                 Bài viết
               </button>
               <button
+                // onClick={dataa}
                 disabled={!content}
                 type="button"
                 className="btn btn-primary"
