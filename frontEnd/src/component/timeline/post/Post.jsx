@@ -15,7 +15,6 @@ import MyModal from "../../modal/Modal";
 import MorePost from "./MorePost";
 import { useCookies } from "react-cookie";
 import ListComment from "./ListComment";
-
 function Post({ user, time, avatar, title, name, id, userid }) {
   const focusInput = useRef();
   const [cookies] = useCookies();
