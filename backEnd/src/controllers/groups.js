@@ -6,7 +6,7 @@ const fs = require("fs");
 const moment = require("moment");
 
 const createGroup = (req, res) => {
-    const { name, moTa } = req.body;
+    const { name, moTa, idCreatedGroup } = req.body;
     const fileName = req.file.filename;
     if (!name || !moTa || !fileName) {
         return res.status(400).json({ error: "Vui lòng nhập đủ thông tin" });
@@ -22,31 +22,43 @@ const createGroup = (req, res) => {
                 return res.status(500).json({ error: "Lỗi máy chủ" });
             }
             if (results.length > 0) {
-                return res.status(400).json({ error: "Tên nhóm đã tồn tại" });
+                return res.status(400).json({ error: "Lỗi máy chủ" });
             }
-        }
-    );
-    connection.query(
-        "INSERT INTO groupsTable (name, moTaNhom, avatarGroup) VALUES (?, ?, ?)",
-        [name, moTa, imageURL],
-        function (err, results, fields) {
-            if (err) {
-                console.error(err);
-                return res.status(500).json({ error: "Lỗi máy chủ 2" });
+            else {
+                connection.query(
+                    "INSERT INTO groupsTable (name, moTaNhom, avatarGroup,idUserCreatedGroup) VALUES (?, ?, ?,?)",
+                    [name, moTa, imageURL, idCreatedGroup],
+                    function (err, results, fields) {
+                        if (err) {
+                            console.error(err);
+                            return res.status(500).json({ error: "Lỗi máy chủ 2" });
+                        }
+                        const groupId = results.insertId;
+                        connection.query(
+                            "SELECT * FROM groupsTable",
+                            async function (err, results, fields) {
+                                if (err) {
+                                    return res.status(500).json({ error: "Lỗi máy chủ" });
+                                }
+                                if (results.length > 0) {
+                                    connection.query(
+                                        "INSERT INTO membergroup (group_id,user_id) VALUES (?, ?)",
+                                        [groupId, idCreatedGroup],
+                                        async function (err, results, fields) {
+                                            if (err) {
+                                                return res.status(500).json({ error: "Lỗi máy chủ" });
+                                            }
+                                        }
+                                    );
+                                    return res.status(200).json({ results, success: "Tạo nhóm thành công" });
+                                } else {
+                                    return res.status(400).json({ error: "Lỗi máy chủ" });
+                                }
+                            }
+                        );
+                    }
+                );
             }
-            connection.query(
-                "SELECT * FROM groupsTable",
-                async function (err, results, fields) {
-                    if (err) {
-                        return res.status(500).json({ error: "Lỗi máy chủ" });
-                    }
-                    if (results.length > 0) {
-                        return res.status(200).json({ results, success: "Tạo nhóm thành công" });
-                    } else {
-                        return res.status(400).json({ error: "Lỗi máy chủ" });
-                    }
-                }
-            );
         }
     );
 }
@@ -310,7 +322,6 @@ const TotalMembers = (req, res) => {
             }
         }
     );
-
 }
 
 module.exports = {
@@ -321,4 +332,9 @@ module.exports = {
     changeAvatarGroup,
     removeAvatarGroup,
     UpdateInformationProfileGroup,
+    removeGroup,
+    getDataGroupJoined,
+    joinGroup,
+    TotalMembers,
+    outGroup,
 };
