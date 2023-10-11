@@ -70,6 +70,9 @@
   border-radius: 8px;
   background-color: transparent;
 }
+.OutGroupColorButton {
+  color: rgb(255, 0, 0);
+}
 .CommunityInformationButton button:hover {
   background-color: rgb(128, 128, 128, 0.5);
 }

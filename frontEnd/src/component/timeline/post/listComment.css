@@ -1,0 +1,108 @@
+.listComments {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  width: 100%;
+}
+.listComment-img {
+  flex: 0.55;
+  position: relative;
+}
+.listComment-img-imgs img {
+  width: 100%;
+  height: 80vh;
+  object-fit: cover;
+}
+.listComment-icon-left,
+.listComment-icon-right {
+  color: rgb(162, 154, 154);
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(200, 199, 199, 0.5);
+  border-radius: 50%;
+}
+.listComment-icon-left {
+  left: 8px;
+}
+.listComment-icon-right {
+  right: 8px;
+}
+.listComment-icon-left:hover,
+.listComment-icon-right:hover {
+  background-color: rgba(231, 225, 225, 0.5);
+
+  cursor: pointer;
+}
+.listComment-img-length {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+}
+/* -------------------------------comment---------------------- */
+.listComment-comment {
+  flex: 0.45;
+  padding-left: 8px;
+  position: relative;
+  padding-bottom: 48px;
+}
+.listComment-comment-ortheruser > img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  min-width: 48px;
+}
+.listComment-comment-ortheruser {
+  padding-bottom: 8px;
+  /* border-bottom: 0.5px solid rgb(201, 198, 198); */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  margin: 10px 0;
+}
+.listComment-comment-ortheruser-name {
+  font-weight: 500;
+}
+.listComment-comment-ortheruser-more {
+  opacity: 0.2;
+}
+.listComment-comment-ortheruser-more:hover {
+  cursor: pointer;
+  opacity: 0.6;
+  transition: 0.5s;
+}
+.listComments-notimg {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  width: 100%;
+}
+.listComments-notimg-content-child {
+  text-align: center;
+  border-bottom: 0.5px solid rgb(201, 198, 198);
+  padding: 40px;
+}
+.listComments-notimg-content-user {
+  padding-bottom: 8px;
+  border-bottom: 0.5px solid rgb(201, 198, 198);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+}
+.listComments-notimg-content-user > img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+.listComments-notimg-content-user > span {
+  font-weight: 500;
+}
+
+.listComment-comment.notimg {
+  padding-top: 12px;
+  padding-bottom: 12px;
+}

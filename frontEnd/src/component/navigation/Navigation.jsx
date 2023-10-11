@@ -25,10 +25,8 @@ import imageLogo from "../../../uploads/Logo1.png";
 function Navigation() {
   const Navigate = useNavigate();
   const [userData, setUserData] = useState("");
-  const [cookies, removeCookie] = useCookies(["session"]);
+  const [cookies, , removeCookie] = useCookies(["userId"]);
   const id = cookies.userId;
-  // console.log("chủ: " + id);
-
   const [show, setShow] = useState(false);
   const [checkS, setCheckS] = useState("");
   const [showMore, setShowMore] = useState(false);
@@ -80,7 +78,7 @@ function Navigation() {
     </>
   );
   const handleLogout = () => {
-    removeCookie("userId");
+    removeCookie("userId", { path: "/" });
     Navigate("/", { replace: true });
   };
   useEffect(() => {

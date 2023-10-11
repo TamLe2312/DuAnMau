@@ -1,0 +1,95 @@
+.commentschild {
+  max-height: 460px;
+  overflow-y: scroll;
+}
+.commentschild-notimg {
+  max-height: 360px;
+  overflow-y: scroll;
+}
+.commentschild-once {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  margin: 16px 0;
+}
+
+.commentschild-once img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  min-width: 48px;
+}
+.commentschild-usercomment {
+  font-weight: 500;
+}
+.commentschild-usermore {
+  opacity: 0.2;
+  transition: 0.5s;
+}
+.commentschild-usermore:hover {
+  opacity: 0.6;
+  cursor: pointer;
+}
+
+.commentschild-input {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 10px;
+  padding-right: 12px;
+  position: absolute;
+  bottom: 0;
+  width: 100%;
+}
+.commentschild-inputgroup-btn {
+  font-weight: 500px !important;
+  color: rgb(13, 106, 220) !important;
+}
+.commentschild-inputgroup-btn:hover {
+  cursor: pointer;
+}
+.commentschild-admin {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 8px;
+  border-bottom: 0.5px solid rgba(128, 128, 128, 0.5);
+}
+.commentschild-admin > img {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  min-width: 48px;
+}
+/* modal------------------------------- */
+.comment-more-list {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  text-align: center;
+}
+.comment-more-list li {
+  list-style-type: none;
+  display: block;
+}
+.comment-more-list li:hover {
+  cursor: pointer;
+}
+#comment-del:hover {
+  color: red;
+}
+#comment-edit:hover {
+  color: rgb(15, 146, 141);
+}
+.comment-textarea-edit {
+  width: 100%;
+  min-height: 200px;
+  border: none;
+}
+.comment-textarea-edit:focus {
+  outline: none;
+}

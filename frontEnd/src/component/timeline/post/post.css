@@ -157,6 +157,9 @@
   opacity: 0.7;
   font-size: 0.9rem;
 }
+.post-footer-list-comment:hover {
+  cursor: pointer;
+}
 .post-comment {
   color: rgb(1, 114, 116);
   font-weight: 500;

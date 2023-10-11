@@ -1,5 +1,6 @@
 import axios from "axios";
-import { useState } from "react";
+import { React, useState } from "react";
+import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 import Validation from "../../component/validation/validation";
 import { toast } from "react-toastify"; 
@@ -34,7 +35,11 @@ function register() {
        
      
       setLoading(true);
+<<<<<<< HEAD
       const res= await axios.post("http://localhost:8080/account/register", {
+=======
+      const res = await axios.post("http://localhost:8080/account/register", {
+>>>>>>> 1a2119020305050a960c942a3c35b77d1f848e9e
         username: values.username.trim(),
         password: values.password,
         email: values.email,
@@ -42,14 +47,19 @@ function register() {
 
       });
       console.log(res);
+<<<<<<< HEAD
       
+=======
+>>>>>>> 1a2119020305050a960c942a3c35b77d1f848e9e
       setLoading(false);
       Navigate("/home", { replace: true });
     } catch (error) {
       console.error(error);
       
       setLoading(false);
-      setCheckLogin(error.response.data.error);
+      console.error(error);
+      toast.error(error.response.data.error);
+      // setCheckLogin(error.response.data.error);
     }
   };
   return (
