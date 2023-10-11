@@ -3,7 +3,8 @@ import { useState, useEffect } from "react";
 import { useCookies } from "react-cookie";
 import { Link, useNavigate } from "react-router-dom";
 import Validation from "../../component/validation/validation";
-import { toast } from "react-toastify";
+/* import { toast } from "react-toastify"; */
+import { Toaster, toast } from 'sonner'
 import "./login.css";
 function Login() {
   const Navigate = useNavigate();
@@ -43,7 +44,7 @@ function Login() {
     } catch (error) {
       setLoading(false);
       console.error(error);
-      toast.error(error.response.data.error)
+      toast.error(error.response.data.error);
       setCheckLogin(error.response.data.error);
     }
   };

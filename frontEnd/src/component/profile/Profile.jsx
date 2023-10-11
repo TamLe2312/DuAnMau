@@ -208,7 +208,7 @@ function Profile() {
 
   return (
     <>
-      <div className="container-fluid">
+      <div className="container-fluid" style={{ overflowX: 'hidden' }}>
         <div className="container containerProfile">
           <header className="ProfileHeader">
             <div
