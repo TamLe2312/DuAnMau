@@ -14,6 +14,7 @@ import Groups from "./component/group/Groups";
 
 //React Toastify
 import { ToastContainer } from "react-toastify";
+import { Toaster } from 'sonner'
 import "react-toastify/dist/ReactToastify.css";
 import Admin from "./component/ADMIN/Admin";
 function App() {
@@ -50,6 +51,8 @@ function App() {
       />
       {/* Same as */}
       <ToastContainer />
+      <Toaster position="top-right" expand={false} />
+
     </div>
   );
 }

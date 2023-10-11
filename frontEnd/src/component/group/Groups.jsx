@@ -230,7 +230,7 @@ function Groups() {
     }, [groupDataProfile]);
     return (
         <>
-            <div className="container-fluid">
+            <div className="container-fluid" style={{ overflowX: 'hidden' }}>
                 <div className="container GroupContentContainer">
                     <header className="ProfileHeader">
                         <div
