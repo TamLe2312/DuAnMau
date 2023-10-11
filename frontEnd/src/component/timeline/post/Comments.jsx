@@ -6,6 +6,7 @@ import { useCookies } from "react-cookie";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import { Avatar } from "@mui/material";
+import { Toaster, toast } from "sonner";
 
 function Comments(props) {
   const handleRun = props.handlerun;
@@ -120,6 +121,7 @@ function Comments(props) {
           if (res.data) {
             setdoi((e) => !e);
             handleRun();
+            toast.success("Bạn đã xóa bình luận");
           }
         };
         fetchApi();
@@ -140,6 +142,7 @@ function Comments(props) {
           if (res.data) {
             setdoi((e) => !e);
             handleRun();
+            toast.success("Bạn đã sửa bình luận");
           }
         };
         fetchApi();
@@ -151,6 +154,7 @@ function Comments(props) {
   };
   return (
     <>
+      <Toaster richColors />
       {img.length > 0 && (
         <div className="commentschild-admin">
           {avatar ? (

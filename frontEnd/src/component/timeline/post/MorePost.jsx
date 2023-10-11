@@ -2,10 +2,11 @@ import "./morepost.css";
 import { useState, useContext, useEffect } from "react";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
-import { toast } from "react-toastify";
+// import { toast } from "react-toastify";
 import * as request from "../../../utils/request";
 import { Context } from "../../../page/home/home";
 import axios from "axios";
+import { Toaster, toast } from "sonner";
 
 function MorePost(props) {
   const conTent = props.title;
@@ -67,6 +68,7 @@ function MorePost(props) {
 
   return (
     <div className="morepost">
+      <Toaster richColors />
       <ul className="morepost-list">
         <li className="morepost-list-item">
           <span
