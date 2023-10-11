@@ -17,6 +17,7 @@ import { ToastContainer } from "react-toastify";
 import { Toaster } from 'sonner'
 import "react-toastify/dist/ReactToastify.css";
 import Admin from "./component/ADMIN/Admin";
+import Account from "./component/ADMIN/adminchild/account";
 function App() {
   return (
     <div>
@@ -32,7 +33,9 @@ function App() {
           <Route path="/home/profile" element={<Profile />} />
           <Route path="/home/community" element={<Community />} />
           <Route path="/home/messenger" element={<Messenger />} />
-          <Route path="/home/admin" element={<Admin />} />
+          <Route path="/home/admin" element={<Admin />}>
+            <Route path="/home/admin/account" element={<Account />} />
+          </Route>
         </Route>
         <Route path="/verifyToken" element={<VerifyToken />} />
         <Route path="*" element={<NoMath />} />
