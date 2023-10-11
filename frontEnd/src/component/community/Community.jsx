@@ -240,7 +240,7 @@ function Community() {
 
   return (
     <>
-      <div className="container-fluid">
+      <div className="container-fluid" style={{ overflowX: 'hidden' }}>
         <div className="container containerCommunity">
           <div className="container" style={{ padding: 0 }}>
             <Form>
