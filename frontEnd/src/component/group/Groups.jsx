@@ -4,16 +4,19 @@ import React, { useState, useEffect } from "react";
 import SettingsIcon from "@mui/icons-material/Settings";
 import GridOnIcon from "@mui/icons-material/GridOn";
 import Validation from "../../component/validation/validation";
+import { useCookies } from "react-cookie";
 import { Modal, Button, Form } from "react-bootstrap";
 import { toast } from "react-toastify";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import "./Groups.css"
 
 function Groups() {
+    const Navigate = useNavigate();
     const groupID = useParams();
     const [selectedImage, setSelectedImage] = useState(null);
     const [loading, setLoading] = useState(false);
     const [showModalAvatar, setShowModalAvatar] = useState(false);
+    const [cookies] = useCookies(["session"]);
     const [showModalInformationProfile, setShowModalInformationProfile] = useState(false);
     const [Images, setImages] = useState(null);
     const [hasAvatarGroup, setHasAvatarGroup] = useState(null);
@@ -23,6 +26,8 @@ function Groups() {
         moTaNhom: "",
     });
     const [error, setError] = useState({});
+    const [TotalMembers, setTotalMembers] = useState(0);
+    const idUser = cookies.userId;
 
     const handleChange = (e) => {
         setFormValues({
@@ -160,6 +165,27 @@ function Groups() {
             setLoading(false);
         }
     };
+    const handleRemoveGroup = async () => {
+        setLoading(true);
+        const groupIdProfile = groupID.groupID;
+        console.log(groupIdProfile);
+        try {
+            const response = await axios.post(
+                "http://localhost:8080/groups/removeGroup",
+                {
+                    groupIdProfile,
+                    hasAvatarGroup,
+                }
+            );
+            Navigate("/home/community", { replace: true });
+            toast.success(response.data.success);
+            handleCloseModalAvatar();
+            setLoading(false);
+        } catch (error) {
+            setLoading(false);
+            console.error(error);
+        }
+    }
     useEffect(() => {
         const groupIdProfile = groupID.groupID;
         const fetchData = async () => {
@@ -169,6 +195,22 @@ function Groups() {
                     `http://localhost:8080/groups/group/${groupIdProfile}`
                 );
                 setGroupDataProfile(response.data[0]);
+                setLoading(false);
+            } catch (error) {
+                console.error(error);
+            }
+        };
+        fetchData();
+    }, [groupID]);
+    useEffect(() => {
+        const groupIdProfile = groupID.groupID;
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const response = await axios.get(
+                    `http://localhost:8080/groups/TotalMembers/${groupIdProfile}`
+                );
+                setTotalMembers(response.data[0].totalMembers);
                 setLoading(false);
             } catch (error) {
                 console.error(error);
@@ -301,14 +343,17 @@ function Groups() {
                                             </p>
                                         )}
                                     <div className="ProfileLinkContainer">
-                                        <button
-                                            className="ProfileLinkButton"
-                                            onClick={handleShowModalInformationProfile}
-                                        >
-                                            <a href="#" className="ProfileLink">
-                                                Chỉnh sửa thông tin nhóm
-                                            </a>
-                                        </button>
+                                        {groupDataProfile && groupDataProfile.idUserCreatedGroup === idUser ? (
+                                            <button
+                                                className="ProfileLinkButton"
+                                                onClick={handleShowModalInformationProfile}
+                                            >
+                                                <a href="#" className="ProfileLink">
+                                                    Chỉnh sửa thông tin nhóm
+                                                </a>
+                                            </button>) :
+                                            (<></>)
+                                        }
                                         <Modal
                                             centered
                                             show={showModalInformationProfile}
@@ -366,6 +411,19 @@ function Groups() {
                                                     </Form.Group>
                                                     <br />
                                                     <Modal.Footer>
+                                                        {groupDataProfile && groupDataProfile.idUserCreatedGroup === idUser ?
+                                                            (
+                                                                <Button
+                                                                    variant="danger"
+                                                                    onClick={handleRemoveGroup}
+                                                                >
+                                                                    {loading ? "Deleting..." : "Delete Group"}
+                                                                </Button>
+                                                            ) :
+                                                            (
+                                                                <></>
+                                                            )
+                                                        }
                                                         <Button
                                                             variant="primary"
                                                             type="submit"
@@ -384,7 +442,7 @@ function Groups() {
                                         <span>0 bài viết</span>
                                         <span>
                                             <a href="#">
-                                                Có <b>120</b> thành viên
+                                                Có <b>{TotalMembers}</b> thành viên
                                             </a>
                                         </span>
                                     </div>

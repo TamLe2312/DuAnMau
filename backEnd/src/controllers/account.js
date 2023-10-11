@@ -24,9 +24,7 @@ const register = (req, res) => {
             return res.status(500).json({ error: "Lỗi máy chủ 1" });
           }
           if (results.length > 0) {
-            return res
-              .status(400)
-              .json({ error: "Tên người dùng hoặc email đã tồn tại" });
+            return res.status(400).json({ error: "Tên người dùng hoặc email đã tồn tại" });
           }
         }
       );
@@ -69,6 +67,9 @@ const register = (req, res) => {
 
 const login = (req, res) => {
   const { username, password } = req.body;
+  if (!username || !password) {
+    return res.status(400).json({ error: "Vui lòng nhập đầy đủ thông tin" });
+  }
   connection.query(
     "SELECT * FROM Users WHERE username = ?",
     [username],
@@ -79,10 +80,10 @@ const login = (req, res) => {
       if (results.length > 0) {
         const match = await bcrypt.compare(password, results[0].password);
         if (match) {
-          req.session.uID = results[0].id;
+          let uId = results[0].id;
           return res
             .status(200)
-            .json({ id: req.session.uID, error: "Đăng nhập thành công" });
+            .json({ id: uId, error: "Đăng nhập thành công" });
         } else {
           return res.status(400).json({ error: "Sai tài khoản hoặc mật khẩu" });
         }

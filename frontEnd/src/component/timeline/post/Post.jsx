@@ -14,13 +14,13 @@ import { Link } from "react-router-dom";
 import MyModal from "../../modal/Modal";
 import MorePost from "./MorePost";
 import { useCookies } from "react-cookie";
-
-// import { Context } from "../../../page/home/home";
-// import { useContext } from "react";
+import ListComment from "./ListComment";
 function Post({ user, time, avatar, title, name, id, userid }) {
+  const focusInput = useRef();
   const [cookies] = useCookies();
   const myID = cookies.userId;
   const [modalShow, setModalShow] = useState(false);
+  const [modalShowComment, setModalShowComment] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const postFooterRef = useRef(null);
   const [them, setThem] = useState(false);
@@ -64,6 +64,8 @@ function Post({ user, time, avatar, title, name, id, userid }) {
         );
         if (res.data[0].countlike > 0) {
           setlike(res.data[0].countlike);
+        } else {
+          setlike(0);
         }
       };
       fetchApi();
@@ -106,6 +108,7 @@ function Post({ user, time, avatar, title, name, id, userid }) {
   };
   const handleHide = () => {
     setModalShow(false);
+    // setModalShowComment(false);
   };
 
   useEffect(() => {
@@ -168,13 +171,90 @@ function Post({ user, time, avatar, title, name, id, userid }) {
     }
   };
   // comment------------------------------------
-  const hanldleSentComment = (postID) => {
-    console.log("post id: " + postID);
-    console.log("myID: " + myID);
-    console.log(comment);
-    setcomment("");
+  const [dymanicComment, setdymanicComment] = useState(true);
+  const [commentNew, setcommentew] = useState({
+    comment: "",
+    user: "",
+    userID: "",
+  });
+
+  const hanldleSentComment = () => {
+    try {
+      const fetchApi = async () => {
+        const res = await axios.post("http://localhost:8080/post/commentPost", {
+          postID: id,
+          userID: myID,
+          content: comment.trim(),
+        });
+        if (res.status == 200) {
+          setdymanicComment(!dymanicComment);
+          console.log("bạn đã bình luận: " + id);
+          setcomment("");
+        } else {
+          console.log("Có vấn đề gì đó rồi");
+        }
+      };
+      fetchApi();
+    } catch (error) {
+      console.log(error);
+    }
   };
+
+  useEffect(() => {
+    const fetchApi = async () => {
+      try {
+        const res = await axios.post(
+          "http://localhost:8080/post/onCommentPostLast",
+          {
+            postID: id,
+          }
+        );
+        if (res.data) {
+          if (res.data.user_id) {
+            const resUser = await axios.get(
+              `http://localhost:8080/account/getDataUser/${res.data.user_id}`
+            );
+            setcommentew({
+              comment: res.data.content,
+              user: resUser.data[0].name || resUser.data[0].username,
+              userID: res.data.user_id,
+            });
+          }
+        } else {
+          setcommentew({
+            comment: "",
+            user: "",
+            userID: "",
+          });
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    };
+    fetchApi();
+  }, [dymanicComment, id]);
+  const [hasComment, sethasComment] = useState(false);
+  useEffect(() => {
+    const fetchApi = async () => {
+      try {
+        const res = await axios.get(
+          ` http://localhost:8080/post/countCommentPost/${id}`
+        );
+        if (res.data[0].countcomment > 1) {
+          sethasComment(true);
+        } else {
+          sethasComment(false);
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    };
+    fetchApi();
+  }, [id, dymanicComment]);
   // -------------------------------------------
+  const handlerun = () => {
+    setdymanicComment(!dymanicComment);
+  };
   return (
     <>
       <div className="post" key={id}>
@@ -187,7 +267,10 @@ function Post({ user, time, avatar, title, name, id, userid }) {
               {avatar ? (
                 <img className="post-avatar" src={avatar} />
               ) : (
-                <Avatar> {name.charAt(0) || user.charAt(0)}</Avatar>
+                <Avatar>
+                  {name !== null ? name.charAt(0) : user.charAt(0)}
+                </Avatar>
+                // <img className="post-avatar" src="" />
               )}
               &nbsp;<span>{name || user}</span>
             </Link>
@@ -203,7 +286,12 @@ function Post({ user, time, avatar, title, name, id, userid }) {
           {/* -------------more------------ */}
           <span className="post-more-delete">
             {userid === myID && (
-              <MoreHorizIcon onClick={() => handleDELETE(id)} />
+              <MoreHorizIcon
+                onClick={() => {
+                  handleDELETE(id);
+                  setModalShowComment(false);
+                }}
+              />
             )}
           </span>
         </div>
@@ -261,7 +349,10 @@ function Post({ user, time, avatar, title, name, id, userid }) {
               </span>
             )}
 
-            <span className="post-footer-icon-like-comment">
+            <span
+              className="post-footer-icon-like-comment"
+              onClick={() => focusInput.current.focus()}
+            >
               <ChatBubbleOutlineIcon />
             </span>
           </div>
@@ -279,21 +370,38 @@ function Post({ user, time, avatar, title, name, id, userid }) {
           ) : (
             ""
           )}
-          <a href="" className="post-footer-list-comment">
-            Xem thêm bình luận
-          </a>
+          {hasComment && (
+            <span
+              className="post-footer-list-comment"
+              onClick={() => {
+                setModalShow(true);
+                setModalShowComment(true);
+              }}
+            >
+              Xem thêm bình luận
+            </span>
+          )}
         </div>
-        <div className="post-footer-user-comment">
-          <Link to="/home" className="post-footer-user-user">
-            name
-          </Link>
-          &nbsp;
-          <span className="post-footer-comment-comment">
-            bình luận mới nhất
-          </span>
-        </div>
+        {commentNew.comment && commentNew.user && (
+          <>
+            <div className="post-footer-user-comment">
+              <Link
+                to={`/home/profile/user/${commentNew.userID}`}
+                className="post-footer-user-user"
+              >
+                {commentNew.user}
+              </Link>
+              &nbsp;
+              <span className="post-footer-comment-comment">
+                {commentNew.comment}
+              </span>
+            </div>
+          </>
+        )}
+
         <div className="post-footer-input">
           <input
+            ref={focusInput}
             type="text"
             placeholder="Thêm bình luận"
             value={comment}
@@ -303,7 +411,7 @@ function Post({ user, time, avatar, title, name, id, userid }) {
           <button
             disabled={!comment}
             className={comment && "post-comment"}
-            onClick={() => hanldleSentComment(id)}
+            onClick={hanldleSentComment}
           >
             Đăng
           </button>
@@ -315,7 +423,21 @@ function Post({ user, time, avatar, title, name, id, userid }) {
         show={modalShow}
         onHide={handleHide}
         childrens={
-          <MorePost id={id} title={title} show={handleDataFromChild} />
+          //  user(tk), time, avatar, title, name, id, userid
+          modalShowComment ? (
+            <ListComment
+              id={id}
+              img={img}
+              title={title}
+              user={user}
+              avatar={avatar}
+              name={name}
+              userid={userid}
+              handlerun={handlerun}
+            />
+          ) : (
+            <MorePost id={id} title={title} show={handleDataFromChild} />
+          )
         }
       />
     </>
