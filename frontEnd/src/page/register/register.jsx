@@ -1,10 +1,11 @@
-import axios from "axios";
-import { useState } from "react";
+import React, { useState } from "react";
+import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 import Validation from "../../component/validation/validation";
 import "./register.css";
-function register() {
-  const Navigate = useNavigate();
+
+function Register() {
+  const navigate = useNavigate();
   const style = {
     margin: "0 auto",
     width: 600,
@@ -25,24 +26,33 @@ function register() {
     setError({ ...error, [e.target.name]: "" });
     setCheckLogin("");
   };
+
   const handleClick = async (e) => {
     e.preventDefault();
     setError(Validation(values));
     try {
+      console.log
+
+
       setLoading(true);
-      await axios.post("http://localhost:8080/account/register", {
+      const res = await axios.post("http://localhost:8080/account/register", {
         username: values.username.trim(),
         password: values.password,
         email: values.email,
-
       });
+      console.log(res);
       setLoading(false);
-      Navigate("/home", { replace: true });
+      navigate("/home", { replace: true });
     } catch (error) {
+      console.error(error);
+
       setLoading(false);
-      setCheckLogin(error.response.data.error);
+      console.error(error);
+      toast.error(error.response.data.error);
+      // setCheckLogin(error.response.data.error);
     }
   };
+
   return (
     <>
       <form style={style} className="mt-4">
@@ -157,4 +167,4 @@ function register() {
   );
 }
 
-export default register;
+export default Register;

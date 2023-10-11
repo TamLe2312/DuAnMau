@@ -7,6 +7,7 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import { useCookies } from "react-cookie";
+import Post from "../timeline/post/Post"
 import Validation from "../../component/validation/validation";
 import { toast } from "react-toastify";
 import "./Profile.css";
@@ -15,6 +16,9 @@ import { useParams } from "react-router-dom";
 function Profile() {
   // id user khác
   const { userID } = useParams();
+  const [pageData, setpageData] = useState(2);
+  const [postsData, setPostsData] = useState([]);
+
 
   // useEffect(() => {
   //   console.log("Khách: " + userID);
@@ -206,9 +210,24 @@ function Profile() {
     }
   }, [userData]);
 
+  const fetchDataNew = () => {
+    setpageData(pageData + 1);
+    const dataNew = async () => {
+      const response = await axios.get(
+        `http://localhost:8080/post/datapost/${pageData}`
+      );
+      if (response.status === 200) {
+        const datas = response.data;
+        setPostsData(postsData.concat(datas));
+      } else {
+        console.log("Lỗi rồi");
+      }
+    };
+    dataNew();
+  };
   return (
     <>
-      <div className="container-fluid">
+      <div className="container-fluid" style={{ overflowX: 'hidden' }}>
         <div className="container containerProfile">
           <header className="ProfileHeader">
             <div
@@ -451,6 +470,25 @@ function Profile() {
                   <span>đã lưu</span>
                 </a>
               </div> */}
+            </div>
+          </div>
+          <div className="container">
+            <div className="timeline-post">
+              {postsData
+                ? postsData.map((post, index) => (
+                  <Post
+                    key={index}
+                    id={post.id}
+                    userid={post.userid}
+                    user={post.username}
+                    name={post.name}
+                    time={post.created_at}
+                    avatar={post.avatar}
+                    title={post.content}
+                  // like={100}
+                  />
+                ))
+                : "loading..."}
             </div>
           </div>
         </div>

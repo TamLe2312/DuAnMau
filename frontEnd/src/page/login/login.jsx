@@ -1,7 +1,10 @@
 import axios from "axios";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useCookies } from "react-cookie";
 import { Link, useNavigate } from "react-router-dom";
 import Validation from "../../component/validation/validation";
+/* import { toast } from "react-toastify"; */
+import { Toaster, toast } from 'sonner'
 import "./login.css";
 function Login() {
   const Navigate = useNavigate();
@@ -17,6 +20,7 @@ function Login() {
 
   const [error, setError] = useState({});
   const [loading, setLoading] = useState(false);
+  const [cookies, setCookie] = useCookies(["userId"]);
   const [checkLogin, setCheckLogin] = useState("");
 
   const handleChange = (e) => {
@@ -34,10 +38,13 @@ function Login() {
         password: values.password,
       });
       let uID = res.data.id;
+      setCookie("userId", uID);
       setLoading(false);
-      Navigate("/home", { state: { uID } }, { replace: true });
+      Navigate("/home", { replace: true });
     } catch (error) {
       setLoading(false);
+      console.error(error);
+      toast.error(error.response.data.error);
       setCheckLogin(error.response.data.error);
     }
   };
