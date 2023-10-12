@@ -1,3 +1,4 @@
+import { Toaster, toast } from "sonner";
 import "./morepost.css";
 import { useState, useContext, useEffect } from "react";
 import Modal from "react-bootstrap/Modal";

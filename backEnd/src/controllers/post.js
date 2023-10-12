@@ -103,7 +103,45 @@ const upImgs = (req, res) => {
     }
   });
 };
-
+const groupUpImgs = (req, res) => {
+  const uploadMiddleware = upload.any();
+  uploadMiddleware(req, res, function (err) {
+    if (err instanceof multer.MulterError) {
+      console.log(err);
+      return res.status(500).json({ error: "Có lỗi xảy ra khi tải lên file" });
+    } else if (err) {
+      console.log(err);
+      return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau 1" });
+    }
+    if (req.files) {
+      const postGroupId = req.body.postGroupId;
+      const files = req.files;
+      let completed = 0;
+      files.forEach((file) => {
+        connection.query(
+          "INSERT INTO listdata (groupPost_id,img) VALUES (?,?)",
+          [postGroupId, file.filename],
+          function (err, results, fields) {
+            completed++;
+            if (err) {
+              return res
+                .status(500)
+                .json({ error: "Có lỗi xảy ra xin thử lại sau 2" });
+            } else {
+              if (completed == files.length) {
+                return res
+                  .status(200)
+                  .json({ success: "Bạn đã đăng bài viết thành công" });
+              }
+            }
+          }
+        );
+      });
+    } else {
+      return res.status(200).json({ success: "Không nhận được img" });
+    }
+  });
+};
 const createPost = (req, res) => {
   const { userID, content } = req.body;
   if (!userID || !content) {
@@ -121,6 +159,28 @@ const createPost = (req, res) => {
         return res
           .status(200)
           .json({ lastID: lastID, success: "Bạn đã tải bài viết lên" });
+      }
+    }
+  );
+};
+const createGroupPost = (req, res) => {
+  const { groupId, content, userId } = req.body;
+  if (!userId || !content || !groupId) {
+    return res.status(400).json({ error: "Không bỏ trống thông tin" });
+  }
+  connection.query(
+    "INSERT INTO postsgroup (group_id,user_id,content) VALUES (?, ?,?)",
+    [groupId, userId, content.PostGroupContentNew],
+    function (err, results, fields) {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+      }
+      if (results) {
+        const lastID = results.insertId;
+        return res
+          .status(200)
+          .json({ lastID: lastID, success: "Bạn đã đăng bài viết thành công" });
       }
     }
   );
@@ -254,7 +314,6 @@ const dataPost = (req, res) => {
     }
   );
 };
-
 const postimgs = (req, res) => {
   const postID = parseInt(req.params.postID);
   connection.query(
@@ -262,6 +321,27 @@ const postimgs = (req, res) => {
     FROM listdata  
    WHERE post_id = ? `,
     [postID], // Use the postID variable here
+    function (err, results, fields) {
+      if (err) {
+        // console.log(err);
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+      }
+      if (results.length > 0) {
+        return res.status(200).json(results);
+      } else {
+        // return res.status(400).json({ success: "Không có bài post nào img" });
+        return res.status(200).json(results);
+      }
+    }
+  );
+};
+const postGroupImgs = (req, res) => {
+  const postGroupId = parseInt(req.params.postGroupId);
+  connection.query(
+    `SELECT img
+    FROM listdata  
+   WHERE groupPost_id = ? `,
+    [postGroupId], // Use the postID variable here
     function (err, results, fields) {
       if (err) {
         // console.log(err);
@@ -413,9 +493,12 @@ const countCommentPost = (req, res) => {
 
 module.exports = {
   createPost,
+  createGroupPost,
   upImgs,
+  groupUpImgs,
   dataPost,
   postimgs,
+  postGroupImgs,
   deletePost,
   deletePostImgs,
   editPost,

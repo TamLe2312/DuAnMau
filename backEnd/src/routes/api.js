@@ -12,6 +12,7 @@ const {
   detail,
   listUsers,
   RemoveAvatar,
+  postProfileUser,
 } = require("../controllers/account");
 const Router = express.Router();
 const multer = require("multer");
@@ -34,6 +35,7 @@ Router.post("/UpdateInformationProfile", UpdateInformationProfile);
 Router.post("/removeAvatar", RemoveAvatar);
 Router.post("/changeAvatar", upload.single("avatar"), changeAvatar);
 Router.post("/register", register);
+Router.get("/postProfileUser/:id&:page", postProfileUser);
 Router.post("/login", upload.single("avatar"), login);
 Router.post("/forgotPassword", forgotPassword);
 Router.post("/verifyToken", verifyToken);
