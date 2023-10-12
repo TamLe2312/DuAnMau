@@ -12,6 +12,7 @@ const {
     joinGroup,
     TotalMembers,
     outGroup,
+    postGroupData,
 } = require("../controllers/groups");
 const Router = express.Router();
 const multer = require("multer");
@@ -40,5 +41,6 @@ Router.get("/getDataGroup", getDataGroup);
 Router.get("/group/:groupId", getDataGroupProfile);
 Router.get("/TotalMembers/:groupId", TotalMembers);
 Router.get("/getDataGroupJoined", getDataGroupJoined)
+Router.get("/postGroupData/:groupId&:page", postGroupData)
 
 module.exports = Router;

@@ -15,7 +15,7 @@ import MyModal from "../../modal/Modal";
 import MorePost from "./MorePost";
 import { useCookies } from "react-cookie";
 import ListComment from "./ListComment";
-function Post({ user, time, avatar, title, name, id, userid }) {
+function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
   const focusInput = useRef();
   const [cookies] = useCookies();
   const myID = cookies.userId;
@@ -39,7 +39,7 @@ function Post({ user, time, avatar, title, name, id, userid }) {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:8080/post/postimg/${id}`
+          `http://localhost:8080/post/${groupPostId ? 'postGroupImgs' : 'postimg'}/${groupPostId ? groupPostId : id}`
         );
         if (response.status === 200) {
           setImg(response.data);
@@ -51,7 +51,9 @@ function Post({ user, time, avatar, title, name, id, userid }) {
       }
     };
     fetchData();
-  }, [id]);
+  }, [id, groupPostId]);
+
+
   // like-------------------------------------
   useEffect(() => {
     try {
@@ -267,9 +269,11 @@ function Post({ user, time, avatar, title, name, id, userid }) {
               {avatar ? (
                 <img className="post-avatar" src={avatar} />
               ) : (
-                <Avatar>
-                  {name !== null ? name.charAt(0) : user.charAt(0)}
-                </Avatar>
+                <img
+                  className="post-avatar"
+                  src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg"
+                  alt="Avatar"
+                />
                 // <img className="post-avatar" src="" />
               )}
               &nbsp;<span>{name || user}</span>
@@ -279,8 +283,8 @@ function Post({ user, time, avatar, title, name, id, userid }) {
               {minute < 61
                 ? minute + " phút"
                 : minute / 60 > 24
-                ? Math.floor(minute / 60 / 24) + " Ngày"
-                : Math.floor(minute / 60) + " Giờ"}
+                  ? Math.floor(minute / 60 / 24) + " Ngày"
+                  : Math.floor(minute / 60) + " Giờ"}
             </span>
           </div>
           {/* -------------more------------ */}

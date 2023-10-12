@@ -224,8 +224,6 @@ const changeAvatar = (req, res) => {
   const imageURL = `${baseURL.slice(0, -1)}${filePath}`;
   const uploadDir = path.join(__dirname, "../../../frontEnd/uploads");
   const filePathOldAvatar = path.join(uploadDir, hasAvatar);
-  console.log(hasAvatar);
-  console.log(id);
   connection.query(
     "UPDATE Users SET avatar = ? WHERE id = ?",
     [imageURL, id],
@@ -431,6 +429,30 @@ const ChangePassword = (req, res) => {
     }
   );
 };
+const postProfileUser = (req, res) => {
+  const id = parseInt(req.params.id);
+  const page = parseInt(req.params.page) || 1;
+  const limit = 4; // Số lượng người dùng hiển thị trên mỗi trang
+  const offset = (page - 1) * limit; // Vị trí bắt đầu lấy dữ liệu
+  connection.query(
+    `SELECT posts.id,posts.content,posts.created_at,users.id as userid, users.username,users.avatar,users.name
+    FROM posts  
+    JOIN users ON posts.user_id = users.id
+    WHERE posts.user_id = ?
+    ORDER BY posts.id DESC
+    LIMIT ? OFFSET ?
+    `,
+    [id, limit, offset],
+    function (err, results, fields) {
+      if (err) {
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+      }
+      if (results) {
+        return res.status(200).json(results);
+      }
+    }
+  );
+};
 
 module.exports = {
   login,
@@ -444,4 +466,5 @@ module.exports = {
   listUsers,
   RemoveAvatar,
   ChangePassword,
+  postProfileUser,
 };

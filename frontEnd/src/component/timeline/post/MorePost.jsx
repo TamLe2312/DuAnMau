@@ -1,3 +1,4 @@
+import { Toaster, toast } from "sonner";
 import "./morepost.css";
 import { useState, useContext, useEffect } from "react";
 import Modal from "react-bootstrap/Modal";
@@ -6,7 +7,7 @@ import Button from "react-bootstrap/Button";
 import * as request from "../../../utils/request";
 import { Context } from "../../../page/home/home";
 import axios from "axios";
-import { Toaster, toast } from "sonner";
+
 
 function MorePost(props) {
   const conTent = props.title;

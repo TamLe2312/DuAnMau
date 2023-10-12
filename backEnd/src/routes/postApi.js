@@ -1,9 +1,12 @@
 const express = require("express");
 const {
   createPost,
+  createGroupPost,
   upImgs,
+  groupUpImgs,
   dataPost,
   postimgs,
+  postGroupImgs,
   deletePost,
   deletePostImgs,
   editPost,
@@ -23,9 +26,12 @@ const Router = express.Router();
 
 // api login;
 Router.post("/create", createPost);
+Router.post("/createGroupPost", createGroupPost);
 Router.post("/upimgs", upImgs);
+Router.post("/groupUpImgs", groupUpImgs);
 Router.get("/datapost/:page", dataPost);
 Router.get("/postimg/:postID", postimgs);
+Router.get("/postGroupImgs/:postGroupId", postGroupImgs);
 Router.post("/deldete", deletePost);
 Router.post("/deletePostImgs", deletePostImgs);
 Router.post("/editPost", editPost);
