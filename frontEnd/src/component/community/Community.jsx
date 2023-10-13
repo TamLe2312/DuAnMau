@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useState, useEffect } from "react";
 import Validation from "../../component/validation/validation";
 import { Modal, Button, Form } from "react-bootstrap";
-import { toast } from "react-toastify";
+import { toast } from 'sonner'
 import { useCookies } from "react-cookie";
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline';
 import SearchIcon from '@mui/icons-material/Search';
@@ -14,7 +14,7 @@ function Community() {
   const [hasJoined, setHasJoined] = useState([])
   const [error, setError] = useState({});
   const [loading, setLoading] = useState(false);
-  const [cookies] = useCookies(["session"]);
+  const [cookies] = useCookies(["userId"]);
   const [selectedImage, setSelectedImage] = useState(null);
   const [Images, setImages] = useState(null);
   const [showModalCreateGroup, setShowModalCreateGroup] = useState(false);
@@ -25,6 +25,21 @@ function Community() {
   const [searchValue, setSearchValue] = useState("");
   const [searchGroup, setSearchGroup] = useState([]);
   const id = cookies.userId;
+  const fetchDataJoined = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8080/groups/getDataGroupJoined/${id}`);
+      if (response && response.data) {
+        setHasJoined(response.data);
+      } else {
+        setHasJoined([]);
+      }
+    } catch (error) {
+      console.error(error);
+      if (error.response && error.response.status === 400) {
+        setHasJoined([]);
+      }
+    }
+  };
   const handleChange = (e) => {
     setFormValues({
       ...formValues,
@@ -136,18 +151,18 @@ function Community() {
 
         });
         setDataGroup(formattedData);
+        fetchDataJoined();
       }
       setLoading(false);
       handleCloseModalCreateGroup();
     } catch (error) {
-      if (error.response && error.response.status === 400) {
-        toast.error("Tên nhóm đã tồn tại.Vui lòng nhập tên khác");
+      if (error.response && error.response.data) {
+        toast.error(error.response.data.error);
       }
       setLoading(false);
     }
   }
   const handleJoinGroup = async (groupId) => {
-    setLoading(true);
     try {
       const response = await axios.post("http://localhost:8080/groups/joinGroup", {
         groupId: groupId,
@@ -155,16 +170,13 @@ function Community() {
       });
       if (response.data.success) {
         toast.success(response.data.success);
-        /* setHasJoined(response.data); */
+        fetchDataJoined();
       }
-      setLoading(false);
     } catch (error) {
       console.error(error);
-      setLoading(false);
     }
   }
   const handleOutGroup = async (groupId) => {
-    setLoading(true);
     try {
       const response = await axios.post(`http://localhost:8080/groups/outGroup`, {
         groupId: groupId,
@@ -172,15 +184,12 @@ function Community() {
       });
       if (response.data.success) {
         toast.success(response.data.success);
-        /* setHasJoined(response.data); */
+        fetchDataJoined();
       }
-      setLoading(false);
     } catch (error) {
       if (error.response && error.response.data && error.response.data.error) {
         toast.error(error.response.data.error);
-        /* setHasJoined(response.data); */
       }
-      setLoading(false);
     }
   }
   useEffect(() => {
@@ -217,26 +226,21 @@ function Community() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:8080/groups/getDataGroupJoined`
-        );
+        const response = await axios.get(`http://localhost:8080/groups/getDataGroupJoined/${id}`);
         if (response && response.data) {
           setHasJoined(response.data);
         } else {
           setHasJoined([]);
         }
       } catch (error) {
+        console.error(error);
         if (error.response && error.response.status === 400) {
           setHasJoined([]);
         }
       }
     };
-    const interval = setInterval(fetchData, 1000); // Chạy hàm fetchData() mỗi 2 giây
-
-    return () => {
-      clearInterval(interval); // Xóa bỏ interval khi component bị unmount
-    };
-  }, []);
+    fetchData();
+  }, [id]);
 
   return (
     <>
@@ -256,13 +260,6 @@ function Community() {
                 <SearchIcon style={{ position: 'absolute', right: '10px', top: '50%', transform: 'translateY(-50%)' }} />
               </Form.Group>
             </Form>
-          </div>
-          <div className="container containerCreateContentCommunity" onClick={handleShowModalCreateGroup}>
-            <AddCircleOutlineIcon
-              className='CommunityCreateIconGroup'
-              style={{ color: 'var(#8083FF)' }}
-            />
-            <span>create a group</span>
           </div>
           <Modal
             show={showModalCreateGroup}
@@ -355,7 +352,15 @@ function Community() {
             </Modal.Footer>
           </Modal>
           <div className="container containerGroupContentCommunity">
-            <h4 style={{ padding: '12px 0 0 12px' }}>Nhóm</h4>
+            <div className="container" style={{ display: 'flex', paddingTop: 20 }}>
+              <h4>Nhóm</h4>
+              <button className="container containerCreateContentCommunity" onClick={handleShowModalCreateGroup}>
+                <AddCircleOutlineIcon
+                  className='CommunityCreateIconGroup'
+                />
+                <span>group</span>
+              </button>
+            </div>
             {loading || dataGroup.length < 1 ? (
               <div className="container">Loading...</div>
             ) : (

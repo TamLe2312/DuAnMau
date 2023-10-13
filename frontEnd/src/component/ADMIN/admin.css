@@ -1,0 +1,20 @@
+.admin {
+  display: flex;
+  flex-direction: row;
+  height: 100vh;
+  flex-wrap: wrap;
+}
+.admin a {
+  text-decoration: none;
+}
+.admin-nav {
+  flex: 0.2;
+  /* border: 1px solid red; */
+  padding: 8px;
+  padding-top: 20px;
+}
+.admin-page {
+  flex: 0.8;
+  padding: 8px;
+  padding-top: 20px;
+}
