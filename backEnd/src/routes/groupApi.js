@@ -13,6 +13,7 @@ const {
     TotalMembers,
     outGroup,
     postGroupData,
+    CountPostGroup,
 } = require("../controllers/groups");
 const Router = express.Router();
 const multer = require("multer");
@@ -39,8 +40,9 @@ Router.post("/outGroup", outGroup);
 Router.post("/changeAvatarGroup", upload.single("avatarGroup"), changeAvatarGroup);
 Router.get("/getDataGroup", getDataGroup);
 Router.get("/group/:groupId", getDataGroupProfile);
-Router.get("/TotalMembers/:groupId", TotalMembers);
-Router.get("/getDataGroupJoined", getDataGroupJoined)
+Router.get("/CountPostGroup/:groupId", CountPostGroup);
+Router.get("/TotalMembers/:groupId&:userId", TotalMembers);
+Router.get("/getDataGroupJoined/:idUser", getDataGroupJoined)
 Router.get("/postGroupData/:groupId&:page", postGroupData)
 
 module.exports = Router;

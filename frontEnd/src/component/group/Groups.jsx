@@ -14,8 +14,6 @@ import { toast } from 'sonner'
 import { useParams, useNavigate } from "react-router-dom";
 import Post from "../timeline/post/Post"
 import "./Groups.css"
-import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt";
-import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
 
 function Groups() {
     const Navigate = useNavigate();
@@ -24,7 +22,7 @@ function Groups() {
     const [loading, setLoading] = useState(false);
     const [showModalAvatar, setShowModalAvatar] = useState(false);
     const [showModalPostGroup, setShowModalPostGroup] = useState(false);
-    const [cookies] = useCookies(["session"]);
+    const [cookies] = useCookies(["userId"]);
     const [showModalInformationProfile, setShowModalInformationProfile] = useState(false);
     const [showModalConfirmDelete, setShowModalConfirmDelete] = useState(false);
     const [Images, setImages] = useState(null);
@@ -36,6 +34,7 @@ function Groups() {
     });
     const [error, setError] = useState({});
     const [TotalMembers, setTotalMembers] = useState(0);
+    const [CountPostGroup, setCountPostGroup] = useState(0);
     const idUser = cookies.userId;
     const [userData, setUserData] = useState("");
     const [content, setContent] = useState("");
@@ -45,6 +44,16 @@ function Groups() {
     const [pageData, setpageData] = useState(2);
     // id account
 
+    const fetchDataCountPostGroup = async (groupId) => {
+        try {
+            const response = await axios.get(
+                `http://localhost:8080/groups/CountPostGroup/${groupId}`
+            ); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
+            setCountPostGroup(response.data.results[0].countPostGroup);
+        } catch (error) {
+            console.error("Error fetching user data:", error);
+        }
+    };
     const handleChange = (e) => {
         setFormValues({
             ...formValues,
@@ -78,7 +87,8 @@ function Groups() {
                 formData.append("postGroupId", response.data.lastID);
                 const responseImg = await axios.post("http://localhost:8080/post/groupUpImgs", formData);
                 toast.success(responseImg.data.success);
-                fetchData();
+                fetchData(groupID.groupID);
+                fetchDataCountPostGroup(groupID.groupID);
                 handleCloseModalPostGroup();
             } catch (error) {
                 console.log(error);
@@ -87,7 +97,8 @@ function Groups() {
             try {
                 const res = await axios.post("http://localhost:8080/post/createGroupPost", postData);
                 toast.success(res.data.success);
-                fetchData();
+                fetchData(groupID.groupID);
+                fetchDataCountPostGroup(groupID.groupID);
                 handleCloseModalPostGroup();
             } catch (error) {
                 console.log(error);
@@ -293,7 +304,7 @@ function Groups() {
     }
     useEffect(() => {
         const groupIdProfile = groupID.groupID;
-        const fetchData = async () => {
+        const fetchDataCountPostGroup = async () => {
             setLoading(true);
             try {
                 const response = await axios.get(
@@ -305,24 +316,28 @@ function Groups() {
                 console.error(error);
             }
         };
-        fetchData();
+        fetchDataCountPostGroup();
     }, [groupID]);
+    const [hasJoined, setHasJoined] = useState(false);
     useEffect(() => {
         const groupIdProfile = groupID.groupID;
         const fetchData = async () => {
             setLoading(true);
             try {
                 const response = await axios.get(
-                    `http://localhost:8080/groups/TotalMembers/${groupIdProfile}`
+                    `http://localhost:8080/groups/TotalMembers/${groupIdProfile}&${idUser}`
                 );
-                setTotalMembers(response.data[0].totalMembers);
+                if (response.data.hasJoined) {
+                    setHasJoined(true);
+                }
+                setTotalMembers(response.data.results[0].totalMembers);
                 setLoading(false);
             } catch (error) {
                 console.error(error);
             }
         };
         fetchData();
-    }, [groupID]);
+    }, [groupID, idUser]);
     useEffect(() => {
         if (groupDataProfile.avatarGroup) {
             const imageUrl = groupDataProfile.avatarGroup;
@@ -346,8 +361,36 @@ function Groups() {
         };
         fetchData();
     }, [idUser]);
-    const groupId = groupID.groupID;
-    const fetchData = async () => {
+
+    useEffect(() => {
+        const fetchData = async () => {
+            try {
+                const response = await axios.get(
+                    `http://localhost:8080/account/getDataUser/${idUser}`
+                ); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
+                setUserData(response.data[0]);
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            }
+        };
+        fetchData();
+    }, [idUser]);
+    useEffect(() => {
+        const fetchData = async () => {
+            const groupPostId = groupID.groupID;
+            try {
+                const response = await axios.get(
+                    `http://localhost:8080/groups/CountPostGroup/${groupPostId}`
+                ); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
+                setCountPostGroup(response.data.results[0].countPostGroup);
+            } catch (error) {
+                console.error("Error fetching user data:", error);
+            }
+        };
+        fetchData();
+    }, [groupID]);
+
+    const fetchData = async (groupId) => {
         try {
             const response = await axios.get(
                 `http://localhost:8080/groups/postGroupData/${groupId}&1`
@@ -357,7 +400,6 @@ function Groups() {
             console.error("Error fetching user data:", error);
         }
     };
-
     const [chay, setChay] = useState(false);
     useEffect(() => {
         setChay(true);
@@ -369,7 +411,7 @@ function Groups() {
             setpageData(2);
             if (chay) {
                 setTimeout(() => {
-                    fetchData();
+                    fetchData(groupID.groupID);
                     setChay(false);
                 }, 1000);
             }
@@ -620,7 +662,7 @@ function Groups() {
                                 </div>
                                 <div className="ProfileRow">
                                     <div>
-                                        <span>0 bài viết</span>
+                                        <span><b>{CountPostGroup}</b> bài viết</span>
                                         <span>
                                             <a href="#">
                                                 Có <b>{TotalMembers}</b> thành viên
@@ -653,135 +695,137 @@ function Groups() {
                             <hr />
                         </div>
                     </div>
-                    <div className="container containerPostGroup">
-                        <div className="PostGroupContent">
-                            <div className="PostGroupAvatarContent">
-                                {loading ? (
-                                    <div>Loading....</div>
-                                ) : userData && !userData.avatar ? (
-                                    <img
-                                        src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg"
-                                        alt="Avatar"
-                                    />
-                                ) : (
-                                    <img
-                                        src={userData.avatar}
-                                        alt="Avatar"
-                                    />
-                                )}
-                            </div>
-                            <button
-                                onClick={handleShowModalPostGroup} >Hôm nay bạn thế nào...
-                            </button>
-                            <Modal
-                                show={showModalPostGroup}
-                                onHide={handleCloseModalPostGroup}
-                                size="lg"
-                                centered
-                            >
-                                <Modal.Header closeButton>
-                                    <Modal.Title>
-                                        Tạo bài viết
-                                    </Modal.Title>
-                                </Modal.Header>
-                                <Modal.Body className="modal-body">
-                                    <div className="container">
-                                        <div className="row">
-                                            <div className="col-md-5 PostGroupColumnContent5">
-                                                {imgsPostGroup.length === 0 && (
-                                                    <>
-                                                        <input
-                                                            id="ImgUploadFileGroupPost"
-                                                            multiple
-                                                            type="file"
-                                                            onChange={(e) => {
-                                                                handleFile(e);
-                                                            }}
-                                                        />
-                                                        <label htmlFor="ImgUploadFileGroupPost" className="LabelForImgUploadGroupPost">
-                                                            Chọn hình ảnh
-                                                            &nbsp;
-                                                            <i className="fa-solid fa-images"></i>
-                                                        </label>
-                                                    </>
-                                                )}
-                                                {imgsPostGroup.length > 0 && (
-                                                    <>
-                                                        <span
-                                                            id="left"
-                                                            className="PrevButtonIcon"
-                                                            onClick={(e) => handleRun(e)}
-                                                        >
-                                                            <ChevronLeftIcon sx={{ fontSize: 40 }} />
-                                                        </span>
-                                                        <img src={imgsPostGroup[run]} alt="" />
-                                                        <span
-                                                            id="right"
-                                                            className="NextButtonIcon"
-                                                            onClick={(e) => handleRun(e)}
-                                                        >
-                                                            <ChevronRightIcon sx={{ fontSize: 40 }} />
-                                                        </span>
-                                                        <span className="ImgPostGroupListDot">
-                                                            {imgsPostGroup.map((img, index) => {
-                                                                return (
-                                                                    <span key={index} className="imgNews-dot">
-                                                                        {index === run ? (
-                                                                            <FiberManualRecordIcon />
-                                                                        ) : (
-                                                                            <FiberManualRecordOutlinedIcon />
-                                                                        )}
-                                                                    </span>
-                                                                );
-                                                            })}
-                                                        </span>
-                                                    </>
-                                                )}
-                                            </div>
-                                            <div className="col-md-7 PostGroupColumnContent7">
-                                                <div className="PostGroupAuthor">
-                                                    <div className="PostGroupAvatarContent">
-                                                        {loading ? (
-                                                            <div>Loading....</div>
-                                                        ) : userData && !userData.avatar ? (
-                                                            <img
-                                                                src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg"
-                                                                alt="Avatar"
+                    {hasJoined && (
+                        <div className="container containerPostGroup">
+                            <div className="PostGroupContent">
+                                <div className="PostGroupAvatarContent">
+                                    {loading ? (
+                                        <div>Loading....</div>
+                                    ) : userData && !userData.avatar ? (
+                                        <img
+                                            src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg"
+                                            alt="Avatar"
+                                        />
+                                    ) : (
+                                        <img
+                                            src={userData.avatar}
+                                            alt="Avatar"
+                                        />
+                                    )}
+                                </div>
+                                <button
+                                    onClick={handleShowModalPostGroup} >Hôm nay bạn thế nào...
+                                </button>
+                                <Modal
+                                    show={showModalPostGroup}
+                                    onHide={handleCloseModalPostGroup}
+                                    size="lg"
+                                    centered
+                                >
+                                    <Modal.Header closeButton>
+                                        <Modal.Title>
+                                            Tạo bài viết
+                                        </Modal.Title>
+                                    </Modal.Header>
+                                    <Modal.Body className="modal-body">
+                                        <div className="container">
+                                            <div className="row">
+                                                <div className="col-md-5 PostGroupColumnContent5">
+                                                    {imgsPostGroup.length === 0 && (
+                                                        <>
+                                                            <input
+                                                                id="ImgUploadFileGroupPost"
+                                                                multiple
+                                                                type="file"
+                                                                onChange={(e) => {
+                                                                    handleFile(e);
+                                                                }}
                                                             />
-                                                        ) : (
-                                                            <img
-                                                                src={userData.avatar}
-                                                                alt="Avatar"
-                                                            />
-                                                        )}
-                                                    </div>
-                                                    <span>{userData && userData.name ? userData.name : userData.username}</span>
+                                                            <label htmlFor="ImgUploadFileGroupPost" className="LabelForImgUploadGroupPost">
+                                                                Chọn hình ảnh
+                                                                &nbsp;
+                                                                <i className="fa-solid fa-images"></i>
+                                                            </label>
+                                                        </>
+                                                    )}
+                                                    {imgsPostGroup.length > 0 && (
+                                                        <>
+                                                            <span
+                                                                id="left"
+                                                                className="PrevButtonIcon"
+                                                                onClick={(e) => handleRun(e)}
+                                                            >
+                                                                <ChevronLeftIcon sx={{ fontSize: 40 }} />
+                                                            </span>
+                                                            <img src={imgsPostGroup[run]} alt="" />
+                                                            <span
+                                                                id="right"
+                                                                className="NextButtonIcon"
+                                                                onClick={(e) => handleRun(e)}
+                                                            >
+                                                                <ChevronRightIcon sx={{ fontSize: 40 }} />
+                                                            </span>
+                                                            <span className="ImgPostGroupListDot">
+                                                                {imgsPostGroup.map((img, index) => {
+                                                                    return (
+                                                                        <span key={index} className="imgNews-dot">
+                                                                            {index === run ? (
+                                                                                <FiberManualRecordIcon />
+                                                                            ) : (
+                                                                                <FiberManualRecordOutlinedIcon />
+                                                                            )}
+                                                                        </span>
+                                                                    );
+                                                                })}
+                                                            </span>
+                                                        </>
+                                                    )}
                                                 </div>
-                                                <textarea
-                                                    className="PostGroupContentNew"
-                                                    name="PostGroupContentNew"
-                                                    id="PostGroupContentNew"
-                                                    cols="55" rows="10"
-                                                    placeholder="Hôm nay bạn thế nào...."
-                                                    onChange={handleChangeContent}
-                                                ></textarea>
-                                                <div className="PostGroupContentNewButton">
-                                                    <button
-                                                        type="button"
-                                                        disabled={!content || loading}
-                                                        className="btn btn-primary"
-                                                        onClick={handleSubmitPostGroup}
-                                                    >
-                                                        Đăng lên...
-                                                    </button>
+                                                <div className="col-md-7 PostGroupColumnContent7">
+                                                    <div className="PostGroupAuthor">
+                                                        <div className="PostGroupAvatarContent">
+                                                            {loading ? (
+                                                                <div>Loading....</div>
+                                                            ) : userData && !userData.avatar ? (
+                                                                <img
+                                                                    src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg"
+                                                                    alt="Avatar"
+                                                                />
+                                                            ) : (
+                                                                <img
+                                                                    src={userData.avatar}
+                                                                    alt="Avatar"
+                                                                />
+                                                            )}
+                                                        </div>
+                                                        <span>{userData && userData.name ? userData.name : userData.username}</span>
+                                                    </div>
+                                                    <textarea
+                                                        className="PostGroupContentNew"
+                                                        name="PostGroupContentNew"
+                                                        id="PostGroupContentNew"
+                                                        cols="55" rows="10"
+                                                        placeholder="Hôm nay bạn thế nào...."
+                                                        onChange={handleChangeContent}
+                                                    ></textarea>
+                                                    <div className="PostGroupContentNewButton">
+                                                        <button
+                                                            type="button"
+                                                            disabled={!content || loading}
+                                                            className="btn btn-primary"
+                                                            onClick={handleSubmitPostGroup}
+                                                        >
+                                                            Đăng lên...
+                                                        </button>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </Modal.Body>
-                            </Modal>
+                                    </Modal.Body>
+                                </Modal>
+                            </div>
                         </div>
-                    </div>
+                    )}
                     {postsDataGroup.length > 0 ? (
                         postsDataGroup.map((data, index) => {
                             return (

@@ -17,17 +17,38 @@ function MorePost(props) {
   const [contentNew, setcontentNew] = useState(conTent);
   const [dis, setdis] = useState(false);
   const postID = props.id;
+  const groupPostId = props.groupPostId;
   // console.log(postID);
   const deletePost = () => {
     try {
       const fetchApi = async () => {
-        const res2 = await request.deldete("post/deletePostImgs", { postID });
-        const res = await request.deldete("post/deldete", { postID });
-        if (res || res2) {
-          props.show(false);
-          // console.log(res2);
-          againPage();
+        if (groupPostId) {
+          const res2 = await request.deldete("post/deletePostImgs", { groupPostId });
+          const res = await request.deldete("post/deldete", { groupPostId });
+          if (res || res2) {
+            props.show(false);
+            if (res.successWithoutImgs && res) {
+              toast.success(res.successWithoutImgs);
+            }
+            if (res2.successWithImgs && res2) {
+              toast.success(res.successWithImgs);
+            }
+          }
+        } else {
+          const res2 = await request.deldete("post/deletePostImgs", { postID });
+          const res = await request.deldete("post/deldete", { postID });
+          if (res || res2) {
+            props.show(false);
+            if (res2.successWithImgs && res2) {
+              toast.success(res2.successWithImgs);
+            }
+            if (res.successWithoutImgs && res) {
+              toast.success(res.successWithoutImgs);
+            }
+            againPage();
+          }
         }
+
       };
       fetchApi();
     } catch (error) {
@@ -42,14 +63,29 @@ function MorePost(props) {
   const editPost = () => {
     try {
       const fetchApi = async () => {
-        const res = await axios.post("http://localhost:8080/post/editPost", {
-          content: contentNew,
-          postID: postID,
-        });
-        if (res.status === 200) {
-          props.show(false);
-          againPage();
+        if (groupPostId) {
+          const res = await axios.post("http://localhost:8080/post/editPost", {
+            content: contentNew,
+            groupPostId: groupPostId,
+          });
+          if (res.status === 200) {
+            props.show(false);
+            console.log(res);
+            toast.success(res.data.success)
+          }
         }
+        else {
+          const res = await axios.post("http://localhost:8080/post/editPost", {
+            content: contentNew,
+            postID: postID,
+          });
+          if (res.status === 200) {
+            props.show(false);
+            toast.success(res.data.success);
+            againPage();
+          }
+        }
+
       };
       fetchApi();
     } catch (err) {

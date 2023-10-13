@@ -77,6 +77,7 @@ function ListComment(props) {
       <div className="listComment-comment">
         <Comments
           id={props.id}
+          groupPostId={props.groupPostId}
           img={img}
           title={title}
           user={user}
