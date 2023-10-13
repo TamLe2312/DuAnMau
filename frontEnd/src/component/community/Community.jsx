@@ -14,7 +14,7 @@ function Community() {
   const [hasJoined, setHasJoined] = useState([])
   const [error, setError] = useState({});
   const [loading, setLoading] = useState(false);
-  const [cookies] = useCookies(["session"]);
+  const [cookies] = useCookies(["userId"]);
   const [selectedImage, setSelectedImage] = useState(null);
   const [Images, setImages] = useState(null);
   const [showModalCreateGroup, setShowModalCreateGroup] = useState(false);
@@ -25,6 +25,21 @@ function Community() {
   const [searchValue, setSearchValue] = useState("");
   const [searchGroup, setSearchGroup] = useState([]);
   const id = cookies.userId;
+  const fetchDataJoined = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8080/groups/getDataGroupJoined/${id}`);
+      if (response && response.data) {
+        setHasJoined(response.data);
+      } else {
+        setHasJoined([]);
+      }
+    } catch (error) {
+      console.error(error);
+      if (error.response && error.response.status === 400) {
+        setHasJoined([]);
+      }
+    }
+  };
   const handleChange = (e) => {
     setFormValues({
       ...formValues,
@@ -136,6 +151,7 @@ function Community() {
 
         });
         setDataGroup(formattedData);
+        fetchDataJoined();
       }
       setLoading(false);
       handleCloseModalCreateGroup();
@@ -154,7 +170,7 @@ function Community() {
       });
       if (response.data.success) {
         toast.success(response.data.success);
-        /* setHasJoined(response.data); */
+        fetchDataJoined();
       }
     } catch (error) {
       console.error(error);
@@ -168,12 +184,11 @@ function Community() {
       });
       if (response.data.success) {
         toast.success(response.data.success);
-        setHasJoined(response.data);
+        fetchDataJoined();
       }
     } catch (error) {
       if (error.response && error.response.data && error.response.data.error) {
         toast.error(error.response.data.error);
-        setHasJoined([]);
       }
     }
   }
@@ -211,20 +226,21 @@ function Community() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/groups/getDataGroupJoined`);
+        const response = await axios.get(`http://localhost:8080/groups/getDataGroupJoined/${id}`);
         if (response && response.data) {
           setHasJoined(response.data);
         } else {
           setHasJoined([]);
         }
       } catch (error) {
+        console.error(error);
         if (error.response && error.response.status === 400) {
           setHasJoined([]);
         }
       }
     };
-    fetchData(); // Kích hoạt fetchData ngay khi component được render
-  }, [hasJoined]); // Thêm hasJoined vào mảng dependency của useEffect
+    fetchData();
+  }, [id]);
 
   return (
     <>

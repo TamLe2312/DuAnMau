@@ -262,8 +262,10 @@ const removeGroup = (req, res) => {
     );
 }
 const getDataGroupJoined = (req, res) => {
+    const idUser = parseInt(req.params.idUser);
     connection.query(
-        "SELECT * FROM membergroup",
+        "SELECT * FROM membergroup WHERE user_id = ? ",
+        [idUser],
         async function (err, results, fields) {
             if (err) {
                 return res.status(500).json({ error: "Lỗi máy chủ" });
@@ -345,7 +347,8 @@ const outGroup = (req, res) => {
     );
 }
 const TotalMembers = (req, res) => {
-    const groupId = req.params.groupId;
+    const groupId = parseInt(req.params.groupId);
+    const userId = parseInt(req.params.userId || null);
     connection.query(
         "SELECT COUNT(*) as totalMembers FROM membergroup WHERE group_id = ?",
         [groupId],
@@ -354,9 +357,41 @@ const TotalMembers = (req, res) => {
                 return res.status(500).json({ error: "Lỗi máy chủ" });
             }
             if (results.length > 0) {
-                return res.status(200).json(results);
+                if (userId) {
+                    connection.query(
+                        "SELECT * FROM membergroup WHERE user_id = ? AND group_id = ?",
+                        [userId, groupId],
+                        async function (err, results1, fields) {
+                            if (err) {
+                                return res.status(500).json({ error: "Lỗi máy chủ" });
+                            }
+                            if (results1.length > 0) {
+                                return res.status(200).json({ hasJoined: true, results });
+                            } else {
+                                return res.status(400).json({ hasJoined: false, error: "Không có dữ liệu Member Group" });
+                            }
+                        }
+                    );
+                }
             } else {
                 return res.status(400).json({ error: "Nhóm không tồn tại" });
+            }
+        }
+    );
+}
+const CountPostGroup = (req, res) => {
+    const groupId = parseInt(req.params.groupId);
+    connection.query(
+        "SELECT COUNT(*) as countPostGroup FROM postsgroup WHERE group_id = ?",
+        [groupId],
+        async function (err, results, fields) {
+            if (err) {
+                return res.status(500).json({ error: "Lỗi máy chủ" });
+            }
+            if (results.length > 0) {
+                return res.status(200).json({ results });
+            } else {
+                return res.status(400).json({ error: "Lỗi đếm bài viết group" });
             }
         }
     );
@@ -401,4 +436,5 @@ module.exports = {
     TotalMembers,
     outGroup,
     postGroupData,
+    CountPostGroup,
 };

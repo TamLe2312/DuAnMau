@@ -41,6 +41,7 @@ function Profile() {
   const [userData, setUserData] = useState("");
   // id account
   const id = userID ? userID : cookies.userId;
+  const [CountPost, setCountPost] = useState(0);
   const handleCloseModalAvatar = () => {
     setSelectedImage(null);
     setShowModalAvatar(false);
@@ -216,7 +217,6 @@ function Profile() {
           `http://localhost:8080/account/postProfileUser/${id}&1`
         ); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
         /*  setUserData(response.data[0]); */
-        console.log(response.data);
         setPostsData(response.data);
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -225,6 +225,21 @@ function Profile() {
     fetchData();
   }, [id]);
   const [pageData, setpageData] = useState(2);
+  useEffect(() => {
+    const fetchDataCountPost = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get(
+          `http://localhost:8080/account/countPost/${id}`
+        );
+        setCountPost(response.data[0].CountPosts);
+        setLoading(false);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchDataCountPost();
+  }, [id]);
   const fetchDataNew = () => {
     setpageData(pageData + 1);
     const dataNew = async () => {
@@ -457,7 +472,7 @@ function Profile() {
                 </div>
                 <div className="ProfileRow">
                   <div>
-                    <span>0 bài viết</span>
+                    <span><b>{CountPost}</b> bài viết</span>
                     <span>
                       <a href="#">
                         Có <b>12</b> bạn bè

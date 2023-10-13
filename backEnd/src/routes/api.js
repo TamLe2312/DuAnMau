@@ -13,6 +13,7 @@ const {
   listUsers,
   RemoveAvatar,
   postProfileUser,
+  CountPost,
 } = require("../controllers/account");
 const Router = express.Router();
 const multer = require("multer");
@@ -42,4 +43,5 @@ Router.post("/verifyToken", verifyToken);
 Router.post("/ChangePassword", ChangePassword);
 Router.get("/detail/:id", detail);
 Router.get("/listUsers/:slug", listUsers);
+Router.get("/countPost/:userId", CountPost);
 module.exports = Router;

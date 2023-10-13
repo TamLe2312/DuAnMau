@@ -294,6 +294,24 @@ const getDataUser = (req, res) => {
     }
   );
 };
+const CountPost = (req, res) => {
+  const userId = req.params.userId;
+  connection.query(
+    "SELECT COUNT(user_id) as CountPosts FROM posts WHERE user_id = ?",
+    [userId],
+    async function (err, results, fields) {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Lỗi máy chủ" });
+      }
+      if (results.length > 0) {
+        return res.status(200).json(results);
+      } else {
+        return res.status(400).json({ error: "Người dùng không tồn tại" });
+      }
+    }
+  );
+};
 
 const UpdateInformationProfile = (req, res) => {
   const { name, moTa, date, id } = req.body;
@@ -461,4 +479,5 @@ module.exports = {
   RemoveAvatar,
   ChangePassword,
   postProfileUser,
+  CountPost,
 };
