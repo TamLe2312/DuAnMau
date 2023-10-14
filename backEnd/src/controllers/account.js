@@ -24,7 +24,9 @@ const register = (req, res) => {
             return res.status(500).json({ error: "Lỗi máy chủ 1" });
           }
           if (results.length > 0) {
-            return res.status(400).json({ error: "Tên người dùng hoặc email đã tồn tại" });
+            return res
+              .status(400)
+              .json({ error: "Tên người dùng hoặc email đã tồn tại" });
           }
         }
       );
