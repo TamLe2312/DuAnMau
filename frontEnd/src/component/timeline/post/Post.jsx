@@ -29,12 +29,11 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
   const [liked, setliked] = useState(false);
   const [like, setlike] = useState(0);
   const [comment, setcomment] = useState("");
-  // set times
+
   const now = new Date();
   const targetDate = new Date(time);
   const milliseconds = now - targetDate;
   const minute = Math.floor(milliseconds / (1000 * 60));
-  // const minute = (minutes);
   useEffect(() => {
     const fetchData = async () => {
       try {
@@ -51,10 +50,12 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
       }
     };
     fetchData();
+
   }, [id, groupPostId]);
 
 
   // like-------------------------------------
+
   useEffect(() => {
     try {
       const fetchApi = async () => {
@@ -91,18 +92,17 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
     }
   }, [id, groupPostId]);
 
-  useEffect(() => {
-    const postFooterElement = postFooterRef.current;
-    if (
-      postFooterElement &&
-      postFooterElement.scrollWidth > postFooterElement.offsetWidth
-    ) {
-      setThem(true);
-    } else {
-      setThem(false);
-    }
-  }, []);
-
+  // useEffect(() => {
+  //   const postFooterElement = postFooterRef.current;
+  //   if (
+  //     postFooterElement &&
+  //     postFooterElement.scrollWidth > postFooterElement.offsetWidth
+  //   ) {
+  //     setThem(true);
+  //   } else {
+  //     setThem(false);
+  //   }
+  // }, [id]);
   const handleToggleExpand = () => {
     setExpanded(!expanded);
   };
@@ -167,7 +167,6 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
 
   const handleLikePost = () => {
     setlike((pre) => pre - 1);
-    // setlikePost(false);
     setliked(false);
     try {
       const fetchApi = async () => {
@@ -372,6 +371,8 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
   const handlerun = () => {
     setdymanicComment(!dymanicComment);
   };
+  // console.log(them);
+  // -------------------------------------------------------------------------------------------------------
   return (
     <>
       <div className="post" key={id}>
@@ -391,7 +392,7 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
                 />
                 // <img className="post-avatar" src="" />
               )}
-              &nbsp;<span>{name || user}</span>
+              &nbsp;<span>{name ? name : user}</span>
             </Link>
             •
             <span className="post-time">
@@ -482,13 +483,13 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
           >
             {img && img.length > 0 ? title : ""}
           </p>
-          {them ? (
+          {/* {them ? (
             <button className="post-title-btn" onClick={handleToggleExpand}>
               {expanded ? "Thu gọn" : "Xem thêm"}
             </button>
           ) : (
             ""
-          )}
+          )} */}
           {hasComment && (
             <span
               className="post-footer-list-comment"

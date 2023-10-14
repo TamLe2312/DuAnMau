@@ -1,0 +1,86 @@
+.detailMess {
+  position: relative;
+  height: 81vh;
+  overflow-y: auto;
+  border: 0.1px solid rgb(243, 243, 243);
+  padding: 0px 20px 6px;
+  background-position: center;
+  background-size: cover;
+}
+.detailMess::-webkit-scrollbar {
+  width: 6px;
+  background-color: #eeeeee;
+}
+.detailMess-user {
+  padding: 8px;
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  align-items: center;
+}
+.detailMess-user-img {
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-right: 8px;
+}
+.detailMess-user-name {
+  font-weight: 500;
+}
+.detailMess-imput {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.detailMess-imput-send {
+  margin-right: 12px;
+}
+.detailMess-imput-send * {
+  color: rgb(173, 173, 173);
+  transition: 0.5s;
+}
+.detailMess-imput-send-success {
+  margin-right: 12px;
+}
+.detailMess-imput-send-success:hover {
+  cursor: pointer;
+}
+.detailMess-imput-send-success * {
+  color: rgb(28, 113, 233);
+  transition: 0.5s;
+}
+
+.detailMessContainer {
+  display: flex;
+  flex-direction: column;
+}
+.detailMessYou,
+.detailMessMe {
+  display: inline-block;
+  max-width: 70%; /* Giới hạn chiều rộng tối đa của tin nhắn */
+  padding: 8px 20px;
+  margin: 4px;
+  /* border-radius: 18px 18px 18px 0; */
+}
+
+.detailMessYou {
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(173, 173, 173, 0.5);
+  align-self: flex-start; /* Đặt tin nhắn bạn ở bên trái */
+  border-radius: 18px 18px 18px 0;
+}
+
+.detailMessMe {
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(55, 151, 240, 0.8);
+  align-self: flex-end; /* Đặt tin nhắn mình ở bên phải */
+  border-radius: 18px 18px 0 18px;
+}
+.detailMessContainer-time {
+  text-align: right;
+  font-size: 0.8rem;
+}
