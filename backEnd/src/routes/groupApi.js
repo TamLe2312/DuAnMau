@@ -1,17 +1,19 @@
 const express = require("express");
 const {
-  createGroup,
-  getDataGroup,
-  searchGroup,
-  getDataGroupProfile,
-  changeAvatarGroup,
-  removeAvatarGroup,
-  UpdateInformationProfileGroup,
-  removeGroup,
-  getDataGroupJoined,
-  joinGroup,
-  TotalMembers,
-  outGroup,
+    createGroup,
+    getDataGroup,
+    searchGroup,
+    getDataGroupProfile,
+    changeAvatarGroup,
+    removeAvatarGroup,
+    UpdateInformationProfileGroup,
+    removeGroup,
+    getDataGroupJoined,
+    joinGroup,
+    TotalMembers,
+    outGroup,
+    postGroupData,
+    CountPostGroup,
 } = require("../controllers/groups");
 const Router = express.Router();
 const multer = require("multer");
@@ -43,6 +45,6 @@ Router.post(
 Router.get("/getDataGroup", getDataGroup);
 Router.get("/group/:groupId", getDataGroupProfile);
 Router.get("/TotalMembers/:groupId", TotalMembers);
-Router.get("/getDataGroupJoined", getDataGroupJoined);
+Router.get("/getDataGroupJoined", getDataGroupJoined)
 
 module.exports = Router;

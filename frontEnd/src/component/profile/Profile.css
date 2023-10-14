@@ -1,44 +1,58 @@
-*{
+* {
+
     padding: 0;
     margin: 0;
     box-sizing: border-box;
 }
-.containerProfile{
-    padding: 30px 20px 0 !important;
+
+.containerProfile {
+    padding-top: 30px;
     box-sizing: content-box;
     margin-bottom: 0;
     flex-grow: 1;
     margin: 0 auto;
 }
-.ProfileHeader{
+
+.ProfileHeader {
     margin-bottom: 44px;
 }
-.ProfileRow{
+
+.ProfileRow {
     display: flex;
     align-items: center;
     margin-bottom: 20px;
 }
-.ProfileRow span{
+
+.ProfileRow span {
     margin-right: 20px;
+
 }
+
 .ProfileRow span a {
-    text-decoration: none;
+  text-decoration: none;
 }
+
 .ProfileRow span a:hover {
-   color: #9EEDEF
+    color: #9EEDEF
 }
-.ProfileTitle{
+
+.ProfileTitle {
     margin: 0;
+    font-size: 1.5rem;
+    font-weight: 500;
 }
-.ProfileLinkContainer{
+
+.ProfileLinkContainer {
     margin-left: 20px;
 }
-.ProfileLinkButton{
+
+.ProfileLinkButton {
     display: flex;
     border: 0;
     background-color: transparent;
 }
-.ProfileLinkButton a{
+
+.ProfileLinkButton a {
     text-decoration: none;
     align-items: center;
     padding: 3px 16px;
@@ -46,33 +60,40 @@
     border: 1px solid black;
     border-radius: 8px;
 }
-.ProfileLinkButton a:hover{
+
+.ProfileLinkButton a:hover {
     background-color: rgb(128, 128, 128, 0.5);
 }
-.ProfileSettingIcon{
+
+.ProfileSettingIcon {
     margin: 5px;
     cursor: pointer;
 }
-.ChangeAvatar{
+
+.ChangeAvatar {
     cursor: pointer;
     height: 100%;
-    padding: 0;
+    padding: 0 !important;
     width: 100%;
     background-color: transparent !important;
     border: 0 !important;
 }
-.ProfileAvatarImg{
-    left: 0;
+
+.ProfileAvatarImg {
+    /*     left: 0;
     margin: 0;
     padding: 0;
     position: absolute;
     top: 0;
-    vertical-align: middle;
+    vertical-align: middle; */
+    object-fit: cover;
     width: 100%;
+    height: 100%;
     cursor: pointer;
     background-color: white;
 }
-.Profile_Avatar{
+
+.Profile_Avatar {
     max-width: 150px;
     width: auto;
     height: 150px;
@@ -80,7 +101,8 @@
     margin-left: auto;
     display: block;
 }
-.Profile_Avatar_Content{
+
+.Profile_Avatar_Content {
     background-color: rgb(var(--ig-secondary-background));
     border-radius: 50%;
     box-sizing: border-box;
@@ -91,68 +113,82 @@
     width: 100%;
     border: 1px solid #eceff1 !important;
 }
-.containerFeature{
+
+.containerFeature {
     letter-spacing: 1px;
 }
-.containerFeature .row .col-md-3 a span{
+
+.containerFeature .row .col-md-3 a span {
     text-transform: uppercase;
 }
-.ColumnProfileFeature{
+
+.ColumnProfileFeature {
     cursor: pointer;
-    display: flex!important;
+    display: flex !important;
     flex-direction: row;
     height: 52px;
     width: auto !important;
     justify-content: center;
     align-items: center;
 }
-.ColumnProfileFeature a span{
+
+.ColumnProfileFeature a span {
     margin-left: 6px;
 }
-.ModalBody{
+
+.ModalBody {
     padding: 0 !important;
     width: 100%;
 }
-.ButtonChangeAvatarContainer{
-        align-items: center;
-        border: 0;
-        box-sizing: border-box;
-        display: flex;
-        flex-direction: column;
-        font: inherit;
-        font-size: 100%;
-        margin: 0;
-        padding: 0;
-        position: relative;
-        vertical-align: baseline;
+
+.ButtonChangeAvatarContainer {
+    align-items: center;
+    border: 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    font: inherit;
+    font-size: 100%;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    vertical-align: baseline;
 }
-.ButtonUploadAvatarProfile{
+
+.ButtonUploadAvatarProfile {
     color: #0095f6;
 }
-.ButtonDeleteAvatarProfile{
+
+.ButtonDeleteAvatarProfile {
     color: #ed4956;
 }
-.ShowImageWhenUpload{
+
+.ShowImageWhenUpload {
     max-width: 400px;
     max-height: 400px;
 }
-.ProfileShowImageContainer{
+
+.ProfileShowImageContainer {
     display: flex;
     align-items: center;
     justify-content: center;
     padding: 10px;
 }
-.ProfileAvatarModalBody{
+
+.ProfileAvatarModalBody {
     display: block;
     padding: 0 !important;
 }
-.ProfileInformationModalBody{
+
+.ProfileInformationModalBody {
     display: block;
 }
-#ProfileUploadFile{
+
+#ProfileUploadFile {
     display: none;
 }
-.HandleButtonProfile{
+
+.HandleButtonProfile {
     width: 100%;
     height: 50px;
     margin: 0 !important;
@@ -163,19 +199,94 @@
     align-items: center;
     cursor: pointer;
 }
-.HandleButtonProfile:not(:first-child){
+
+.HandleButtonProfile:not(:first-child) {
     border-top: 1px solid silver;
 }
-.HandleButtonProfile:hover{
+
+.HandleButtonProfile:hover {
     background-color: rgb(128, 128, 128, 0.5);
 }
-.ProfileUploadColor{
+
+.ProfileUploadColor {
     color: #00BDFF;
 }
-.ProfileRemoveColor{
+
+.ProfileRemoveColor {
     color: #ed4956;
 }
-.HandleButtonProfileWhileEmpty{
+
+.HandleButtonProfileWhileEmpty {
     width: 100%;
     height: 100% !important;
 }
+
+/* .ProfilePostAvatarContent{
+height: 50px;
+}
+.ProfilePostAvatarAndNameLink{
+    border-radius: 50%;
+    box-sizing: border-box;
+    height: 100%;
+    position: relative;
+    width: 100%;
+}
+.ProfilePostAvatar{
+    left: 0;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    top: 0;
+    vertical-align: middle;
+    width: 100%;
+    cursor: pointer;
+    background-color: white;
+}
+.ProfileInformPost{
+display: block;
+} */
+.ProfileInformPost {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+.ProfilePostHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-evenly;
+    margin-bottom: 20px;
+}
+
+.ProfilePostContent {
+    margin: 20px 0 50px 0;
+    padding: 0 !important;
+}
+
+.ProfilePostImg {
+    padding: 0 !important;
+    width: 550px !important;
+    height: 700px !important;
+}
+
+.ProfilePostImg img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.ProfilePostFooter {
+    width: 550px !important;
+    padding: 0 !important;
+}
+
+.ProfilePostInformationOfPost {
+    display: flex;
+    flex-direction: column;
+}
+
+.fa-chevron-right {
+    margin: 100px;
+}
+

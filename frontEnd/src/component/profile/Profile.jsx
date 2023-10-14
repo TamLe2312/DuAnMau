@@ -3,22 +3,22 @@ import moment from "moment";
 import SettingsIcon from "@mui/icons-material/Settings";
 import GridOnIcon from "@mui/icons-material/GridOn";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
+import FavoriteIcon from "@mui/icons-material/Favorite";
+import InfiniteScroll from "react-infinite-scroll-component";
 import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import { useCookies } from "react-cookie";
-import Post from "../timeline/post/Post"
+import Post from "../timeline/post/Post";
 import Validation from "../../component/validation/validation";
 import { toast } from "react-toastify";
 import "./Profile.css";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 function Profile() {
   // id user khác
   const { userID } = useParams();
-  const [pageData, setpageData] = useState(2);
   const [postsData, setPostsData] = useState([]);
-
 
   // useEffect(() => {
   //   console.log("Khách: " + userID);
@@ -41,6 +41,7 @@ function Profile() {
   const [userData, setUserData] = useState("");
   // id account
   const id = userID ? userID : cookies.userId;
+  const [CountPost, setCountPost] = useState(0);
   const handleCloseModalAvatar = () => {
     setSelectedImage(null);
     setShowModalAvatar(false);
@@ -209,12 +210,41 @@ function Profile() {
       }
     }
   }, [userData]);
-
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8080/account/postProfileUser/${id}&1`
+        ); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
+        /*  setUserData(response.data[0]); */
+        setPostsData(response.data);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+    fetchData();
+  }, [id]);
+  const [pageData, setpageData] = useState(2);
+  useEffect(() => {
+    const fetchDataCountPost = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get(
+          `http://localhost:8080/account/countPost/${id}`
+        );
+        setCountPost(response.data[0].CountPosts);
+        setLoading(false);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchDataCountPost();
+  }, [id]);
   const fetchDataNew = () => {
     setpageData(pageData + 1);
     const dataNew = async () => {
       const response = await axios.get(
-        `http://localhost:8080/post/datapost/${pageData}`
+        `http://localhost:8080/account/postProfileUser/${id}&${pageData}`
       );
       if (response.status === 200) {
         const datas = response.data;
@@ -227,7 +257,7 @@ function Profile() {
   };
   return (
     <>
-      <div className="container-fluid" style={{ overflowX: 'hidden' }}>
+      <div className="container-fluid" style={{ overflowX: "hidden" }}>
         <div className="container containerProfile">
           <header className="ProfileHeader">
             <div
@@ -279,15 +309,17 @@ function Profile() {
                               alt="Avatar"
                             />
                           </div>
-                        )
-                          : (
-                            <div></div>
-                          )}
-                        <Form
-                          encType="multipart/form-data"
-                        >
+                        ) : (
+                          <div></div>
+                        )}
+                        <Form encType="multipart/form-data">
                           <Form.Group>
-                            <Form.Label className="HandleButtonProfile ProfileUploadColor" htmlFor="ProfileUploadFile">Tải ảnh đại diện</Form.Label>
+                            <Form.Label
+                              className="HandleButtonProfile ProfileUploadColor"
+                              htmlFor="ProfileUploadFile"
+                            >
+                              Tải ảnh đại diện
+                            </Form.Label>
                             <Form.Control
                               type="file"
                               name="avatar"
@@ -442,11 +474,15 @@ function Profile() {
                 </div>
                 <div className="ProfileRow">
                   <div>
-                    <span>0 bài viết</span>
+                    <span><b>{CountPost}</b> bài viết</span>
                     <span>
                       <a href="#">
                         Có <b>12</b> bạn bè
                       </a>
+                    </span>
+                    {/* userID */}
+                    <span>
+                      <Link to={`/home/messenger/${userID}`}>Nhắn tin</Link>
                     </span>
                   </div>
                 </div>
@@ -472,26 +508,43 @@ function Profile() {
               </div> */}
             </div>
           </div>
-          <div className="container">
-            <div className="timeline-post">
-              {postsData
-                ? postsData.map((post, index) => (
-                  <Post
-                    key={index}
-                    id={post.id}
-                    userid={post.userid}
-                    user={post.username}
-                    name={post.name}
-                    time={post.created_at}
-                    avatar={post.avatar}
-                    title={post.content}
-                  // like={100}
-                  />
-                ))
-                : "loading..."}
-            </div>
-          </div>
+          {postsData.length > 0 ? (
+            postsData.map((data, index) => {
+              return (
+                <>
+                  <div className="container ProfilePostContent" key={index}>
+                    <Post
+                      key={index}
+                      id={data.id}
+                      userid={data.userid}
+                      user={data.username}
+                      name={data.name}
+                      time={data.created_at}
+                      avatar={data.avatar}
+                      title={data.content}
+                    // like={100}
+                    />
+                  </div>
+                </>
+              )
+            })
+          ) :
+            (
+              <div className="container NotificationPostGroup">
+                <div style={{ display: "flex", gap: 10, alignItems: 'center' }}>
+                  <span>Không có bài viết nào</span>
+                  <i className="fa-regular fa-face-frown"></i>
+                </div>
+              </div>
+            )}
+
         </div>
+        <InfiniteScroll
+          dataLength={postsData.length + 1}
+          next={fetchDataNew}
+          hasMore={true}
+        // loader={<h4>Loading...</h4>}
+        ></InfiniteScroll>
       </div>
     </>
   );

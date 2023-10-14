@@ -2,8 +2,6 @@ import React, { useState } from "react";
 // import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 import Validation from "../../component/validation/validation";
-// import { toast } from "sooner";
-import axios from "axios";
 import "./register.css";
 
 function Register() {
@@ -34,7 +32,9 @@ function Register() {
     console.log(values);
     setError(Validation(values));
     try {
-      console.log;
+       console.log
+       
+     
       setLoading(true);
       const res = await axios.post("http://localhost:8080/account/register", {
         username: values.username.trim(),
@@ -45,7 +45,8 @@ function Register() {
       setLoading(false);
       navigate("/", { replace: true });
     } catch (error) {
-      console.log(error);
+      console.error(error);
+      
       setLoading(false);
       // toast.error(error.response.data.error);
     }

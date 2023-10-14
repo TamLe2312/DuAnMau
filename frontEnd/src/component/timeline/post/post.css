@@ -66,14 +66,14 @@
   border: 0;
 }
 .post-title {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  /* overflow: hidden; */
+  /* text-overflow: ellipsis; */
+  /* white-space: nowrap; */
   margin: 0;
 }
 
 .post-title.expanded {
-  white-space: normal;
+  /* white-space: normal; */
 }
 .post-title-btn {
   background: 0;
@@ -84,7 +84,6 @@
 }
 .post-img-run * {
   color: rgba(255, 255, 255, 0.5);
-  /* font-size: 100px; */
 }
 #post-img-left {
   position: absolute;

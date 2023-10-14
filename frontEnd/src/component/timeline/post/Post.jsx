@@ -15,7 +15,7 @@ import MyModal from "../../modal/Modal";
 import MorePost from "./MorePost";
 import { useCookies } from "react-cookie";
 import ListComment from "./ListComment";
-function Post({ user, time, avatar, title, name, id, userid }) {
+function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
   const focusInput = useRef();
   const [cookies] = useCookies();
   const myID = cookies.userId;
@@ -29,17 +29,16 @@ function Post({ user, time, avatar, title, name, id, userid }) {
   const [liked, setliked] = useState(false);
   const [like, setlike] = useState(0);
   const [comment, setcomment] = useState("");
-  // set times
+
   const now = new Date();
   const targetDate = new Date(time);
   const milliseconds = now - targetDate;
   const minute = Math.floor(milliseconds / (1000 * 60));
-  // const minute = (minutes);
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          `http://localhost:8080/post/postimg/${id}`
+          `http://localhost:8080/post/${groupPostId ? 'postGroupImgs' : 'postimg'}/${groupPostId ? groupPostId : id}`
         );
         if (response.status === 200) {
           setImg(response.data);
@@ -51,41 +50,59 @@ function Post({ user, time, avatar, title, name, id, userid }) {
       }
     };
     fetchData();
-  }, [id]);
+
+  }, [id, groupPostId]);
+
+
   // like-------------------------------------
+
   useEffect(() => {
     try {
       const fetchApi = async () => {
-        const res = await axios.post(
-          "http://localhost:8080/post/countLikedPost",
-          {
-            postID: id, // Gửi id trong phần thân của yêu cầu
+        if (groupPostId) {
+          const res = await axios.post(
+            "http://localhost:8080/post/countLikedPost",
+            {
+              groupPostId: groupPostId, // Gửi id trong phần thân của yêu cầu
+            }
+          );
+          if (res.data[0].countlike > 0) {
+            setlike(res.data[0].countlike);
+          } else {
+            setlike(0);
           }
-        );
-        if (res.data[0].countlike > 0) {
-          setlike(res.data[0].countlike);
-        } else {
-          setlike(0);
+        }
+        else {
+          const res = await axios.post(
+            "http://localhost:8080/post/countLikedPost",
+            {
+              postID: id, // Gửi id trong phần thân của yêu cầu
+            }
+          );
+          if (res.data[0].countlike > 0) {
+            setlike(res.data[0].countlike);
+          } else {
+            setlike(0);
+          }
         }
       };
       fetchApi();
     } catch (error) {
       console.log(error);
     }
-  }, [id]);
+  }, [id, groupPostId]);
 
-  useEffect(() => {
-    const postFooterElement = postFooterRef.current;
-    if (
-      postFooterElement &&
-      postFooterElement.scrollWidth > postFooterElement.offsetWidth
-    ) {
-      setThem(true);
-    } else {
-      setThem(false);
-    }
-  }, []);
-
+  // useEffect(() => {
+  //   const postFooterElement = postFooterRef.current;
+  //   if (
+  //     postFooterElement &&
+  //     postFooterElement.scrollWidth > postFooterElement.offsetWidth
+  //   ) {
+  //     setThem(true);
+  //   } else {
+  //     setThem(false);
+  //   }
+  // }, [id]);
   const handleToggleExpand = () => {
     setExpanded(!expanded);
   };
@@ -110,41 +127,66 @@ function Post({ user, time, avatar, title, name, id, userid }) {
     setModalShow(false);
     // setModalShowComment(false);
   };
-
   useEffect(() => {
     try {
       const fetchApi = async () => {
-        const res = await axios.get("http://localhost:8080/post/likedPost", {
-          params: {
-            postID: id,
-            otherUserID: myID,
-          },
-        });
-        if (res.data.success) {
-          // console.log(id);
-          setliked(true);
-        } else {
-          setliked(false);
+        if (groupPostId) {
+          const res = await axios.get("http://localhost:8080/post/likedPost", {
+            params: {
+              groupPostId: groupPostId,
+              otherUserID: myID,
+            },
+          });
+          if (res.data.success) {
+            // console.log(id);
+            setliked(true);
+          } else {
+            setliked(false);
+          }
+        }
+        else {
+          const res = await axios.get("http://localhost:8080/post/likedPost", {
+            params: {
+              postID: id,
+              otherUserID: myID,
+            },
+          });
+          if (res.data.success) {
+            // console.log(id);
+            setliked(true);
+          } else {
+            setliked(false);
+          }
         }
       };
       fetchApi();
     } catch (error) {
       console.log(error);
     }
-  }, [id]);
+  }, [id, groupPostId]);
 
   const handleLikePost = () => {
     setlike((pre) => pre - 1);
-    // setlikePost(false);
     setliked(false);
     try {
       const fetchApi = async () => {
-        const res = await axios.post("http://localhost:8080/post/UnLikePost", {
-          postID: id,
-          otherUserID: myID,
-        });
-        if (res) {
-          console.log("bạn đã bỏ thích post: " + id);
+        if (groupPostId) {
+          const res = await axios.post("http://localhost:8080/post/UnLikePost", {
+            groupPostId: groupPostId,
+            otherUserID: myID,
+          });
+          if (res) {
+            console.log("bạn đã bỏ thích post: " + groupPostId);
+          }
+        }
+        else {
+          const res = await axios.post("http://localhost:8080/post/UnLikePost", {
+            postID: id,
+            otherUserID: myID,
+          });
+          if (res) {
+            console.log("bạn đã bỏ thích post: " + id);
+          }
         }
       };
       fetchApi();
@@ -157,13 +199,26 @@ function Post({ user, time, avatar, title, name, id, userid }) {
     setliked(true);
     try {
       const fetchApi = async () => {
-        const res = await axios.post("http://localhost:8080/post/likePost", {
-          postID: id,
-          otherUserID: myID,
-        });
-        if (res) {
-          console.log("bạn đã thích post: " + id);
+        if (groupPostId) {
+          console.log(groupPostId);
+          const res = await axios.post("http://localhost:8080/post/likePost", {
+            groupPostId: groupPostId,
+            otherUserID: myID,
+          });
+          if (res) {
+            console.log("bạn đã thích Group post: " + groupPostId);
+          }
         }
+        else {
+          const res = await axios.post("http://localhost:8080/post/likePost", {
+            postID: id,
+            otherUserID: myID,
+          });
+          if (res) {
+            console.log("bạn đã thích post: " + id);
+          }
+        }
+
       };
       fetchApi();
     } catch (error) {
@@ -176,23 +231,41 @@ function Post({ user, time, avatar, title, name, id, userid }) {
     comment: "",
     user: "",
     userID: "",
+    groupPostId: "",
   });
 
   const hanldleSentComment = () => {
     try {
       const fetchApi = async () => {
-        const res = await axios.post("http://localhost:8080/post/commentPost", {
-          postID: id,
-          userID: myID,
-          content: comment.trim(),
-        });
-        if (res.status == 200) {
-          setdymanicComment(!dymanicComment);
-          console.log("bạn đã bình luận: " + id);
-          setcomment("");
-        } else {
-          console.log("Có vấn đề gì đó rồi");
+        if (groupPostId) {
+          const res = await axios.post("http://localhost:8080/post/commentPost", {
+            groupPostId: groupPostId,
+            userID: myID,
+            content: comment.trim(),
+          });
+          if (res.status == 200) {
+            setdymanicComment(!dymanicComment);
+            console.log("bạn đã bình luận: " + groupPostId);
+            setcomment("");
+          } else {
+            console.log("Có vấn đề gì đó rồi");
+          }
         }
+        else {
+          const res = await axios.post("http://localhost:8080/post/commentPost", {
+            postID: id,
+            userID: myID,
+            content: comment.trim(),
+          });
+          if (res.status == 200) {
+            setdymanicComment(!dymanicComment);
+            console.log("bạn đã bình luận: " + id);
+            setcomment("");
+          } else {
+            console.log("Có vấn đề gì đó rồi");
+          }
+        }
+
       };
       fetchApi();
     } catch (error) {
@@ -203,58 +276,103 @@ function Post({ user, time, avatar, title, name, id, userid }) {
   useEffect(() => {
     const fetchApi = async () => {
       try {
-        const res = await axios.post(
-          "http://localhost:8080/post/onCommentPostLast",
-          {
-            postID: id,
-          }
-        );
-        if (res.data) {
-          if (res.data.user_id) {
-            const resUser = await axios.get(
-              `http://localhost:8080/account/getDataUser/${res.data.user_id}`
-            );
+        if (groupPostId) {
+          const res = await axios.post(
+            "http://localhost:8080/post/onCommentPostLast",
+            {
+              groupPostId: groupPostId,
+            }
+          );
+          if (res.data) {
+            if (res.data.user_id) {
+              const resUser = await axios.get(
+                `http://localhost:8080/account/getDataUser/${res.data.user_id}`
+              );
+              setcommentew({
+                comment: res.data.content,
+                user: resUser.data[0].name || resUser.data[0].username,
+                userID: res.data.user_id,
+              });
+            }
+          } else {
             setcommentew({
-              comment: res.data.content,
-              user: resUser.data[0].name || resUser.data[0].username,
-              userID: res.data.user_id,
+              comment: "",
+              user: "",
+              userID: "",
             });
           }
-        } else {
-          setcommentew({
-            comment: "",
-            user: "",
-            userID: "",
-          });
         }
+        else {
+          const res = await axios.post(
+            "http://localhost:8080/post/onCommentPostLast",
+            {
+              postID: id,
+            }
+          );
+          if (res.data) {
+            if (res.data.user_id) {
+              const resUser = await axios.get(
+                `http://localhost:8080/account/getDataUser/${res.data.user_id}`
+              );
+              setcommentew({
+                comment: res.data.content,
+                user: resUser.data[0].name || resUser.data[0].username,
+                userID: res.data.user_id,
+              });
+            }
+          } else {
+            setcommentew({
+              comment: "",
+              user: "",
+              userID: "",
+            });
+          }
+        }
+
       } catch (e) {
         console.log(e);
       }
     };
     fetchApi();
-  }, [dymanicComment, id]);
+  }, [dymanicComment, id, groupPostId]);
   const [hasComment, sethasComment] = useState(false);
   useEffect(() => {
     const fetchApi = async () => {
       try {
-        const res = await axios.get(
-          ` http://localhost:8080/post/countCommentPost/${id}`
-        );
-        if (res.data[0].countcomment > 1) {
-          sethasComment(true);
-        } else {
-          sethasComment(false);
+        if (groupPostId) {
+          const id = groupPostId;
+          const res = await axios.get(
+            ` http://localhost:8080/post/countCommentPost/${id}&${groupPostId}`
+          );
+          if (res.data[0].countcomment > 1) {
+            sethasComment(true);
+          } else {
+            sethasComment(false);
+          }
         }
+        else {
+          const res = await axios.get(
+            ` http://localhost:8080/post/countCommentPost/${id}&0`
+          );
+          if (res.data[0].countcomment > 1) {
+            sethasComment(true);
+          } else {
+            sethasComment(false);
+          }
+        }
+
       } catch (e) {
         console.log(e);
       }
     };
     fetchApi();
-  }, [id, dymanicComment]);
+  }, [id, groupPostId, dymanicComment]);
   // -------------------------------------------
   const handlerun = () => {
     setdymanicComment(!dymanicComment);
   };
+  // console.log(them);
+  // -------------------------------------------------------------------------------------------------------
   return (
     <>
       <div className="post" key={id}>
@@ -267,20 +385,22 @@ function Post({ user, time, avatar, title, name, id, userid }) {
               {avatar ? (
                 <img className="post-avatar" src={avatar} />
               ) : (
-                <Avatar>
-                  {name !== null ? name.charAt(0) : user.charAt(0)}
-                </Avatar>
+                <img
+                  className="post-avatar"
+                  src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg"
+                  alt="Avatar"
+                />
                 // <img className="post-avatar" src="" />
               )}
-              &nbsp;<span>{name || user}</span>
+              &nbsp;<span>{name ? name : user}</span>
             </Link>
             •
             <span className="post-time">
               {minute < 61
                 ? minute + " phút"
                 : minute / 60 > 24
-                ? Math.floor(minute / 60 / 24) + " Ngày"
-                : Math.floor(minute / 60) + " Giờ"}
+                  ? Math.floor(minute / 60 / 24) + " Ngày"
+                  : Math.floor(minute / 60) + " Giờ"}
             </span>
           </div>
           {/* -------------more------------ */}
@@ -363,13 +483,13 @@ function Post({ user, time, avatar, title, name, id, userid }) {
           >
             {img && img.length > 0 ? title : ""}
           </p>
-          {them ? (
+          {/* {them ? (
             <button className="post-title-btn" onClick={handleToggleExpand}>
               {expanded ? "Thu gọn" : "Xem thêm"}
             </button>
           ) : (
             ""
-          )}
+          )} */}
           {hasComment && (
             <span
               className="post-footer-list-comment"
@@ -427,6 +547,7 @@ function Post({ user, time, avatar, title, name, id, userid }) {
           modalShowComment ? (
             <ListComment
               id={id}
+              groupPostId={groupPostId}
               img={img}
               title={title}
               user={user}
@@ -436,7 +557,7 @@ function Post({ user, time, avatar, title, name, id, userid }) {
               handlerun={handlerun}
             />
           ) : (
-            <MorePost id={id} title={title} show={handleDataFromChild} />
+            <MorePost id={id} groupPostId={groupPostId} title={title} show={handleDataFromChild} />
           )
         }
       />
