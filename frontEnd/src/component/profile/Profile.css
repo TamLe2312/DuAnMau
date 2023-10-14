@@ -1,4 +1,5 @@
 * {
+
     padding: 0;
     margin: 0;
     box-sizing: border-box;
@@ -24,10 +25,11 @@
 
 .ProfileRow span {
     margin-right: 20px;
+
 }
 
 .ProfileRow span a {
-    text-decoration: none;
+  text-decoration: none;
 }
 
 .ProfileRow span a:hover {
@@ -287,3 +289,4 @@ display: block;
 .fa-chevron-right {
     margin: 100px;
 }
+

@@ -92,12 +92,11 @@ function Navigation() {
         console.error("Error fetching user data:", error);
       }
     };
-
-    const interval = setInterval(fetchData, 2000); // Chạy hàm fetchData() mỗi 2 giây
-
-    return () => {
-      clearInterval(interval); // Xóa bỏ interval khi component bị unmount
-    };
+    fetchData();
+    // const interval = setInterval(fetchData, 2000); // Chạy hàm fetchData() mỗi 2 giây
+    // return () => {
+    //   clearInterval(interval); // Xóa bỏ interval khi component bị unmount
+    // };
   }, [id]);
   return (
     <div className="navigation">

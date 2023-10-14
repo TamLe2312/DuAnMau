@@ -83,18 +83,18 @@ function Timeline() {
         <div className="timeline-post">
           {postsData
             ? postsData.map((post, index) => (
-              <Post
-                key={index}
-                id={post.id}
-                userid={post.userid}
-                user={post.username}
-                name={post.name}
-                time={post.created_at}
-                avatar={post.avatar}
-                title={post.content}
-              // like={100}
-              />
-            ))
+                <Post
+                  key={index}
+                  id={post.id}
+                  userid={post.userid}
+                  user={post.username}
+                  name={post.name}
+                  time={post.created_at}
+                  avatar={post.avatar}
+                  title={post.content}
+                  // like={100}
+                />
+              ))
             : "loading..."}
         </div>
         <div className="timeline-post-end">
@@ -108,7 +108,7 @@ function Timeline() {
         dataLength={postsData.length + 1}
         next={fetchDataNew}
         hasMore={true}
-      // loader={<h4>Loading...</h4>}
+        // loader={<h4>Loading...</h4>}
       ></InfiniteScroll>
     </div>
   );

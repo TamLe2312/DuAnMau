@@ -9,11 +9,11 @@ import "bootstrap/dist/css/bootstrap.min.css";
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import { useCookies } from "react-cookie";
-import Post from "../timeline/post/Post"
+import Post from "../timeline/post/Post";
 import Validation from "../../component/validation/validation";
 import { toast } from "react-toastify";
 import "./Profile.css";
-import { useParams } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
 
 function Profile() {
   // id user khác
@@ -257,7 +257,7 @@ function Profile() {
   };
   return (
     <>
-      <div className="container-fluid" style={{ overflowX: 'hidden' }}>
+      <div className="container-fluid" style={{ overflowX: "hidden" }}>
         <div className="container containerProfile">
           <header className="ProfileHeader">
             <div
@@ -309,15 +309,17 @@ function Profile() {
                               alt="Avatar"
                             />
                           </div>
-                        )
-                          : (
-                            <div></div>
-                          )}
-                        <Form
-                          encType="multipart/form-data"
-                        >
+                        ) : (
+                          <div></div>
+                        )}
+                        <Form encType="multipart/form-data">
                           <Form.Group>
-                            <Form.Label className="HandleButtonProfile ProfileUploadColor" htmlFor="ProfileUploadFile">Tải ảnh đại diện</Form.Label>
+                            <Form.Label
+                              className="HandleButtonProfile ProfileUploadColor"
+                              htmlFor="ProfileUploadFile"
+                            >
+                              Tải ảnh đại diện
+                            </Form.Label>
                             <Form.Control
                               type="file"
                               name="avatar"
@@ -477,6 +479,10 @@ function Profile() {
                       <a href="#">
                         Có <b>12</b> bạn bè
                       </a>
+                    </span>
+                    {/* userID */}
+                    <span>
+                      <Link to={`/home/messenger/${userID}`}>Nhắn tin</Link>
                     </span>
                   </div>
                 </div>
