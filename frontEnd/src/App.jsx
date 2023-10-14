@@ -14,7 +14,7 @@ import Groups from "./component/group/Groups";
 
 //React Toastify
 import { ToastContainer } from "react-toastify";
-import { Toaster } from 'sonner'
+import { Toaster } from "sonner";
 import "react-toastify/dist/ReactToastify.css";
 import Admin from "./component/ADMIN/Admin";
 import Account from "./component/ADMIN/adminchild/account";
@@ -33,6 +33,7 @@ function App() {
           <Route path="/home/profile" element={<Profile />} />
           <Route path="/home/community" element={<Community />} />
           <Route path="/home/messenger" element={<Messenger />} />
+          <Route path="/home/messenger/:id" element={<Messenger />} />
           <Route path="/home/admin" element={<Admin />}>
             <Route path="/home/admin/account" element={<Account />} />
           </Route>
@@ -55,7 +56,6 @@ function App() {
       {/* Same as */}
       <ToastContainer />
       <Toaster position="top-right" expand={false} />
-
     </div>
   );
 }
