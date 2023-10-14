@@ -32,9 +32,8 @@ function Register() {
     console.log(values);
     setError(Validation(values));
     try {
-       console.log
-       
-     
+      console.log;
+
       setLoading(true);
       const res = await axios.post("http://localhost:8080/account/register", {
         username: values.username.trim(),
@@ -46,7 +45,7 @@ function Register() {
       navigate("/", { replace: true });
     } catch (error) {
       console.error(error);
-      
+
       setLoading(false);
       // toast.error(error.response.data.error);
     }
@@ -63,6 +62,7 @@ function Register() {
 
         <div className="mb-3">
           <label className="form-label">Username</label>
+
           <input
             name="username"
             value={values.username}
