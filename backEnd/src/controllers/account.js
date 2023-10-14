@@ -27,7 +27,6 @@ const register = (req, res) => {
             return res
               .status(400)
               .json({ error: "Tên người dùng hoặc email đã tồn tại" });
-
           } else {
             if (username.trim() === "admin") {
               connection.query(
@@ -346,10 +345,8 @@ const detail = (req, res) => {
       if (err) {
         return res.status(500).json({ error: "Lỗi máy chủ" });
       }
-      if (results.length > 0) {
+      if (results) {
         return res.status(200).json(results);
-      } else {
-        return res.status(400).json({ error: "Người dùng không tồn tại" });
       }
     }
   );
