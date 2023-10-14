@@ -13,8 +13,9 @@ import Messenger from "./component/messenger/Messenger";
 import Groups from "./component/group/Groups";
 
 //React Toastify
-import { ToastContainer } from "react-toastify";
-import { Toaster } from "sonner";
+
+import { Toaster } from 'sonner'
+
 import "react-toastify/dist/ReactToastify.css";
 import Admin from "./component/ADMIN/Admin";
 import Account from "./component/ADMIN/adminchild/account";
@@ -41,21 +42,10 @@ function App() {
         <Route path="/verifyToken" element={<VerifyToken />} />
         <Route path="*" element={<NoMath />} />
       </Routes>
-      <ToastContainer
-        position="top-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="light"
-      />
-      {/* Same as */}
-      <ToastContainer />
-      <Toaster position="top-right" expand={false} />
+
+      <Toaster position="top-right" expand={false} richColors />
+
+
     </div>
   );
 }

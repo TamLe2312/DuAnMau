@@ -22,7 +22,7 @@ const createGroup = (req, res) => {
                 return res.status(500).json({ error: "Lỗi máy chủ" });
             }
             if (results.length > 0) {
-                return res.status(400).json({ error: "Lỗi máy chủ" });
+                return res.status(400).json({ error: "Tên nhóm đã tồn tại.Vui lòng nhập tên khác" });
             }
             else {
                 connection.query(
@@ -203,20 +203,34 @@ const UpdateInformationProfileGroup = (req, res) => {
         return res.status(400).json({ error: "Vui lòng nhập đủ thông tin" });
     }
     connection.query(
-        "UPDATE groupsTable SET name = ?,moTaNhom = ? WHERE id = ?",
-        [name, moTaNhom, groupId],
-        function (err, results, fields) {
+        "SELECT * FROM groupsTable WHERE name = ?",
+        [name],
+        async function (err, results, fields) {
             if (err) {
-                console.error(err);
                 return res.status(500).json({ error: "Lỗi máy chủ" });
             }
-            return res.status(200).json({
-                name: name,
-                moTaNhom: moTaNhom,
-                success: "Cập nhật thông tin thành công",
-            });
+            if (results.length > 0) {
+                return res.status(400).json({ error: "Tên nhóm đã tồn tại.Vui lòng nhập tên khác" });
+            }
+            else {
+                connection.query(
+                    "UPDATE groupsTable SET name = ?,moTaNhom = ? WHERE id = ?",
+                    [name, moTaNhom, groupId],
+                    function (err, results, fields) {
+                        if (err) {
+                            console.error(err);
+                            return res.status(500).json({ error: "Lỗi máy chủ" });
+                        }
+                        return res.status(200).json({
+                            name: name,
+                            moTaNhom: moTaNhom,
+                            success: "Cập nhật thông tin thành công",
+                        });
+                    }
+                );
+            }
         }
-    );
+    )
 }
 const removeGroup = (req, res) => {
     const { hasAvatarGroup, groupIdProfile } = req.body;
@@ -248,8 +262,10 @@ const removeGroup = (req, res) => {
     );
 }
 const getDataGroupJoined = (req, res) => {
+    const idUser = parseInt(req.params.idUser);
     connection.query(
-        "SELECT * FROM membergroup",
+        "SELECT * FROM membergroup WHERE user_id = ? ",
+        [idUser],
         async function (err, results, fields) {
             if (err) {
                 return res.status(500).json({ error: "Lỗi máy chủ" });
@@ -271,7 +287,19 @@ const joinGroup = (req, res) => {
             if (err) {
                 return res.status(500).json({ error: "Lỗi máy chủ" });
             }
-            return res.status(200).json({ success: "Tham gia nhóm thành công" });
+            connection.query(
+                "SELECT * FROM membergroup",
+                async function (err, results, fields) {
+                    if (err) {
+                        return res.status(500).json({ error: "Lỗi máy chủ" });
+                    }
+                    if (results.length > 0) {
+                        return res.status(200).json({ results, success: "Vào nhóm thành công" });
+                    } else {
+                        return res.status(400).json({ error: "Không có dữ liệu Member Group" });
+                    }
+                }
+            );
         }
     );
 }
@@ -296,7 +324,19 @@ const outGroup = (req, res) => {
                             if (err) {
                                 return res.status(500).json({ error: "Lỗi máy chủ" });
                             }
-                            return res.status(200).json({ success: "Rời nhóm thành công" });
+                            connection.query(
+                                "SELECT * FROM membergroup",
+                                async function (err, results, fields) {
+                                    if (err) {
+                                        return res.status(500).json({ error: "Lỗi máy chủ" });
+                                    }
+                                    if (results.length > 0) {
+                                        return res.status(200).json({ results, success: "Rời nhóm thành công" });
+                                    } else {
+                                        return res.status(400).json({ error: "Không có dữ liệu Member Group" });
+                                    }
+                                }
+                            );
                         }
                     );
                 }
@@ -307,7 +347,8 @@ const outGroup = (req, res) => {
     );
 }
 const TotalMembers = (req, res) => {
-    const groupId = req.params.groupId;
+    const groupId = parseInt(req.params.groupId);
+    const userId = parseInt(req.params.userId || null);
     connection.query(
         "SELECT COUNT(*) as totalMembers FROM membergroup WHERE group_id = ?",
         [groupId],
@@ -316,13 +357,70 @@ const TotalMembers = (req, res) => {
                 return res.status(500).json({ error: "Lỗi máy chủ" });
             }
             if (results.length > 0) {
-                return res.status(200).json(results);
+                if (userId) {
+                    connection.query(
+                        "SELECT * FROM membergroup WHERE user_id = ? AND group_id = ?",
+                        [userId, groupId],
+                        async function (err, results1, fields) {
+                            if (err) {
+                                return res.status(500).json({ error: "Lỗi máy chủ" });
+                            }
+                            if (results1.length > 0) {
+                                return res.status(200).json({ hasJoined: true, results });
+                            } else {
+                                return res.status(400).json({ hasJoined: false, error: "Không có dữ liệu Member Group" });
+                            }
+                        }
+                    );
+                }
             } else {
                 return res.status(400).json({ error: "Nhóm không tồn tại" });
             }
         }
     );
 }
+const CountPostGroup = (req, res) => {
+    const groupId = parseInt(req.params.groupId);
+    connection.query(
+        "SELECT COUNT(*) as countPostGroup FROM postsgroup WHERE group_id = ?",
+        [groupId],
+        async function (err, results, fields) {
+            if (err) {
+                return res.status(500).json({ error: "Lỗi máy chủ" });
+            }
+            if (results.length > 0) {
+                return res.status(200).json({ results });
+            } else {
+                return res.status(400).json({ error: "Lỗi đếm bài viết group" });
+            }
+        }
+    );
+}
+const postGroupData = (req, res) => {
+    const groupId = parseInt(req.params.groupId);
+    const page = parseInt(req.params.page) || 1;
+    const limit = 4; // Số lượng người dùng hiển thị trên mỗi trang
+    const offset = (page - 1) * limit; // Vị trí bắt đầu lấy dữ liệu
+    connection.query(
+        `SELECT postsgroup.id,postsgroup.group_id,postsgroup.content,postsgroup.created_at,user_id as userid, users.username,users.avatar,users.name
+      FROM postsgroup
+      JOIN users ON postsgroup.user_id = users.id
+      WHERE postsgroup.group_id = ?
+      ORDER BY postsgroup.id DESC
+      LIMIT ? OFFSET ?
+      `,
+        [groupId, limit, offset],
+        function (err, results, fields) {
+            if (err) {
+                return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+            }
+            if (results) {
+                return res.status(200).json(results);
+            }
+        }
+    );
+};
+
 
 module.exports = {
     createGroup,
@@ -337,4 +435,6 @@ module.exports = {
     joinGroup,
     TotalMembers,
     outGroup,
+    postGroupData,
+    CountPostGroup,
 };
