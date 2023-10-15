@@ -4,10 +4,11 @@ import SendIcon from "@mui/icons-material/Send";
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { format } from "timeago.js";
-import io from "socket.io-client";
-const socket = io.connect("http://localhost:8080");
+import { io } from "socket.io-client";
+// const socket = io.connect("http://localhost:8080");
 
 function DetailMess(props) {
+  const socket = useRef();
   const scroll = useRef();
   const input = useRef();
   const { myID, yourID } = props;
@@ -55,14 +56,16 @@ function DetailMess(props) {
     };
     fetchApi();
   }, [youID]);
-  // youID, ;
+  // --------------------------
+  useEffect(() => {
+    socket.current = io("http://localhost:8080");
+    socket.current.emit("add_new_user", myID);
+    socket.current.on("get_user", (userOl) => {
+      console.log(userOl);
+    });
+  }, [listmess]);
   // ------------------------------------------
-  // const [data, setData] = useState([]);
   const handleSendMess = async () => {
-    //   socket.emit("set_id", youID);
-    //   socket.on("data", (data) => {
-    //     console.log(data);
-    //   });
     const textMes = text.trim();
     try {
       setLoading(true);

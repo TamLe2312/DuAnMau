@@ -1,5 +1,7 @@
 // require("dotenv").config();
 const express = require("express");
+const { createServer } = require("http");
+const { Server } = require("socket.io");
 const cors = require("cors");
 var bodyParser = require("body-parser");
 const path = require("path");
@@ -9,56 +11,46 @@ const api = require("./routes/api");
 const postApi = require("./routes/postApi");
 const groups = require("./routes/groupApi");
 const connection = require("./config/database");
-
 const session = require("express-session");
 const messenger = require("./routes/messengerApi");
 const app = express();
 // ---------------------------
 // const http = require("http");
-const { createServer } = require("http");
-const { Server } = require("socket.io");
-const server = createServer(app);
 
-// Configure CORS for Socket.IO
+const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173", // Allow requests from this origin
+    origin: "http://localhost:5173",
     methods: ["GET", "POST"],
   },
 });
-// const activeUsers = [];
-// // const idToSocket = {};
-// io.on("connection", (socket) => {
-//   console.log("user connected: " + socket.id);
-
-//   socket.on("set_id", (id) => {
-//     user = {
-//       id: id,
-//       socket: socket.id,
-//     };
-//     activeUsers.push(user);
-//     io.emit("data", activeUsers); // Gửi danh sách người dùng kích hoạt đến tất cả các client
-//   });
-
-//   socket.on("disconnect", () => {
-//     console.log("người dùng k online" + socket.id);
-//   });
-// });
+let activeUsers = [];
+io.on("connection", (socket) => {
+  socket.on("add_new_user", (newUserID) => {
+    if (!activeUsers.some((user) => user.userId === newUserID)) {
+      activeUsers.push({
+        userId: newUserID,
+        socketId: socket.id,
+      });
+      console.log(activeUsers);
+    }
+    console.log("user connect: " + activeUsers);
+    io.emit("get_user", activeUsers);
+  });
+  socket.on("disconnect", () => {
+    activeUsers = activeUsers.filter((user) => user.socketId !== socket.id);
+    console.log("user disconnect: " + activeUsers);
+    io.emit("get_user", activeUsers);
+  });
+});
 
 // });
 // -----------------------
 app.use(cors());
 
-// parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
-// parse application/json
 app.use(bodyParser.json());
 app.use(express.static("public"));
-// app.use(
-//   cors({
-//     origin: "http://localhost:5173", // Thay đổi thành nguồn gốc của you
-//   })
-// );
 
 const port = process.env.PORT || 8888;
 const hostname = process.env.HOST_NAME;

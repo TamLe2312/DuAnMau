@@ -4,7 +4,7 @@ import { useCookies } from "react-cookie";
 import { Link, useNavigate } from "react-router-dom";
 import Validation from "../../component/validation/validation";
 /* import { toast } from "react-toastify"; */
-import { toast } from 'sonner'
+import { toast } from "sonner";
 import "./login.css";
 function Login() {
   const Navigate = useNavigate();
