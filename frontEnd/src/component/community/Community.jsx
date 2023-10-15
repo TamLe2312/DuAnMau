@@ -2,7 +2,7 @@ import axios from "axios";
 import React, { useState, useEffect } from "react";
 import Validation from "../../component/validation/validation";
 import { Modal, Button, Form } from "react-bootstrap";
-import { toast } from 'sonner'
+import { toast } from "sonner";
 import { useCookies } from "react-cookie";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import SearchIcon from "@mui/icons-material/Search";
@@ -27,7 +27,9 @@ function Community() {
   const id = cookies.userId;
   const fetchDataJoined = async () => {
     try {
-      const response = await axios.get(`http://localhost:8080/groups/getDataGroupJoined/${id}`);
+      const response = await axios.get(
+        `http://localhost:8080/groups/getDataGroupJoined/${id}`
+      );
       if (response && response.data) {
         setHasJoined(response.data);
       } else {
@@ -237,7 +239,9 @@ function Community() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(`http://localhost:8080/groups/getDataGroupJoined/${id}`);
+        const response = await axios.get(
+          `http://localhost:8080/groups/getDataGroupJoined/${id}`
+        );
         if (response && response.data) {
           setHasJoined(response.data);
         } else {
@@ -368,13 +372,16 @@ function Community() {
             </Modal.Footer>
           </Modal>
           <div className="container containerGroupContentCommunity">
-
-            <div className="container" style={{ display: 'flex', paddingTop: 20 }}>
+            <div
+              className="container"
+              style={{ display: "flex", paddingTop: 20 }}
+            >
               <h4>Nhóm</h4>
-              <button className="container containerCreateContentCommunity" onClick={handleShowModalCreateGroup}>
-                <AddCircleOutlineIcon
-                  className='CommunityCreateIconGroup'
-                />
+              <button
+                className="container containerCreateContentCommunity"
+                onClick={handleShowModalCreateGroup}
+              >
+                <AddCircleOutlineIcon className="CommunityCreateIconGroup" />
                 <span>group</span>
               </button>
             </div>

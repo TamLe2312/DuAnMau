@@ -19,6 +19,8 @@ import { Toaster } from 'sonner'
 import "react-toastify/dist/ReactToastify.css";
 import Admin from "./component/ADMIN/Admin";
 import Account from "./component/ADMIN/adminchild/account";
+import GroupsTable from "./component/ADMIN/adminchild/Groups"
+import Posts from "./component/ADMIN/adminchild/Posts";
 function App() {
   return (
     <div>
@@ -37,6 +39,8 @@ function App() {
           <Route path="/home/messenger/:id" element={<Messenger />} />
           <Route path="/home/admin" element={<Admin />}>
             <Route path="/home/admin/account" element={<Account />} />
+            <Route path="/home/admin/groups" element={<GroupsTable />} />
+            <Route path="/home/admin/posts" element={<Posts />} />
           </Route>
         </Route>
         <Route path="/verifyToken" element={<VerifyToken />} />
