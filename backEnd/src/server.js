@@ -12,6 +12,7 @@ const connection = require("./config/database");
 
 const session = require("express-session");
 const messenger = require("./routes/messengerApi");
+const adminApi = require("./routes/adminApi");
 const app = express();
 // ---------------------------
 // const http = require("http");
@@ -87,6 +88,8 @@ app.use("/post", postApi);
 app.use("/groups", groups);
 
 app.use("/messenger", messenger);
+
+app.use("/admin", adminApi);
 
 server.listen(port, () => {
   console.log(`Sever app listening on port ${port}`);
