@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useState } from "react";
-import { toast } from "react-toastify";
+// import { toast } from "react-toastify";
 import { Link, useNavigate } from "react-router-dom";
 import Validation from "../../component/validation/validation";
 import "./register.css";
@@ -30,8 +30,10 @@ function Register() {
 
   const handleClick = async (e) => {
     e.preventDefault();
+    console.log(values);
     setError(Validation(values));
     try {
+      console.log;
       setLoading(true);
       const res = await axios.post("http://localhost:8080/account/register", {
         username: values.username.trim(),
@@ -40,17 +42,14 @@ function Register() {
       });
       console.log(res);
       setLoading(false);
-      navigate("/home", { replace: true });
+      navigate("/", { replace: true });
     } catch (error) {
       console.error(error);
 
       setLoading(false);
-      console.error(error);
-      toast.error(error.response.data.error);
-      // setCheckLogin(error.response.data.error);
+      // toast.error(error.response.data.error);
     }
   };
-
   return (
     <>
       <form style={style} className="mt-4">
@@ -63,6 +62,7 @@ function Register() {
 
         <div className="mb-3">
           <label className="form-label">Username</label>
+
           <input
             name="username"
             value={values.username}
@@ -119,9 +119,7 @@ function Register() {
               handleChange(e);
             }}
             type="email"
-            className={
-              error.email ? "form-control is-invalid" : "form-control"
-            }
+            className={error.email ? "form-control is-invalid" : "form-control"}
           />
           {error.email && (
             <div
