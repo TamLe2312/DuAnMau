@@ -104,6 +104,7 @@ function Account() {
       setAllDataUser(response.data);
     } catch (error) {
       console.error(error);
+      setAllDataUser([]);
     }
   };
 

@@ -11,7 +11,8 @@ const {
     adjustGroupInformContent,
     adjustGroupInform,
     getDataAllPost,
-    postImgs
+    postImgs,
+    deletePost,
 } = require("../controllers/adminController");
 const Router = express.Router();
 
@@ -31,6 +32,7 @@ const upload = multer({ storage: storage });
 
 Router.post("/deleteUser", deleteUser);
 Router.post("/deleteGroup", deleteGroup);
+Router.post("/deletePost", deletePost);
 Router.post("/adjustInformUser", AdjustInformUser);
 Router.post("/adjustGroupInformContent", adjustGroupInformContent);
 Router.post("/createNewUser", createNewUser);

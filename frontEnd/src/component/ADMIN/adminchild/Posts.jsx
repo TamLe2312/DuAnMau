@@ -36,9 +36,42 @@ function Posts() {
     const handleCloseModalMoreDetailPost = () => {
         setShowModalMoreDetailPost(false);
     };
-    const handleDeletePost = () => {
-        console.log(IdPostDelete);
+    const handleDeletePost = async () => {
+        setLoading(true);
+        try {
+            const response = await axios.post("http://localhost:8080/admin/deletePost", {
+                idPost: IdPostDelete,
+            });
+            console.log(response);
+            toast.success(response.data.success);
+            fetchDataAllPost();
+            handleCloseModalConfirmDelete();
+            setLoading(false);
+        } catch (error) {
+            console.error(error);
+        }
     }
+    const fetchDataAllPost = async () => {
+        try {
+            const response = await axios.get("http://localhost:8080/admin/getDataAllPost");
+            if (response && response.data) {
+                const formattedData = response.data.map((item) => {
+                    const createdAt = item.created_at;
+                    const formattedDate = moment(createdAt).format("MMMM Do, YYYY");
+                    return {
+                        ...item,
+                        created_at: formattedDate,
+                    };
+                });
+                setAllDataPost(formattedData);
+            } else {
+                setAllDataPost([]);
+            }
+        } catch (error) {
+            console.error(error);
+            setAllDataPost([]);
+        }
+    };
     const handleRun = (e) => {
         if (imgs) {
             const id = e.currentTarget.id;
@@ -71,7 +104,6 @@ function Posts() {
                 console.error(error);
             }
         };
-
         fetchData();
     }, []);
     return (
@@ -88,7 +120,7 @@ function Posts() {
                     </tr>
                 </thead>
                 <tbody>
-                    {AllDataPost &&
+                    {AllDataPost && AllDataPost.length > 0 ? (
                         AllDataPost.map((dataPost, index) => {
                             return (
                                 <>
@@ -178,7 +210,12 @@ function Posts() {
                                     </tr>
                                 </>
                             )
-                        })}
+                        })
+                    ) :
+                        (
+                            <tr><td colSpan={5}>Không có post nào</td></tr>
+                        )
+                    }
                 </tbody>
             </table>
         </>
