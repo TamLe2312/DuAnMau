@@ -6,10 +6,13 @@ import { toast } from "sonner";
 
 function Account() {
   const [showModalConfirmDelete, setShowModalConfirmDelete] = useState(false);
-  const [showModalAdjustInformation, setShowModalAdjustInformation] = useState(false);
+  const [showModalAdjustInformation, setShowModalAdjustInformation] =
+    useState(false);
   const [showModalCreateUser, setShowModalCreateUser] = useState(false);
   const [IdUserDelete, setIdUserDelete] = useState(null);
   const [IdUserAdjust, setIdUserAdjust] = useState(null);
+  const [TotalPage, setTotalPage] = useState(1);
+  const [indexPagination, setIndexPagination] = useState(1);
   const [error, setError] = useState({});
   const [loading, setLoading] = useState(false);
   const [formValuesAdjustUser, setFormValuesAdjustUser] = useState({
@@ -42,6 +45,7 @@ function Account() {
     setError(Validation(formValuesAdjustUser));
     try {
       setLoading(true);
+      const currentPage = indexPagination; // Lưu giá trị trang hiện tại
       const response = await axios.post(
         "http://localhost:8080/admin/adjustInformUser",
         {
@@ -54,7 +58,7 @@ function Account() {
       if (response.data.success) {
         toast.success(response.data.success);
       }
-      fetchDataAllUser();
+      fetchDataAllUser(currentPage); // Sử dụng giá trị trang hiện tại
       setLoading(false);
       handleCloseModalAdjustInformation();
     } catch (error) {
@@ -62,7 +66,7 @@ function Account() {
       toast.error(error.response.data.error);
       setLoading(false);
     }
-  }
+  };
   const handleShowModalConfirmDelete = (id) => {
     setIdUserDelete(id);
     setShowModalConfirmDelete(true);
@@ -84,7 +88,6 @@ function Account() {
     setShowModalAdjustInformation(false);
   };
   const handleShowModalCreateUser = () => {
-
     setShowModalCreateUser(true);
   };
   const handleCloseModalCreateUser = () => {
@@ -98,10 +101,14 @@ function Account() {
     setError({});
     setShowModalCreateUser(false);
   };
-  const fetchDataAllUser = async () => {
+  const fetchDataAllUser = async (page) => {
     try {
-      const response = await axios.get("http://localhost:8080/admin/getDataAllUser");
-      setAllDataUser(response.data);
+      const response = await axios.get(
+        `http://localhost:8080/admin/getDataAllUser/${page}`
+      );
+      setAllDataUser(response.data.results);
+      setTotalPage(response.data.pageCount);
+      setIndexPagination(page);
     } catch (error) {
       console.error(error);
       setAllDataUser([]);
@@ -111,17 +118,29 @@ function Account() {
   const handleDeleteUser = async () => {
     setLoading(true);
     try {
-      const response = await axios.post("http://localhost:8080/admin/deleteUser", {
-        idUser: IdUserDelete,
-      });
-      fetchDataAllUser();
+      const response = await axios.post(
+        "http://localhost:8080/admin/deleteUser",
+        {
+          idUser: IdUserDelete,
+        }
+      );
+      if (response.data.pageCount < TotalPage) {
+        setTotalPage(response.data.pageCount);
+        fetchDataAllUser(response.data.pageCount);
+        setIndexPagination(response.data.pageCount);
+      }
+      if (response.data.pageCount === 0) {
+        setTotalPage(1);
+        setIndexPagination(1);
+      }
+      fetchDataAllUser(indexPagination);
       toast.success(response.data.success);
       handleCloseModalConfirmDelete();
       setLoading(false);
     } catch (error) {
       console.error(error);
     }
-  }
+  };
   const handleSubmitCreateUser = async (e) => {
     e.preventDefault();
     setError(Validation(formValuesCreateUser));
@@ -137,26 +156,66 @@ function Account() {
           role: formValuesCreateUser.role.trim(),
         }
       );
-      console.log(response);
       if (response.data.success) {
         toast.success(response.data.success);
       }
-      fetchDataAllUser();
+      fetchDataAllUser(indexPagination);
       setLoading(false);
       handleCloseModalCreateUser();
     } catch (error) {
       toast.error(error.response.data.error);
       setLoading(false);
     }
-  }
+  };
+  const handlePaginationClick = (pageIndex) => {
+    setIndexPagination(pageIndex, () => {
+      fetchDataAllUser(pageIndex);
+    });
+  };
+
+  const handlePrevIndex = () => {
+    setIndexPagination(
+      (prevIndex) => {
+        if (prevIndex > 1) {
+          return prevIndex - 1;
+        }
+        return prevIndex;
+      },
+      () => {
+        fetchDataAllUser(indexPagination);
+      }
+    );
+  };
+
+  const handleNextIndex = () => {
+    setIndexPagination(
+      (prevIndex) => {
+        if (prevIndex < TotalPage) {
+          return prevIndex + 1;
+        }
+        return prevIndex;
+      },
+      () => {
+        fetchDataAllUser(indexPagination);
+      }
+    );
+  };
+
+  useEffect(() => {
+    fetchDataAllUser(indexPagination);
+  }, [indexPagination]);
   const [AllDataUser, setAllDataUser] = useState([]);
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/admin/getDataAllUser");
-        setAllDataUser(response.data);
+        const response = await axios.get(
+          "http://localhost:8080/admin/getDataAllUser/1"
+        );
+        setTotalPage(response.data.pageCount);
+        setAllDataUser(response.data.results);
       } catch (error) {
         console.error(error);
+        setAllDataUser([]);
       }
     };
 
@@ -167,8 +226,11 @@ function Account() {
     <div>
       <div style={{ display: "flex", justifyContent: "space-between" }}>
         Tài khoản
-        <div style={{ marginRight: '50px' }}>
-          <button className="btn btn-success" onClick={handleShowModalCreateUser}>
+        <div style={{ marginRight: "50px" }}>
+          <button
+            className="btn btn-success"
+            onClick={handleShowModalCreateUser}
+          >
             Thêm tài khoản
           </button>
         </div>
@@ -190,21 +252,37 @@ function Account() {
                 <>
                   <tr key={index}>
                     <th scope="row">{index + 1}</th>
-                    <td>{dataUser && dataUser.name ? (dataUser.name) : "Không có name"}</td>
+                    <td>
+                      {dataUser && dataUser.name
+                        ? dataUser.name
+                        : "Không có name"}
+                    </td>
                     <td>{dataUser.username}</td>
                     <td>{dataUser.role}</td>
                     <td>
-                      <button type="button" className="btn btn-primary" onClick={() => handleShowModalAdjustInformatione(dataUser.id)}>
+                      <button
+                        type="button"
+                        className="btn btn-primary"
+                        onClick={() =>
+                          handleShowModalAdjustInformatione(dataUser.id)
+                        }
+                      >
                         Sửa
                       </button>
                       &nbsp;
-                      <button type="button" className="btn btn-danger" onClick={() => handleShowModalConfirmDelete(dataUser.id)}>
+                      <button
+                        type="button"
+                        className="btn btn-danger"
+                        onClick={() =>
+                          handleShowModalConfirmDelete(dataUser.id)
+                        }
+                      >
                         Xóa
                       </button>
                     </td>
                   </tr>
                 </>
-              )
+              );
             })}
           <Modal
             centered
@@ -214,10 +292,7 @@ function Account() {
             <Modal.Body className="ConfirmDeleteModalBody">
               <h4>Xác nhận xóa người dùng này ?</h4>
               <div>
-                <Button
-                  variant="danger"
-                  onClick={handleDeleteUser}
-                >
+                <Button variant="danger" onClick={handleDeleteUser}>
                   {loading ? "Deleting..." : "Yes"}
                 </Button>
                 <Button
@@ -268,14 +343,19 @@ function Account() {
                     name="role"
                     value={formValuesAdjustUser.role}
                     onChange={handleChangeAdjustUser}
-                    className={error.role ? "form-control is-invalid" : "form-control"}
+                    className={
+                      error.role ? "form-control is-invalid" : "form-control"
+                    }
                   >
                     <option value="">Select role</option>
                     <option value={"admin"}>Admin</option>
                     <option value={"user"}>User</option>
                   </Form.Control>
                   {error.role && (
-                    <div id="validationServerRoleFeedback" className="invalid-feedback">
+                    <div
+                      id="validationServerRoleFeedback"
+                      className="invalid-feedback"
+                    >
                       {error.role}
                     </div>
                   )}
@@ -333,9 +413,12 @@ function Account() {
                     name="password"
                     value={formValuesCreateUser.password}
                     onChange={handleChangeCreateUser}
-                    className={error.password ? "form-control is-invalid" : "form-control"}
-                  >
-                  </Form.Control>
+                    className={
+                      error.password
+                        ? "form-control is-invalid"
+                        : "form-control"
+                    }
+                  ></Form.Control>
                   {error.password && (
                     <div
                       id="validationServerUsernameFeedback"
@@ -353,9 +436,12 @@ function Account() {
                     name="Cpassword"
                     value={formValuesCreateUser.Cpassword}
                     onChange={handleChangeCreateUser}
-                    className={error.Cpassword ? "form-control is-invalid" : "form-control"}
-                  >
-                  </Form.Control>
+                    className={
+                      error.Cpassword
+                        ? "form-control is-invalid"
+                        : "form-control"
+                    }
+                  ></Form.Control>
                   {error.Cpassword && (
                     <div
                       id="validationServerUsernameFeedback"
@@ -372,9 +458,10 @@ function Account() {
                     name="email"
                     value={formValuesCreateUser.email}
                     onChange={handleChangeCreateUser}
-                    className={error.email ? "form-control is-invalid" : "form-control"}
-                  >
-                  </Form.Control>
+                    className={
+                      error.email ? "form-control is-invalid" : "form-control"
+                    }
+                  ></Form.Control>
                   {error.email && (
                     <div
                       id="validationServerUsernameFeedback"
@@ -391,14 +478,19 @@ function Account() {
                     name="role"
                     value={formValuesCreateUser.role}
                     onChange={handleChangeCreateUser}
-                    className={error.role ? "form-control is-invalid" : "form-control"}
+                    className={
+                      error.role ? "form-control is-invalid" : "form-control"
+                    }
                   >
                     <option value="">Select role</option>
                     <option value={"admin"}>Admin</option>
                     <option value={"user"}>User</option>
                   </Form.Control>
                   {error.role && (
-                    <div id="validationServerRoleFeedback" className="invalid-feedback">
+                    <div
+                      id="validationServerRoleFeedback"
+                      className="invalid-feedback"
+                    >
                       {error.role}
                     </div>
                   )}
@@ -418,6 +510,43 @@ function Account() {
           </Modal>
         </tbody>
       </table>
+      <nav aria-label="Page navigation example">
+        <ul className="pagination justify-content-center">
+          <li
+            className={
+              indexPagination === 1 ? "page-item disabled" : "page-item"
+            }
+          >
+            <a className="page-link" tabIndex="-1" onClick={handlePrevIndex}>
+              Previous
+            </a>
+          </li>
+          {TotalPage &&
+            Array.from({ length: TotalPage }, (_, index) => (
+              <li className="page-item" key={index}>
+                <a
+                  className={
+                    indexPagination === index + 1
+                      ? "page-link active"
+                      : "page-link"
+                  }
+                  onClick={() => handlePaginationClick(index + 1)}
+                >
+                  {index + 1}
+                </a>
+              </li>
+            ))}
+          <li
+            className={
+              indexPagination === TotalPage ? "page-item disabled" : "page-item"
+            }
+          >
+            <a className="page-link" onClick={handleNextIndex}>
+              Next
+            </a>
+          </li>
+        </ul>
+      </nav>
     </div>
   );
 }
