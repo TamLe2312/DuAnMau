@@ -1,6 +1,6 @@
 const connection = require("../config/database");
 const bcrypt = require("bcrypt");
-const { log } = require("console");
+const { log, error } = require("console");
 const saltRounds = 10;
 const fs = require("fs");
 const path = require("path");
@@ -151,6 +151,7 @@ const deleteUser = (req, res) => {
         return res.status(500).json({ error: "Lỗi máy chủ" });
       }
       if (results.length > 0) {
+        const url = results[0].avatar;
         connection.query(
           "DELETE FROM Users WHERE id = ?",
           [idUser],
@@ -164,12 +165,48 @@ const deleteUser = (req, res) => {
                 if (err) {
                   return res.status(500).json({ error: "Lỗi máy chủ" });
                 }
-                const totalUsers = results[0].total;
-                const pageCount = Math.ceil(totalUsers / 10);
-                return res.status(200).json({
-                  pageCount: pageCount,
-                  success: "Xóa user thành công",
-                });
+
+                if (url) {
+                  const modifiedUrl = url.replace(
+                    "http://localhost:5173/uploads/",
+                    ""
+                  );
+                  const uploadDir = path.join(
+                    __dirname,
+                    "../../../frontEnd/uploads"
+                  );
+                  const filePath = path.join(uploadDir, modifiedUrl);
+                  fs.access(filePath, fs.constants.F_OK, (err) => {
+                    if (err) {
+                      console.error(err);
+                      return res
+                        .status(404)
+                        .json({ error: "Tệp tin không tồn tại" });
+                    }
+                    // Xóa tệp tin
+                    fs.unlink(filePath, (error) => {
+                      if (error) {
+                        // Lỗi khi xóa tệp tin, trả về lỗi hoặc thông báo lỗi xóa tệp tin
+                        return res
+                          .status(500)
+                          .json({ error: "Lỗi khi xóa tệp tin" });
+                      }
+                    });
+                  });
+                  const totalUsers = results[0].total;
+                  const pageCount = Math.ceil(totalUsers / 10);
+                  return res.status(200).json({
+                    pageCount: pageCount,
+                    success: "Xóa user thành công",
+                  });
+                } else {
+                  const totalUsers = results[0].total;
+                  const pageCount = Math.ceil(totalUsers / 10);
+                  return res.status(200).json({
+                    pageCount: pageCount,
+                    success: "Xóa user thành công",
+                  });
+                }
               }
             );
           }
@@ -197,6 +234,7 @@ const deleteGroup = (req, res) => {
         return res.status(500).json({ error: "Lỗi máy chủ" });
       }
       if (results.length > 0) {
+        const url = results[0].avatarGroup;
         connection.query(
           "DELETE FROM groupsTable WHERE id = ?",
           [idGroup],
@@ -210,12 +248,47 @@ const deleteGroup = (req, res) => {
                 if (err) {
                   return res.status(500).json({ error: "Lỗi máy chủ" });
                 }
-                const totalGroups = results[0].total;
-                const pageCount = Math.ceil(totalGroups / 10);
-                return res.status(200).json({
-                  pageCount: pageCount,
-                  success: "Xóa nhóm thành công",
-                });
+                if (url) {
+                  const modifiedUrl = url.replace(
+                    "http://localhost:5173/uploads/",
+                    ""
+                  );
+                  const uploadDir = path.join(
+                    __dirname,
+                    "../../../frontEnd/uploads"
+                  );
+                  const filePath = path.join(uploadDir, modifiedUrl);
+                  fs.access(filePath, fs.constants.F_OK, (err) => {
+                    if (err) {
+                      console.error(err);
+                      return res
+                        .status(404)
+                        .json({ error: "Tệp tin không tồn tại" });
+                    }
+                    // Xóa tệp tin
+                    fs.unlink(filePath, (error) => {
+                      if (error) {
+                        // Lỗi khi xóa tệp tin, trả về lỗi hoặc thông báo lỗi xóa tệp tin
+                        return res
+                          .status(500)
+                          .json({ error: "Lỗi khi xóa tệp tin" });
+                      }
+                    });
+                  });
+                  const totalGroups = results[0].total;
+                  const pageCount = Math.ceil(totalGroups / 10);
+                  return res.status(200).json({
+                    pageCount: pageCount,
+                    success: "Xóa nhóm thành công",
+                  });
+                } else {
+                  const totalGroups = results[0].total;
+                  const pageCount = Math.ceil(totalGroups / 10);
+                  return res.status(200).json({
+                    pageCount: pageCount,
+                    success: "Xóa nhóm thành công",
+                  });
+                }
               }
             );
           }
@@ -500,6 +573,50 @@ const deletePost = (req, res) => {
     return res.status(400).json({ error: "Id Post không tồn tại" });
   }
 };
+const deletePostImgs = async (req, res) => {
+  const uploadDir = path.join(__dirname, "../public/images/");
+  const { idPost } = req.body;
+  const listImg = await new Promise((resolve, reject) => {
+    connection.query(
+      "SELECT * FROM listdata WHERE post_id = ?",
+      [idPost],
+      (err, results, fields) => {
+        if (err) {
+          reject(err);
+        } else {
+          const imgPaths = results.map((re) => path.join(uploadDir, re.img));
+          resolve(imgPaths);
+        }
+      }
+    );
+  });
+
+  if (listImg.length === 0) {
+    return res.status(200).json({ success: "Bài viết không có hình ảnh" });
+  }
+  try {
+    await Promise.all(
+      listImg.map((imgdel) => {
+        return new Promise((resolve, reject) => {
+          fs.unlink(imgdel, (err) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve();
+            }
+          });
+        });
+      })
+    );
+    return res.status(200).json({
+      successWithImgs:
+        "Bạn đã xóa bài viết thành công.Vui lòng cập nhật lại thông tin",
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(400).json({ error: "Lỗi xóa hình ảnh" });
+  }
+};
 
 module.exports = {
   getDataAllUser,
@@ -514,4 +631,5 @@ module.exports = {
   adjustGroupInformContent,
   postImgs,
   deletePost,
+  deletePostImgs,
 };
