@@ -51,23 +51,23 @@ function Posts() {
   const handleDeletePost = async () => {
     setLoading(true);
     try {
-      const response = await axios.post(
-        "http://localhost:8080/admin/deletePost",
-        {
-          idPost: IdPostDelete,
-        }
-      );
-      if (response.data.pageCount < TotalPage) {
-        setTotalPage(response.data.pageCount);
-        fetchDataAllPost(response.data.pageCount);
-        setIndexPagination(response.data.pageCount);
+      await axios.post("http://localhost:8080/admin/deletePostImgs", {
+        idPost: IdPostDelete,
+      });
+      const res = await axios.post("http://localhost:8080/admin/deletePost", {
+        idPost: IdPostDelete,
+      });
+      if (res.data.pageCount < TotalPage) {
+        setTotalPage(res.data.pageCount);
+        fetchDataAllPost(res.data.pageCount);
+        setIndexPagination(res.data.pageCount);
       }
-      if (response.data.pageCount === 0) {
+      if (res.data.pageCount === 0) {
         setTotalPage(1);
         setIndexPagination(1);
       }
       fetchDataAllPost(indexPagination);
-      toast.success(response.data.success);
+      toast.success(res.data.success);
       handleCloseModalConfirmDelete();
       setLoading(false);
     } catch (error) {
