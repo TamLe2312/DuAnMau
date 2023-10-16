@@ -30,6 +30,7 @@ function Navigation() {
   const [show, setShow] = useState(false);
   const [checkS, setCheckS] = useState("");
   const [showMore, setShowMore] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
   const [mode, setMode] = useState(false);
   const handleClose = () => setShow(false);
   const toggleShow = (e) => {
@@ -87,6 +88,9 @@ function Navigation() {
         const response = await axios.get(
           `http://localhost:8080/account/getDataUser/${id}`
         );
+        if (response.data[0].role === 'admin') {
+          setIsAdmin(true);
+        }
         setUserData(response.data[0]);
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -181,7 +185,11 @@ function Navigation() {
         {/* {showMore && ( */}
         <div className={`dropdown-more ${showMore ? "active" : "inactive"}`}>
           <ul className="dropdown-more-ul">
-            <Drop text={admin} path={"home/admin"} />
+            {isAdmin ? (
+              <Drop text={admin} path={"home/admin"} />
+            ) : (
+              <></>
+            )}
             <div onClick={handleMode} className="dropdown-more-title">
               <Drop Title={theme} />
             </div>

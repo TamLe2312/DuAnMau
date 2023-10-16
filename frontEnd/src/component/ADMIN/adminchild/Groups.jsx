@@ -120,8 +120,8 @@ function GroupsTable() {
             const response = await axios.post("http://localhost:8080/admin/deleteGroup", {
                 idGroup: IdGroupDelete,
             });
-            fetchDataAllGroup();
             toast.success(response.data.success);
+            fetchDataAllGroup();
             handleCloseModalConfirmDelete();
             setLoading(false);
         } catch (error) {
@@ -129,14 +129,13 @@ function GroupsTable() {
         }
     }
     const fetchDataAllGroup = async () => {
-        setLoading(true);
         try {
             const response = await axios.get("http://localhost:8080/admin/getDataAllGroup");
+            console.log(response);
             setAllDataGroup(response.data);
-            setLoading(false);
         } catch (error) {
             console.error(error);
-            setLoading(false);
+            setAllDataGroup([]);
         }
     };
     useEffect(() => {
@@ -144,6 +143,7 @@ function GroupsTable() {
             setLoading(true);
             try {
                 const response = await axios.get("http://localhost:8080/admin/getDataAllGroup");
+                console.log(response.data);
                 setAllDataGroup(response.data);
                 setLoading(false);
             } catch (error) {
@@ -163,12 +163,13 @@ function GroupsTable() {
                         <th scope="col">Tên nhóm</th>
                         <th scope="col">Mô tả nhóm</th>
                         <th scope="col">Avatar</th>
+                        <th scope="col">Người tạo</th>
                         <th scope="col">Quản lí</th>
                     </tr>
                 </thead>
                 <tbody >
                     {!loading ? (
-                        AllDataGroup ? (
+                        AllDataGroup && AllDataGroup.length > 0 ? (
                             AllDataGroup.map((dataGroup, index) => {
                                 return (
                                     <>
@@ -188,6 +189,9 @@ function GroupsTable() {
                                                 )}
                                             </td>
                                             <td>
+                                                {dataGroup.nameUser ? dataGroup.nameUser : dataGroup.usernameUser}
+                                            </td>
+                                            <td>
                                                 <button type="button" className="btn btn-primary" onClick={() => handleShowModalAdjustGroup(dataGroup.id, dataGroup.avatarGroup)}>
                                                     Sửa
                                                 </button>
@@ -201,7 +205,7 @@ function GroupsTable() {
                                                     onHide={handleCloseModalConfirmDelete}
                                                 >
                                                     <Modal.Body className="ConfirmDeleteModalBody">
-                                                        <h4>Xác nhận xóa người dùng này ?</h4>
+                                                        <h4>Xác nhận xóa nhóm này ?</h4>
                                                         <div>
                                                             <Button
                                                                 variant="danger"
@@ -298,7 +302,7 @@ function GroupsTable() {
                         ) :
                             (
                                 <tr>
-                                    <td>
+                                    <td colSpan={6}>
                                         Không có nhóm nào
                                     </td>
                                 </tr>

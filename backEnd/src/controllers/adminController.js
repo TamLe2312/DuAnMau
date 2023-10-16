@@ -80,7 +80,8 @@ const getDataCreatedGroupUser = (req, res) => {
 };
 const getDataAllGroup = (req, res) => {
     connection.query(
-        "SELECT id,name,moTaNhom,avatarGroup,idUserCreatedGroup FROM groupstable",
+        `SELECT groupstable.id,groupstable.name,groupstable.moTaNhom,groupstable.avatarGroup, users.name AS nameUser,users.username AS usernameUser FROM groupstable
+        INNER JOIN users on groupstable.idUserCreatedGroup = users.id`,
         async function (err, results, fields) {
             if (err) {
                 return res.status(500).json({ error: "Lỗi máy chủ" });
@@ -362,6 +363,26 @@ const adjustGroupInform = (req, res) => {
         return res.status(400).json({ UpdateNoImg: "Không update ảnh" });
     }
 }
+const deletePost = (req, res) => {
+    const idPost = req.body.idPost;
+    if (idPost) {
+        connection.query(
+            "DELETE FROM posts WHERE id = ?",
+            [idPost],
+            function (err, results, fields) {
+                if (err) {
+                    return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+                }
+                if (results) {
+                    return res.status(200).json({ success: "Bạn đã xóa bài viết thành công.Vui lòng cập nhật lại thông tin" });
+                }
+            }
+        );
+    }
+    else {
+        return res.status(400).json({ error: "Id Post không tồn tại" });
+    }
+}
 
 module.exports = {
     getDataAllUser,
@@ -375,4 +396,5 @@ module.exports = {
     adjustGroupInform,
     adjustGroupInformContent,
     postImgs,
+    deletePost,
 };
