@@ -3,6 +3,7 @@
   display: flex;
   flex-direction: row;
   gap: 10px;
+  align-items: center;
 }
 .suggestions-user-img {
   width: 48px;
@@ -25,4 +26,7 @@
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
+}
+.suggestions-link {
+  text-decoration: none;
 }

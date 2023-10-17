@@ -1,7 +1,11 @@
 import axios from "axios";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useCookies } from "react-cookie";
 import { Link, useNavigate } from "react-router-dom";
 import Validation from "../../component/validation/validation";
+
+import { toast } from 'sonner'
+
 import "./login.css";
 function Login() {
   const Navigate = useNavigate();
@@ -17,6 +21,7 @@ function Login() {
 
   const [error, setError] = useState({});
   const [loading, setLoading] = useState(false);
+  const [cookies, setCookie] = useCookies(["userId"]);
   const [checkLogin, setCheckLogin] = useState("");
 
   const handleChange = (e) => {
@@ -33,24 +38,28 @@ function Login() {
         username: values.username.trim(),
         password: values.password,
       });
+      toast.success(res.data.error);
       let uID = res.data.id;
+      setCookie("userId", uID);
       setLoading(false);
-      Navigate("/home", { state: { uID } }, { replace: true });
+      Navigate("/home", { replace: true });
     } catch (error) {
       setLoading(false);
+      console.error(error);
+      toast.error(error.response.data.error);
       setCheckLogin(error.response.data.error);
     }
   };
+  // console.log(error);
   return (
     <>
       <form style={style} className="mt-4">
         <h3>Login</h3>
-        {checkLogin && Object.keys(error).length === 0 ? (
+        {checkLogin && Object.keys(error).length === 6 ? (
           <p className="text-danger">{checkLogin}</p>
         ) : (
           ""
         )}
-
         <div className="mb-3">
           <label className="form-label">Username</label>
           <input
@@ -115,7 +124,7 @@ function Login() {
               <span className="visually-hidden">Loading...</span>
             </div>
           )}
-          Login
+          &nbsp;Login
         </button>
 
         <div className="mt-2">

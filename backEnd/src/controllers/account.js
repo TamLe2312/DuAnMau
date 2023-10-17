@@ -1,13 +1,11 @@
 const connection = require("../config/database");
 const bcrypt = require("bcrypt");
 const saltRounds = 10;
-const someOtherPlaintextPassword = "not_bacon";
-const mailer = require('../utils/mailer')
-const Mustache = require('mustache');
-const fs = require('fs');
-const moment = require('moment');
-const session = require('express-session');
-
+const mailer = require("../utils/mailer");
+const Mustache = require("mustache");
+const fs = require("fs");
+const path = require("path");
+const moment = require("moment");
 
 // api account
 const register = (req, res) => {
@@ -29,39 +27,30 @@ const register = (req, res) => {
             return res
               .status(400)
               .json({ error: "Tên người dùng hoặc email đã tồn tại" });
-          }
-        }
-      );
-      connection.query(
-        "INSERT INTO Users (username, password, email) VALUES (?, ?, ?)",
-        [username, hash, email],
-        function (err, results, fields) {
-          if (err) {
-            console.error(err);
-            return res.status(500).json({ error: "Lỗi máy chủ 2" });
-          }
-          if (username.trim() === "admin") {
-            connection.query(
-              "INSERT INTO Users (username, password, email,role) VALUES (?, ?, ?,?)",
-              [username, hash, email, "admin"],
-              function (err, results, fields) {
-                if (err) {
-                  return res.status(500).json({ error: "Lỗi máy chủ amdin" });
-                }
-                res.status(200).json({ success: "Đăng ký thành công" });
-              }
-            );
           } else {
-            connection.query(
-              "INSERT INTO Users (username, password, email) VALUES (?, ?, ?)",
-              [username, hash, email],
-              function (err, results, fields) {
-                if (err) {
-                  return res.status(500).json({ error: "Lỗi máy chủ" });
+            if (username.trim() === "admin") {
+              connection.query(
+                "INSERT INTO Users (username, password, email,role) VALUES (?, ?, ?,?)",
+                [username, hash, email, "admin"],
+                function (err, results, fields) {
+                  if (err) {
+                    return res.status(500).json({ error: "Lỗi máy chủ amdin" });
+                  }
+                  res.status(200).json({ success: "Đăng ký thành công" });
                 }
-                res.status(200).json({ success: "Đăng ký thành công" });
-              }
-            );
+              );
+            } else {
+              connection.query(
+                "INSERT INTO Users (username, password, email) VALUES (?, ?, ?)",
+                [username, hash, email],
+                function (err, results, fields) {
+                  if (err) {
+                    return res.status(500).json({ error: "Lỗi máy chủ" });
+                  }
+                  res.status(200).json({ success: "Đăng ký thành công" });
+                }
+              );
+            }
           }
         }
       );
@@ -71,6 +60,9 @@ const register = (req, res) => {
 
 const login = (req, res) => {
   const { username, password } = req.body;
+  if (!username || !password) {
+    return res.status(400).json({ error: "Vui lòng nhập đầy đủ thông tin" });
+  }
   connection.query(
     "SELECT * FROM Users WHERE username = ?",
     [username],
@@ -81,10 +73,10 @@ const login = (req, res) => {
       if (results.length > 0) {
         const match = await bcrypt.compare(password, results[0].password);
         if (match) {
-          req.session.uID = results[0].id;
+          let uId = results[0].id;
           return res
             .status(200)
-            .json({ id: req.session.uID, error: "Đăng nhập thành công" });
+            .json({ id: uId, error: "Đăng nhập thành công" });
         } else {
           return res.status(400).json({ error: "Sai tài khoản hoặc mật khẩu" });
         }
@@ -204,7 +196,9 @@ const verifyToken = (req, res) => {
             );
           });
         } else {
-          return res.status(400).json({ error: "Có lỗi xảy ra. Vui lòng thử lại" });
+          return res
+            .status(400)
+            .json({ error: "Có lỗi xảy ra. Vui lòng thử lại" });
         }
       } else {
         return res
@@ -214,9 +208,72 @@ const verifyToken = (req, res) => {
     }
   );
 };
-const ChangeAvatar = (req, res) => {
 
-}
+const changeAvatar = (req, res) => {
+  const { hasAvatar, id } = req.body;
+  const fileName = req.file.filename;
+  const filePath = "/uploads/" + fileName;
+  const baseURL = "http://localhost:5173/";
+  const imageURL = `${baseURL.slice(0, -1)}${filePath}`;
+  const uploadDir = path.join(__dirname, "../../../frontEnd/uploads");
+  const filePathOldAvatar = path.join(uploadDir, hasAvatar);
+  connection.query(
+    "UPDATE Users SET avatar = ? WHERE id = ?",
+    [imageURL, id],
+    function (err, results, fields) {
+      if (err) {
+        return res.status(500).json({ error: "Lỗi máy chủ" });
+      }
+      if (fs.existsSync(filePathOldAvatar)) {
+        // Xóa tệp tin cũ
+        try {
+          fs.unlinkSync(filePathOldAvatar);
+        } catch (error) {
+          return res.status(500).json({ error: "Lỗi khi cập nhật avatar" });
+        }
+      }
+      return res.status(200).json({
+        success: "Cập nhật avatar thành công",
+        avatar: imageURL,
+        fileName: fileName,
+        filePath: filePath,
+        id: id,
+      });
+    }
+  );
+};
+
+const RemoveAvatar = (req, res) => {
+  const { imagePath, id } = req.body;
+  const uploadDir = path.join(__dirname, "../../../frontEnd/uploads");
+  const filePath = path.join(uploadDir, imagePath);
+  connection.query(
+    "UPDATE users SET avatar = NULL WHERE id = ?",
+    [id],
+    async function (err, results, fields) {
+      if (err) {
+        return res.status(500).json({ error: "Lỗi máy chủ" });
+      }
+      // Kiểm tra xem tệp tin có tồn tại hay không
+      fs.access(filePath, fs.constants.F_OK, (err) => {
+        if (err) {
+          // Tệp tin không tồn tại, trả về lỗi hoặc thông báo không tìm thấy tệp tin
+          return res.status(404).json({ error: "Tệp tin không tồn tại" });
+        }
+        // Xóa tệp tin
+        fs.unlink(filePath, (error) => {
+          if (error) {
+            // Lỗi khi xóa tệp tin, trả về lỗi hoặc thông báo lỗi xóa tệp tin
+            return res.status(500).json({ error: "Lỗi khi xóa tệp tin" });
+          }
+
+          // Xóa thành công, trả về thông báo thành công hoặc mã thành công
+          return res.status(200).json({ success: "Xóa ảnh thành công" });
+        });
+      });
+    }
+  );
+};
 
 const getDataUser = (req, res) => {
   // const { id } = req.body;
@@ -235,35 +292,15 @@ const getDataUser = (req, res) => {
       }
     }
   );
-}
-
-const UpdateInformationProfile = (req, res) => {
-  const { name, moTa, date, id } = req.body;
-  const formattedDate = moment(date).format('YYYY-MM-DD');
-  if (!name || !moTa || !date) {
-    return res.status(400).json({ error: "Vui lòng nhập đủ thông tin" });
-  }
+};
+const CountPost = (req, res) => {
+  const userId = req.params.userId;
   connection.query(
-    "UPDATE Users SET name = ?, birddate = ?, moTa = ? WHERE id = ?",
-    [name, formattedDate, moTa, id],
-    function (err, results, fields) {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({ error: "Lỗi máy chủ" });
-      }
-      return res.status(200).json({ success: "Cập nhật thông tin thành công" });
-    }
-  );
-}
-
-const detail = (req, res) => {
-  // const { id } = req.body;
-  const id = req.params.id;
-  connection.query(
-    "SELECT id,username,birddate,name,avatar FROM Users WHERE id = ?",
-    [id],
+    "SELECT COUNT(user_id) as CountPosts FROM posts WHERE user_id = ?",
+    [userId],
     async function (err, results, fields) {
       if (err) {
+        console.error(err);
         return res.status(500).json({ error: "Lỗi máy chủ" });
       }
       if (results.length > 0) {
@@ -275,11 +312,51 @@ const detail = (req, res) => {
   );
 };
 
+const UpdateInformationProfile = (req, res) => {
+  const { name, moTa, date, id } = req.body;
+  if (!name || !moTa || !date) {
+    return res.status(400).json({ error: "Vui lòng nhập đủ thông tin" });
+  }
+  const formattedDate = moment(date).format("YYYY-MM-DD");
+  connection.query(
+    "UPDATE Users SET name = ?, birddate = ?, moTa = ? WHERE id = ?",
+    [name, formattedDate, moTa, id],
+    function (err, results, fields) {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Lỗi máy chủ" });
+      }
+      return res.status(200).json({
+        name: name,
+        moTa: moTa,
+        success: "Cập nhật thông tin thành công",
+      });
+    }
+  );
+};
+
+const detail = (req, res) => {
+  // const { id } = req.body;
+  const id = req.params.id;
+  connection.query(
+    "SELECT id,username,birddate,name,avatar FROM Users WHERE id = ?",
+    [id],
+    async function (err, results, fields) {
+      if (err) {
+        return res.status(500).json({ error: "Lỗi máy chủ" });
+      }
+      if (results) {
+        return res.status(200).json(results);
+      }
+    }
+  );
+};
+
 const listUsers = (req, res) => {
   if (req.params.slug == 0) {
     const limit = 5; // Số lượng người dùng hiển thị trên mỗi trang
     connection.query(
-      "SELECT id,username,birddate,name,avatar FROM Users WHERE role <> 'admin' ORDER BY RAND() LIMIT ?",
+      "SELECT id,username,birddate,name,avatar,moTa FROM Users WHERE role <> 'admin' ORDER BY RAND() LIMIT ?",
       [limit],
       function (err, results, fields) {
         if (err) {
@@ -298,7 +375,7 @@ const listUsers = (req, res) => {
     const offset = (page - 1) * limit; // Vị trí bắt đầu lấy dữ liệu
 
     connection.query(
-      "SELECT id,username,birddate,name,avatar FROM Users WHERE role <> 'admin' LIMIT ? OFFSET ?",
+      "SELECT id,username,birddate,name,avatar,moTa FROM Users WHERE role <> 'admin' ORDER BY id DESC LIMIT ? OFFSET ?",
       [limit, offset],
       function (err, results, fields) {
         if (err) {
@@ -313,15 +390,91 @@ const listUsers = (req, res) => {
     );
   }
 };
+const ChangePassword = (req, res) => {
+  const { OldPassword, NewPassword, NewConfirmPassword, id } = req.body;
+  if (!OldPassword || !NewPassword || !NewConfirmPassword) {
+    return res
+      .status(400)
+      .json({ error: "Không được bỏ trống trường thông tin" });
+  }
+  if (NewPassword !== NewConfirmPassword) {
+    return res
+      .status(400)
+      .json({ error: "Mật khẩu mới và mật khẩu xác nhận phải giống nhau" });
+  }
+  connection.query(
+    "SELECT * FROM Users WHERE id = ?",
+    [id],
+    async function (err, results, fields) {
+      if (err) {
+        return res.status(500).json({ error: "Lỗi máy chủ" });
+      }
+      if (results.length > 0) {
+        const match = await bcrypt.compare(OldPassword, results[0].password);
+        if (match) {
+          const myPlaintextPassword = NewPassword;
+          bcrypt.hash(myPlaintextPassword, saltRounds, function (err, hash) {
+            if (!err) {
+              connection.query(
+                "UPDATE Users SET password = ? WHERE id = ?",
+                [hash, id],
+                function (err, results, fields) {
+                  if (err) {
+                    return res.status(500).json({ error: "Lỗi máy chủ" });
+                  }
+                  return res
+                    .status(200)
+                    .json({ success: "Cập nhật mật khẩu thành công" });
+                }
+              );
+            }
+          });
+        } else {
+          return res.status(400).json({ error: "Sai mật khẩu đăng nhập" });
+        }
+      } else {
+        return res.status(400).json({ error: "Lỗi máy chủ" });
+      }
+    }
+  );
+};
+const postProfileUser = (req, res) => {
+  const id = parseInt(req.params.id);
+  const page = parseInt(req.params.page) || 1;
+  const limit = 4; // Số lượng người dùng hiển thị trên mỗi trang
+  const offset = (page - 1) * limit; // Vị trí bắt đầu lấy dữ liệu
+  connection.query(
+    `SELECT posts.id,posts.content,posts.created_at,users.id as userid, users.username,users.avatar,users.name
+    FROM posts  
+    JOIN users ON posts.user_id = users.id
+    WHERE posts.user_id = ?
+    ORDER BY posts.id DESC
+    LIMIT ? OFFSET ?
+    `,
+    [id, limit, offset],
+    function (err, results, fields) {
+      if (err) {
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+      }
+      if (results) {
+        return res.status(200).json(results);
+      }
+    }
+  );
+};
 
 module.exports = {
   login,
   register,
   forgotPassword,
   verifyToken,
-  ChangeAvatar,
+  changeAvatar,
   UpdateInformationProfile,
   getDataUser,
   detail,
   listUsers,
+  RemoveAvatar,
+  ChangePassword,
+  postProfileUser,
+  CountPost,
 };

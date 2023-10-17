@@ -1,0 +1,8 @@
+.modal-body {
+  display: flex;
+  flex-direction: row;
+  padding: 8px !important;
+}
+#contained-modal-title-vcenter {
+  font-size: 1.2rem;
+}

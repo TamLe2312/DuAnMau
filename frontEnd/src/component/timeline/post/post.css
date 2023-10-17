@@ -12,6 +12,12 @@
 .post-footer-icon * {
   margin-right: 12px;
 }
+.post-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+}
 .post-header-aut {
   display: flex;
   align-items: center;
@@ -19,12 +25,14 @@
 }
 .post-img {
   width: 100%;
-  text-align: center;
+  text-align: justify;
   margin-top: 10px;
+  position: relative;
 }
 .post-img img {
-  object-fit: contain;
+  object-fit: cover;
   width: 100%;
+  height: 640px;
   border-radius: 6px;
   border: 0.6px solid rgba(255, 255, 255, 0.5);
 }
@@ -58,14 +66,14 @@
   border: 0;
 }
 .post-title {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  /* overflow: hidden; */
+  /* text-overflow: ellipsis; */
+  /* white-space: nowrap; */
   margin: 0;
 }
 
 .post-title.expanded {
-  white-space: normal;
+  /* white-space: normal; */
 }
 .post-title-btn {
   background: 0;
@@ -73,6 +81,50 @@
   opacity: 0.8;
   display: block;
   padding: 0;
+}
+.post-img-run * {
+  color: rgba(255, 255, 255, 0.5);
+}
+#post-img-left {
+  position: absolute;
+  top: 50%;
+  left: 10px;
+  transform: translateY(-50%);
+  background-color: rgba(128, 128, 128, 0.2);
+  border-radius: 50%;
+}
+#post-img-right {
+  border-radius: 50%;
+  position: absolute;
+  top: 50%;
+  right: 10px;
+  transform: translateY(-50%);
+  background-color: rgba(128, 128, 128, 0.2);
+}
+#post-img-left:hover,
+#post-img-right:hover {
+  transition: 0.5s;
+  cursor: pointer;
+  background-color: rgba(128, 128, 128, 0.8);
+}
+.post-img-count {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+}
+.post-time {
+  font-size: 0.8rem;
+  opacity: 0.8;
+}
+.post-header-aut-profile {
+  text-decoration: none;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
+}
+.post-header-aut-profile > span {
+  font-weight: 500;
 }
 @media (max-width: 875px) {
   .post {
@@ -86,4 +138,28 @@
     margin: 0 auto;
     margin-bottom: 30px;
   }
+}
+.post-more-delete:hover {
+  cursor: pointer;
+}
+.post-footer-icon-like-comment {
+  margin: 0 !important;
+}
+.post-footer-icon-like-comment:hover {
+  cursor: pointer;
+}
+.post-footer-user-user {
+  text-decoration: none;
+  font-weight: 500;
+}
+.post-footer-list-comment {
+  opacity: 0.7;
+  font-size: 0.9rem;
+}
+.post-footer-list-comment:hover {
+  cursor: pointer;
+}
+.post-comment {
+  color: rgb(1, 114, 116);
+  font-weight: 500;
 }

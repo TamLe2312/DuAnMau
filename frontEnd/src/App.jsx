@@ -7,30 +7,50 @@ import Home from "./page/home/home";
 import VerifyToken from "./page/VerifyToken/VerifyToken";
 import "../style.scss";
 import Timeline from "./component/timeline/Timeline";
-// import Sreach from "./component/sreach/Sreach";
 import Profile from "./component/profile/Profile";
 import Community from "./component/community/Community";
 import Messenger from "./component/messenger/Messenger";
+import Groups from "./component/group/Groups";
+
+//React Toastify
+
+import { Toaster } from 'sonner'
+
+import "react-toastify/dist/ReactToastify.css";
+import Admin from "./component/ADMIN/Admin";
+import Account from "./component/ADMIN/adminchild/account";
+import GroupsTable from "./component/ADMIN/adminchild/Groups"
+import Posts from "./component/ADMIN/adminchild/Posts";
 function App() {
   return (
-    <>
-      <div>
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route path="/forgotPassword" element={<ForgotPassword />} />
-          <Route path="/register" element={<Register />} />
+    <div>
+      <Routes>
+        <Route path="/" element={<Login />} />
+        <Route path="/forgotPassword" element={<ForgotPassword />} />
+        <Route path="/register" element={<Register />} />
 
-          <Route path="/home" element={<Home />}>
-            <Route path="/home" element={<Timeline />} />
-            <Route path="/home/profile" element={<Profile />} />
-            <Route path="/home/community" element={<Community />} />
-            <Route path="/home/messenger" element={<Messenger />} />
+        <Route path="/home" element={<Home />}>
+          <Route path="/home" element={<Timeline />} />
+          <Route path="/home/profile/user/:userID" element={<Profile />} />
+          <Route path="/home/community/group/:groupID" element={<Groups />} />
+          <Route path="/home/profile" element={<Profile />} />
+          <Route path="/home/community" element={<Community />} />
+          <Route path="/home/messenger" element={<Messenger />} />
+          <Route path="/home/messenger/:id" element={<Messenger />} />
+          <Route path="/home/admin" element={<Admin />}>
+            <Route path="/home/admin/account" element={<Account />} />
+            <Route path="/home/admin/groups" element={<GroupsTable />} />
+            <Route path="/home/admin/posts" element={<Posts />} />
           </Route>
-          <Route path="/verifyToken" element={<VerifyToken />} />
-          <Route path="*" element={<NoMath />} />
-        </Routes>
-      </div>
-    </>
+        </Route>
+        <Route path="/verifyToken" element={<VerifyToken />} />
+        <Route path="*" element={<NoMath />} />
+      </Routes>
+
+      <Toaster position="top-right" expand={false} richColors />
+
+
+    </div>
   );
 }
 

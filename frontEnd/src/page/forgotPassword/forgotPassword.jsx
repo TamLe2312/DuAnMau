@@ -1,6 +1,8 @@
 import axios from "axios";
 import { useState } from "react";
+import Validation from "../../component/validation/validation";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from 'sonner'
 
 
 function ForgotPassword() {
@@ -9,90 +11,91 @@ function ForgotPassword() {
     width: 600,
   };
 
-  const [username, setUserName] = useState("");
-  const [email, setEmail] = useState("");
-  const [checkU, setCheckU] = useState(false);
-  const [checkE, setCheckE] = useState(false);
+  const [values, setValues] = useState({
+    username: "",
+    email: "",
+  });
+  const [checkLogin, setCheckLogin] = useState("");
+  const [error, setError] = useState({});
   const [loading, setLoading] = useState(false);
-  const [checkSendError, setCheckSendError] = useState("");
-  const [checkSendSuccess, setCheckSendSuccess] = useState("");
+  const handleChange = (e) => {
+    setValues({ ...values, [e.target.name]: e.target.value });
+    setError({ ...error, [e.target.name]: "" });
+    setCheckLogin("");
+  };
   const handleClick = async (e) => {
     e.preventDefault();
-    if (checkSendError) {
-      setCheckSendError("");
-    }
-    if (checkSendSuccess) {
-      setCheckSendSuccess("");
-    }
-    if (!username) {
-      setCheckU(true);
-      return;
-    }
-    if (!email) {
-      setCheckE(true);
-      return;
-    }
+    setError(Validation(values));
     try {
       setLoading(true);
       const response = await axios.post("http://localhost:8080/account/forgotPassword", {
-        username,
-        email,
+        username: values.username.trim(),
+        email: values.email,
       });
-      setCheckSendSuccess(response.data.success);
+      toast.success(response.data.success);
       setLoading(false);
     } catch (error) {
       setLoading(false);
-      if (error.response && error.response.data && error.response.data.error) {
-        setCheckSendError(error.response.data.error);
-      } else {
-        setCheckSendError('Something went wrong. Please try again.');
-      }
+      toast.error(error.response.data.error);
     }
   };
   return (
     <>
       <form style={style} className="mt-4">
         <h3>Forgot Password</h3>
-        {checkSendError ? <p className="text-danger">{checkSendError}</p> : ""}
-        {checkSendSuccess ? <p className="text-success">{checkSendSuccess}</p> : ""}
-
+        {checkLogin && Object.keys(error).length === 1 ? (
+          <p className="text-danger">{checkLogin}</p>
+        ) : (
+          ""
+        )}
         <div className="mb-3">
           <label className="form-label">Username</label>
           <input
             name="username"
-            value={username}
+            value={values.username}
             onChange={(e) => {
-              setUserName(e.target.value);
-              setCheckU(false);
+              handleChange(e);
             }}
             type="text"
-            className={checkU ? "form-control is-invalid" : "form-control"}
+            className={
+              error.username ? "form-control is-invalid" : "form-control"
+            }
           />
           <div
             id="validationServerUsernameFeedback"
             className="invalid-feedback"
-          >
-            Không bỏ trống thông tin
-          </div>
+          ></div>
+          {error.username && (
+            <div
+              id="validationServerUsernameFeedback"
+              className="invalid-feedback"
+            >
+              {error.username}
+            </div>
+          )}
         </div>
 
         <div className="mb-3">
           <label className="form-label">Email</label>
           <input
             name="email"
-            value={email}
+            value={values.email}
             onChange={(e) => {
-              setEmail(e.target.value), setCheckE(false);
+              handleChange(e);
             }}
-            type="text"
-            className={checkE ? "form-control is-invalid" : "form-control"}
+            type="email"
+            className={
+              error.email ? "form-control is-invalid" : "form-control"
+            }
           />
-          <div
-            id="validationServerUsernameFeedback"
-            className="invalid-feedback"
-          >
-            Không bỏ trống Thông tin
-          </div>
+          {error.email && (
+            <div
+              id="validationServerUsernameFeedback"
+              className="invalid-feedback"
+            >
+              {error.email}
+            </div>
+          )}
         </div>
         <button
           onClick={handleClick}

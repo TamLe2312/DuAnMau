@@ -23,3 +23,18 @@
 .suggestionFriend-title-name {
   font-weight: 600;
 }
+.suggestionFriend-title-link {
+  text-decoration: none;
+}
+.suggestionFriend-title-link:hover {
+  cursor: pointer;
+}
+.suggestionFriend-add-friend {
+  color: rgb(23, 107, 110);
+  font-weight: 500;
+}
+.suggestionFriend-add-friend:hover {
+  color: rgb(4, 62, 64);
+  transition: 0.5s;
+  cursor: pointer;
+}
