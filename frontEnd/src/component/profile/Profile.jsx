@@ -473,6 +473,7 @@ function Profile() {
                 </div>
                 <div className="ProfileRow">
                   <div>
+
                     <span>
                       <b>{CountPost}</b> bài viết
                     </span>

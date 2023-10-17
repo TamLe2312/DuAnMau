@@ -4,10 +4,14 @@ import "./messenger.css";
 import { useCookies } from "react-cookie";
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
-// import { io } from "socket.io-client";
+import { io } from "socket.io-client";
 function Messenger() {
+  const socket = useRef();
+  const [online, setonline] = useState([]);
   const [cookies] = useCookies();
   const [listUserMess, setlistUserMess] = useState([]);
+  const [chay, setChay] = useState(false);
+
   const myID = cookies.userId;
   const yourID = useParams().id;
 
@@ -23,14 +27,105 @@ function Messenger() {
       console.log(e);
     }
   };
-
+  const handleChay = () => {
+    setChay(!chay);
+  };
   useEffect(() => {
     const fetchApi = async () => {
       await fetchListFriendMess();
     };
     fetchApi();
-  }, []);
+  }, [chay]);
 
+  useEffect(() => {
+    const socket = io("http://localhost:8080");
+    socket.emit("add_new_user", myID);
+    socket.on("get_user", (userOl) => {
+      setonline(userOl);
+    });
+
+    return () => {
+      socket.disconnect();
+    };
+  }, [socket]);
+  const isOnline = (data, yourID) => {
+    if (data.length > 0) {
+      const isOl = data.find((user) => user.userId === yourID);
+      if (isOl) {
+        return (
+          <span className="messenger-user-information-mes online">Online</span>
+        );
+      } else {
+        return <span className="messenger-user-information-mes">OffLine</span>;
+      }
+    }
+  };
+
+  // const [listMesEnd, setlistMessEnd] = useState([]);
+  // const handleIsView = (id) => {
+  //   return axios
+  //     .get(`http://localhost:8080/messenger/lastedMess/${myID}/${id}`)
+  //     .then((res) => {
+  //       if (res.data) {
+  //         return res.data[0];
+  //       }
+  //       return null;
+  //     })
+  //     .catch((error) => {
+  //       console.log(error);
+  //       return null;
+  //     });
+  // };
+
+  // const lastMess = async () => {
+  //   const lastMessages = await Promise.all(
+  //     listUserMess.map((user) => handleIsView(user.id))
+  //   );
+  //   setlistMessEnd(lastMessages);
+  // };
+
+  // useEffect(() => {
+  //   if (listUserMess && listUserMess.length > 0) {
+  //     lastMess();
+  //   }
+  //   console.log("NG");
+  // }, [listUserMess, yourID]);
+
+  // const findView = (id) => {
+  //   const message = listMesEnd?.some(
+  //     (mes) => mes.sender_id === id && mes.view === null
+  //   );
+  //   if (message) {
+  //     return (
+  //       <span className="messenger-user-information-dot">
+  //         <i className="fa-solid fa-circle"></i>
+  //       </span>
+  //     );
+  //   } else {
+  //     return null;
+  //   }
+  // };
+  // const [test, setTest] = useState(true);
+  // const handleView = (user) => {
+  //   try {
+  //     const fetchView = async () => {
+  //       const res = await axios.post(
+  //         "http://localhost:8080/messenger/viewMes",
+  //         {
+  //           sender_id: user.id,
+  //           recipient_id: myID,
+  //         }
+  //       );
+  //       if (res) {
+  //         handleChay();
+  //         setTest(false);
+  //       }
+  //     };
+  //     fetchView();
+  //   } catch (error) {
+  //     console.log(error);
+  //   }
+  // };
   return (
     <div className="messenger">
       <div className="messenger-users">
@@ -41,6 +136,7 @@ function Messenger() {
           ? listUserMess.map((user, index) => {
               return (
                 <NavLink
+                  // onClick={() => handleView(user)}
                   to={`/home/messenger/${user.id}`}
                   className="messenger-user"
                   key={index}
@@ -59,10 +155,9 @@ function Messenger() {
                     <span className="messenger-user-information-name">
                       {user.name ? user.name : user.username}
                     </span>
-                    {/* <span className="messenger-user-information-mes">
-                      bạn: đã ăn chưa bạn
-                    </span> */}
+                    {isOnline(online, user.id)}
                   </div>
+                  {/* {test && findView(user.id)} */}
                 </NavLink>
               );
             })
@@ -71,7 +166,13 @@ function Messenger() {
         {/* ---------------------------------- */}
       </div>
       <div className="messenger-detail">
-        <DetailMess myID={myID} yourID={yourID} />
+        <DetailMess
+          myID={myID}
+          yourID={yourID}
+          handleChay={handleChay}
+          listUserMess={listUserMess}
+          // handleLastedMess={handleLastedMess}
+        />
       </div>
     </div>
   );

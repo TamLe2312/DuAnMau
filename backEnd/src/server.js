@@ -1,5 +1,7 @@
 // require("dotenv").config();
 const express = require("express");
+const { createServer } = require("http");
+const { Server } = require("socket.io");
 const cors = require("cors");
 var bodyParser = require("body-parser");
 const path = require("path");
@@ -9,57 +11,58 @@ const api = require("./routes/api");
 const postApi = require("./routes/postApi");
 const groups = require("./routes/groupApi");
 const connection = require("./config/database");
-
 const session = require("express-session");
 const messenger = require("./routes/messengerApi");
 const adminApi = require("./routes/adminApi");
 const app = express();
 // ---------------------------
 // const http = require("http");
-const { createServer } = require("http");
-const { Server } = require("socket.io");
-const server = createServer(app);
 
-// Configure CORS for Socket.IO
+const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173", // Allow requests from this origin
+    origin: "http://localhost:5173",
     methods: ["GET", "POST"],
   },
 });
-// const activeUsers = [];
-// // const idToSocket = {};
-// io.on("connection", (socket) => {
-//   console.log("user connected: " + socket.id);
+let activeUsers = [];
+io.on("connection", (socket) => {
+  socket.on("add_new_user", (newUserID) => {
+    const userExists = activeUsers.some((user) => user.userId === newUserID);
 
-//   socket.on("set_id", (id) => {
-//     user = {
-//       id: id,
-//       socket: socket.id,
-//     };
-//     activeUsers.push(user);
-//     io.emit("data", activeUsers); // Gửi danh sách người dùng kích hoạt đến tất cả các client
-//   });
+    if (!userExists) {
+      activeUsers.push({
+        userId: newUserID,
+        socketId: socket.id,
+      });
+      // console.log("Người online:", activeUsers);
+      io.emit("get_user", activeUsers);
+    }
+  });
+  socket.on("add_message", (data) => {
+    const { youID } = data;
+    const user = activeUsers.find((user) => user.userId == youID);
+    if (user) {
+      io.to(user.socketId).emit("get_message", data);
+      // console.log("tìm thấy người dùng với youID:", user);
+    } else {
+      // console.log("Không tìm thấy người dùng với youID:", youID);
+    }
+  });
 
-//   socket.on("disconnect", () => {
-//     console.log("người dùng k online" + socket.id);
-//   });
-// });
+  socket.on("disconnect", () => {
+    activeUsers = activeUsers.filter((user) => user.socketId !== socket.id);
+    io.emit("get_user", activeUsers);
+  });
+});
 
 // });
 // -----------------------
 app.use(cors());
 
-// parse application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: false }));
-// parse application/json
 app.use(bodyParser.json());
 app.use(express.static("public"));
-// app.use(
-//   cors({
-//     origin: "http://localhost:5173", // Thay đổi thành nguồn gốc của you
-//   })
-// );
 
 const port = process.env.PORT || 8888;
 const hostname = process.env.HOST_NAME;

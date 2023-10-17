@@ -62,6 +62,31 @@ const listMess = (req, res) => {
     );
   }
 };
+
+// view
+const viewMess = (req, res) => {
+  const { sender_id, recipient_id } = req.body;
+  if (sender_id === recipient_id) {
+    return res.status(400).json({ error: "không có tin nhắn với bản thân??" });
+  } else {
+    connection.query(
+      `UPDATE messenger
+      SET view = 1
+      WHERE (sender_id = ? AND recipient_id = ?)`,
+      [recipient_id, sender_id],
+      function (err, results, fields) {
+        if (err) {
+          console.log(err);
+          return res
+            .status(500)
+            .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+        }
+        return res.status(200).json({ success: "Bạn đã đọc tin nhắn" });
+      }
+    );
+  }
+};
+
 // recipient;
 
 const recipientList = (req, res) => {
@@ -71,8 +96,9 @@ const recipientList = (req, res) => {
     `SELECT DISTINCT users.*
     FROM users  
     JOIN messenger ON (messenger.recipient_id = users.id  OR messenger.sender_id = users.id)
-    WHERE (users.id <> ?)`,
-    [sender_id],
+    WHERE (users.id <> ? AND (messenger.sender_id = ? OR messenger.recipient_id = ?)  )`,
+    // AND messenger.view is NULL
+    [sender_id, sender_id, sender_id],
     function (err, results, fields) {
       if (err) {
         console.log(err);
@@ -85,8 +111,32 @@ const recipientList = (req, res) => {
     }
   );
 };
+
+const lastedMess = (req, res) => {
+  const sender_id = parseInt(req.params.sender_id);
+  const recipient_id = parseInt(req.params.recipient_id);
+  if (sender_id === recipient_id) {
+    return res.status(400).json({ error: "không có tin nhắn với bản thân??" });
+  } else {
+    connection.query(
+      "SELECT * FROM messenger WHERE (sender_id = ? AND recipient_id = ?) OR (sender_id = ? AND recipient_id = ?) ORDER BY id DESC LIMIT 1",
+      [sender_id, recipient_id, recipient_id, sender_id],
+      function (err, results, fields) {
+        if (err) {
+          console.log(err);
+          return res
+            .status(500)
+            .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+        }
+        return res.status(200).json(results);
+      }
+    );
+  }
+};
 module.exports = {
   messengerSend,
   recipientList,
   listMess,
+  lastedMess,
+  viewMess,
 };

@@ -5,13 +5,15 @@ import { createContext, useState } from "react";
 
 export const Context = createContext();
 function Home() {
+  // const location = useLocation();
+  // const userID = location.state;
+  // console.log(userID);
   const [play, setPlay] = useState(false);
   const click = () => {
     setPlay(!play);
   };
   // console.log(play);
   return (
-
     <Context.Provider value={click}>
       <div className="container-fluit home">
         <div className="home-nav">
