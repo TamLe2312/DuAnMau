@@ -11,7 +11,7 @@ import { Modal, Button, Form } from "react-bootstrap";
 import { useCookies } from "react-cookie";
 import Post from "../timeline/post/Post";
 import Validation from "../../component/validation/validation";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import "./Profile.css";
 import { Link, useParams } from "react-router-dom";
 
@@ -134,7 +134,6 @@ function Profile() {
           },
         }
       );
-
       const newAvatar = response.data.avatar;
       setUserData((prevUserData) => ({
         ...prevUserData,
@@ -468,18 +467,20 @@ function Profile() {
                       </Modal.Footer>
                     </Modal>
                   </div>
-                  <div className="ProfileSettingIcon">
+                  {/* <div className="ProfileSettingIcon">
                     <SettingsIcon />
-                  </div>
+                  </div> */}
                 </div>
                 <div className="ProfileRow">
                   <div>
-                    <span><b>{CountPost}</b> bài viết</span>
                     <span>
+                      <b>{CountPost}</b> bài viết
+                    </span>
+                    {/*   <span>
                       <a href="#">
                         Có <b>12</b> bạn bè
                       </a>
-                    </span>
+                    </span> */}
                     {/* userID */}
                     <span>
                       <Link to={`/home/messenger/${userID}`}>Nhắn tin</Link>
@@ -522,28 +523,26 @@ function Profile() {
                       time={data.created_at}
                       avatar={data.avatar}
                       title={data.content}
-                    // like={100}
+                      // like={100}
                     />
                   </div>
                 </>
-              )
+              );
             })
-          ) :
-            (
-              <div className="container NotificationPostGroup">
-                <div style={{ display: "flex", gap: 10, alignItems: 'center' }}>
-                  <span>Không có bài viết nào</span>
-                  <i className="fa-regular fa-face-frown"></i>
-                </div>
+          ) : (
+            <div className="container NotificationPostGroup">
+              <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                <span>Không có bài viết nào</span>
+                <i className="fa-regular fa-face-frown"></i>
               </div>
-            )}
-
+            </div>
+          )}
         </div>
         <InfiniteScroll
           dataLength={postsData.length + 1}
           next={fetchDataNew}
           hasMore={true}
-        // loader={<h4>Loading...</h4>}
+          // loader={<h4>Loading...</h4>}
         ></InfiniteScroll>
       </div>
     </>

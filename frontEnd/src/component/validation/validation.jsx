@@ -16,6 +16,9 @@ const Validation = (value) => {
   } else if (value.Cpassword.length < 5) {
     error.Cpassword = "Confirm password phải trên 5 kí tự";
   }
+  if (!value.role) {
+    error.role = "Không bỏ trống role";
+  }
   if (!value.email) {
     error.email = "không được để trống email";
   }

@@ -60,7 +60,7 @@ function SuggestionFriend() {
                 onClick={() => handleAdd(user)}
                 className="suggestionFriend-add-friend"
               >
-                Add
+                Follow
               </span>
             </div>
           );

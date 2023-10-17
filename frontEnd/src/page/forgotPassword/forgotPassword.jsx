@@ -2,6 +2,7 @@ import axios from "axios";
 import { useState } from "react";
 import Validation from "../../component/validation/validation";
 import { Link, useNavigate } from "react-router-dom";
+import { toast } from 'sonner'
 
 
 function ForgotPassword() {
@@ -31,9 +32,11 @@ function ForgotPassword() {
         username: values.username.trim(),
         email: values.email,
       });
+      toast.success(response.data.success);
       setLoading(false);
     } catch (error) {
       setLoading(false);
+      toast.error(error.response.data.error);
     }
   };
   return (

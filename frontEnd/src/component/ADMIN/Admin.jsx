@@ -11,10 +11,10 @@ function Admin() {
             <Link to="/home/admin/account">Tài khoản</Link>
           </li>
           <li className="list-group-item">
-            <Link to="">Nhóm</Link>
+            <Link to="/home/admin/groups">Nhóm</Link>
           </li>
           <li className="list-group-item">
-            <Link to="">Bài viết</Link>
+            <Link to="/home/admin/posts">Bài viết</Link>
           </li>
         </ul>
       </div>
