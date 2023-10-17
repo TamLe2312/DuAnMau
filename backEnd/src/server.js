@@ -28,19 +28,30 @@ const io = new Server(server, {
 let activeUsers = [];
 io.on("connection", (socket) => {
   socket.on("add_new_user", (newUserID) => {
-    if (!activeUsers.some((user) => user.userId === newUserID)) {
+    const userExists = activeUsers.some((user) => user.userId === newUserID);
+
+    if (!userExists) {
       activeUsers.push({
         userId: newUserID,
         socketId: socket.id,
       });
-      console.log(activeUsers);
+      // console.log("Người online:", activeUsers);
+      io.emit("get_user", activeUsers);
     }
-    console.log("user connect: " + activeUsers);
-    io.emit("get_user", activeUsers);
   });
+  socket.on("add_message", (data) => {
+    const { youID } = data;
+    const user = activeUsers.find((user) => user.userId == youID);
+    if (user) {
+      io.to(user.socketId).emit("get_message", data);
+      // console.log("tìm thấy người dùng với youID:", user);
+    } else {
+      // console.log("Không tìm thấy người dùng với youID:", youID);
+    }
+  });
+
   socket.on("disconnect", () => {
     activeUsers = activeUsers.filter((user) => user.socketId !== socket.id);
-    console.log("user disconnect: " + activeUsers);
     io.emit("get_user", activeUsers);
   });
 });
