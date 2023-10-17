@@ -4,22 +4,23 @@ import SendIcon from "@mui/icons-material/Send";
 import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import { format } from "timeago.js";
-import io from "socket.io-client";
-const socket = io.connect("http://localhost:8080");
+import { io } from "socket.io-client";
 
 function DetailMess(props) {
+  const socket = useRef();
   const scroll = useRef();
   const input = useRef();
-  const { myID, yourID } = props;
+  const { myID, yourID, handleChay, listUserMess, handleLastedMess } = props;
   const youID = parseInt(yourID);
 
   const [text, setText] = useState("");
   const [user, setuser] = useState([]);
   const [listmess, setListmess] = useState([]);
+  const [newMess, setnewMess] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [online, setonline] = useState([]);
+  const [online, setOnline] = useState([]);
+  const [dataMessID, setDataMessID] = useState(null);
   // data user
-
   const FetchDataUser = async (yID) => {
     try {
       const res = await axios.get(
@@ -46,6 +47,7 @@ function DetailMess(props) {
       console.log(e);
     }
   };
+  // console.log(youID);
   useEffect(() => {
     const fetchApi = async () => {
       await FetchDataUser(youID);
@@ -55,14 +57,12 @@ function DetailMess(props) {
     };
     fetchApi();
   }, [youID]);
-  // youID, ;
+  // --------------------------
+  function handleOnEnter() {
+    handleSendMess();
+  }
   // ------------------------------------------
-  // const [data, setData] = useState([]);
   const handleSendMess = async () => {
-    //   socket.emit("set_id", youID);
-    //   socket.on("data", (data) => {
-    //     console.log(data);
-    //   });
     const textMes = text.trim();
     try {
       setLoading(true);
@@ -72,8 +72,16 @@ function DetailMess(props) {
         message: textMes,
       });
       if (res) {
+        // handleChay();
+        if (listUserMess.length === 0) {
+          handleChay();
+        } else {
+          const addUserLisst = listUserMess?.find((user) => user.id === youID);
+          !addUserLisst && handleChay();
+        }
+        // console.log(listUserMess);
         const data = res.data[0];
-        setListmess([...listmess, data]);
+        await setListmess([...listmess, data]);
         setLoading(false);
       }
     } catch (e) {
@@ -82,15 +90,42 @@ function DetailMess(props) {
     }
     setText("");
   };
-  function handleOnEnter() {
-    handleSendMess();
-  }
 
   useEffect(() => {
     scroll.current?.scrollIntoView({ behavior: "smooth" });
     input.current?.focus();
   }, [listmess]);
   // -------------------------------------------
+  // socket-----------------------------
+  useEffect(() => {
+    if (socket) {
+      const socket = io("http://localhost:8080");
+      socket.emit("add_new_user", myID);
+      socket.on("get_user", (userOl) => {
+        setOnline(userOl);
+      });
+
+      if (listmess.length > 0) {
+        socket.emit("add_message", { mes: listmess, youID, myID });
+      }
+      socket.on("get_message", (data) => {
+        const { mes, myID } = data;
+        // const receiverID = data.youID;
+        setDataMessID(myID);
+        setnewMess(mes);
+      });
+      return () => {
+        socket.disconnect();
+      };
+    }
+  }, [socket, loading]);
+  // ---------------------------------------------------------
+  // console.log(listmess);
+  useEffect(() => {
+    if (dataMessID !== null && !isNaN(youID) && dataMessID === youID) {
+      setListmess(newMess);
+    }
+  }, [newMess]);
   return (
     <>
       {yourID ? (
