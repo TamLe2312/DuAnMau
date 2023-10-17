@@ -1,6 +1,7 @@
 import axios from "axios";
 import React, { useEffect, useState } from 'react';
 import Validation from "../../component/validation/validation";
+import { toast } from 'sonner'
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 
 
@@ -56,15 +57,16 @@ function VerifyToken() {
                 Cpassword: values.Cpassword,
                 email: email,
             });
-            setCheckSuccess(response.data.success);
+            console.log(response);
+            toast.success(response.data.success);
             Navigate("/", { replace: true });
             setLoading(false);
         } catch (error) {
             setLoading(false);
             if (error.response && error.response.data && error.response.data.error) {
-                setCheckError(error.response.data.error);
+                toast.error(error.response.data.error);
             } else {
-                setCheckError('Something went wrong. Please try again.');
+                toast.error('Something went wrong. Please try again.');
             }
         }
     };

@@ -11,7 +11,7 @@ import { Modal, Button, Form } from "react-bootstrap";
 import { useCookies } from "react-cookie";
 import Post from "../timeline/post/Post";
 import Validation from "../../component/validation/validation";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import "./Profile.css";
 import { Link, useParams } from "react-router-dom";
 
@@ -134,7 +134,6 @@ function Profile() {
           },
         }
       );
-
       const newAvatar = response.data.avatar;
       setUserData((prevUserData) => ({
         ...prevUserData,
@@ -468,20 +467,21 @@ function Profile() {
                       </Modal.Footer>
                     </Modal>
                   </div>
-                  <div className="ProfileSettingIcon">
+                  {/* <div className="ProfileSettingIcon">
                     <SettingsIcon />
-                  </div>
+                  </div> */}
                 </div>
                 <div className="ProfileRow">
                   <div>
+
                     <span>
                       <b>{CountPost}</b> bài viết
                     </span>
-                    <span>
+                    {/*   <span>
                       <a href="#">
                         Có <b>12</b> bạn bè
                       </a>
-                    </span>
+                    </span> */}
                     {/* userID */}
                     <span>
                       <Link to={`/home/messenger/${userID}`}>Nhắn tin</Link>

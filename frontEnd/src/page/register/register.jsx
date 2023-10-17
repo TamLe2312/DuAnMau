@@ -1,6 +1,6 @@
 import axios from "axios";
 import React, { useState } from "react";
-// import { toast } from "react-toastify";
+import { toast } from 'sonner'
 import { Link, useNavigate } from "react-router-dom";
 import Validation from "../../component/validation/validation";
 import "./register.css";
@@ -30,22 +30,19 @@ function Register() {
 
   const handleClick = async (e) => {
     e.preventDefault();
-    console.log(values);
     setError(Validation(values));
     try {
-      console.log;
       setLoading(true);
       const res = await axios.post("http://localhost:8080/account/register", {
         username: values.username.trim(),
         password: values.password,
         email: values.email,
       });
-      console.log(res);
+      toast.success(res.data.success);
       setLoading(false);
       navigate("/", { replace: true });
     } catch (error) {
-      console.error(error);
-
+      toast.error(error.response.data.error);
       setLoading(false);
       // toast.error(error.response.data.error);
     }
