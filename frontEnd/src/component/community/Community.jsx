@@ -14,7 +14,7 @@ function Community() {
   const [hasJoined, setHasJoined] = useState([]);
   const [error, setError] = useState({});
   const [loading, setLoading] = useState(false);
-  const [cookies] = useCookies(["userId"]);
+  const [cookies] = useCookies(["session"]);
   const [selectedImage, setSelectedImage] = useState(null);
   const [Images, setImages] = useState(null);
   const [showModalCreateGroup, setShowModalCreateGroup] = useState(false);

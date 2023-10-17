@@ -462,6 +462,121 @@ const postProfileUser = (req, res) => {
     }
   );
 };
+const FollowUser = (req, res) => {
+  const { follower_id, followed_id } = req.body;
+  if ((followed_id, follower_id)) {
+    connection.query(
+      `INSERT INTO follows (follower_id,followed_id) VALUES (? , ?)
+    `,
+      [follower_id, followed_id],
+      function (err, results, fields) {
+        if (err) {
+          return res
+            .status(500)
+            .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+        }
+        return res.status(200).json({ success: "Follow thành công" });
+      }
+    );
+  } else {
+    return res
+      .status(400)
+      .json({ error: "Có lỗi xảy ra.Không có follower_id và followed_id" });
+  }
+};
+const UnfollowUser = (req, res) => {
+  const { follower_id, followed_id } = req.body;
+  if ((followed_id, follower_id)) {
+    connection.query(
+      `DELETE FROM follows WHERE follower_id = ? AND followed_id = ?
+    `,
+      [follower_id, followed_id],
+      function (err, results, fields) {
+        if (err) {
+          return res
+            .status(500)
+            .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+        }
+        return res.status(200).json({ success: "Unfollow thành công" });
+      }
+    );
+  } else {
+    return res
+      .status(400)
+      .json({ error: "Có lỗi xảy ra.Không có follower_id và followed_id" });
+  }
+};
+const FollowerData = (req, res) => {
+  const page = req.params.page || 1;
+  const idUser = parseInt(req.params.id);
+  if (idUser) {
+    if (page != 0) {
+      const limit = 5;
+      const offset = (page - 1) * limit;
+      connection.query(
+        `SELECT users.id, users.name, users.username, users.avatar
+FROM follows
+INNER JOIN users ON follows.follower_id = users.id
+WHERE follows.followed_id = ?
+LIMIT ? OFFSET ?`,
+        [idUser, limit, offset],
+        function (err, results, fields) {
+          if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Lỗi máy chủ" });
+          }
+          if (results.length > 0) {
+            return res.status(200).json(results);
+          } else {
+            return res.status(400).json({ error: "Không có người dùng" });
+          }
+        }
+      );
+    } else {
+      connection.query(
+        `SELECT users.id, users.name, users.username, users.avatar
+FROM follows
+INNER JOIN users ON follows.follower_id = users.id
+WHERE follows.followed_id = ?`,
+        [idUser],
+        function (err, results, fields) {
+          if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Lỗi máy chủ" });
+          }
+          if (results.length > 0) {
+            return res.status(200).json(results);
+          } else {
+            return res.status(400).json({ error: "Không có người dùng" });
+          }
+        }
+      );
+    }
+  } else {
+    return res.status(400).json({ error: "Không có Id User" });
+  }
+};
+const suggestFollow = (req, res) => {
+  const idUser = parseInt(req.params.id);
+  const limit = parseInt(req.params.limit) || 5;
+  if (idUser) {
+    connection.query(
+      "SELECT id, username, name, avatar FROM users WHERE id <> ? AND id NOT IN (SELECT followed_id FROM follows WHERE follower_id = ?) ORDER BY RAND() LIMIT ?;",
+      [idUser, idUser, limit],
+      function (err, results, fields) {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
+        if (results.length > 0) {
+          return res.status(200).json(results);
+        } else {
+          return res.status(400).json({ error: "Không có người dùng" });
+        }
+      }
+    );
+  }
+};
 
 module.exports = {
   login,
@@ -477,4 +592,8 @@ module.exports = {
   ChangePassword,
   postProfileUser,
   CountPost,
+  FollowUser,
+  UnfollowUser,
+  FollowerData,
+  suggestFollow,
 };

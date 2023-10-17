@@ -63,7 +63,9 @@ function Suggestions() {
       <div className="suggestions-friend">
         <div className="suggestions-friend-title">
           <p> Gợi ý cho bạn</p>
-          <p>All</p>
+          <Link to={`/home/suggestFollow`} id="suggestFollowLink">
+            All
+          </Link>
         </div>
         <SuggestionFriend />
       </div>
