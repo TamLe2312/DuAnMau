@@ -1,6 +1,7 @@
 .sreach {
   width: 100%;
 }
+
 .SreachSuccess {
   display: flex;
   flex-direction: row;
@@ -8,6 +9,7 @@
   align-items: center;
   margin-bottom: 12px;
 }
+
 .SreachSuccess-title-img img {
   width: 60px;
   height: 60px;
@@ -20,9 +22,20 @@
   flex-direction: column;
   overflow: hidden;
 }
+
+.SreachSuccess-title a {
+  text-decoration: none;
+  color: #000000;
+}
+
+.SreachSuccess-title a:hover {
+  color: #07bbff;
+}
+
 .SreachSuccess-title-name {
   font-weight: 500;
 }
+
 .SreachSuccess-title-name2 {
   opacity: 0.8;
   text-overflow: ellipsis;
@@ -30,6 +43,7 @@
   white-space: nowrap;
   display: block;
 }
+
 .SreachSuccess-parent {
   overflow: hidden;
   display: flex;
@@ -37,7 +51,8 @@
   justify-content: space-between;
   align-items: center;
 }
-.SreachSuccess-parent > button {
+
+.SreachSuccess-parent>button {
   background: 0;
   border: none;
 }

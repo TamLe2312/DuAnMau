@@ -699,6 +699,30 @@ const searchUserFollowed = (req, res) => {
     );
   }
 };
+const searchUserProfile = (req, res) => {
+  const searchValue = req.params.value;
+  const excludedUserId = req.params.id;
+
+  if (searchValue) {
+    connection.query(
+      `SELECT * FROM users
+       WHERE (username LIKE CONCAT('%', ?, '%') OR name LIKE CONCAT('%', ?, '%'))
+       AND id <> ?`,
+      [searchValue, searchValue, excludedUserId],
+      async function (err, results, fields) {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
+        if (results.length > 0) {
+          return res.status(200).json(results);
+        } else {
+          return res.status(400).json({ error: "Người dùng không tồn tại" });
+        }
+      }
+    );
+  }
+};
 
 module.exports = {
   login,
@@ -722,4 +746,5 @@ module.exports = {
   countFollow,
   searchUserFollower,
   searchUserFollowed,
+  searchUserProfile,
 };
