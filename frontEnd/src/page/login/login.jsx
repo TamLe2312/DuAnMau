@@ -4,7 +4,7 @@ import { useCookies } from "react-cookie";
 import { Link, useNavigate } from "react-router-dom";
 import Validation from "../../component/validation/validation";
 
-import { toast } from 'sonner'
+import { toast } from "sonner";
 
 import "./login.css";
 function Login() {
@@ -129,7 +129,7 @@ function Login() {
 
         <div className="mt-2">
           <Link className="mt-4" to="/forgotPassword">
-            Quyên mật khẩu
+            Quên mật khẩu
           </Link>
         </div>
         <div>
