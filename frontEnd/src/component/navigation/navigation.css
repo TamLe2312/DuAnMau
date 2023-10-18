@@ -26,6 +26,22 @@
   text-decoration: none;
   width: 100%;
   max-width: 200px;
+  position: relative;
+}
+
+.navigation-button-number {
+  position: absolute;
+  color: rgb(255, 255, 255);
+  top: 14%;
+  left: 16%;
+  font-size: 0.8rem;
+  background-color: red;
+  border-radius: 50%;
+  width: 16px;
+  height: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 .navigation-button:hover {
   cursor: pointer;

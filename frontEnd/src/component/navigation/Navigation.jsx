@@ -43,6 +43,9 @@ function Navigation() {
   const handleMode = () => {
     setMode(!mode);
   };
+  const closeModal = (data) => {
+    setShow(data);
+  };
   const menuRef = useRef();
   useEffect(() => {
     const handleOutMore = (e) => {
@@ -88,7 +91,7 @@ function Navigation() {
         const response = await axios.get(
           `http://localhost:8080/account/getDataUser/${id}`
         );
-        if (response.data[0].role === 'admin') {
+        if (response.data[0].role === "admin") {
           setIsAdmin(true);
         }
         setUserData(response.data[0]);
@@ -97,11 +100,27 @@ function Navigation() {
       }
     };
     fetchData();
-    // const interval = setInterval(fetchData, 2000); // Chạy hàm fetchData() mỗi 2 giây
-    // return () => {
-    //   clearInterval(interval); // Xóa bỏ interval khi component bị unmount
-    // };
   }, [id]);
+  const [number, setNumber] = useState(0);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8080/notification/countNotifcation/${id}`
+        );
+        if (response) {
+          const num = response.data[0].countNoti;
+          setNumber(num);
+        }
+      } catch (error) {
+        console.error("Lỗi:", error);
+      }
+    };
+    fetchData();
+  }, [number]);
+  const setNum = () => {
+    setNumber((pre) => pre - 1);
+  };
   return (
     <div className="navigation">
       <Link to="/home">
@@ -126,6 +145,7 @@ function Navigation() {
       <NavLink className="navigation-button" to={"/home/messenger"}>
         <ChatBubbleIcon />
         <span>Tin nhắn</span>
+        {/* <div className="navigation-button-number">1</div> */}
       </NavLink>
       <button
         className="navigation-button"
@@ -134,6 +154,7 @@ function Navigation() {
       >
         <FavoriteIcon />
         <span>Thông báo</span>
+        {/* {number > 0 && <div className="navigation-button-number">{number}</div>} */}
       </button>
       <button
         className="navigation-button"
@@ -185,11 +206,7 @@ function Navigation() {
         {/* {showMore && ( */}
         <div className={`dropdown-more ${showMore ? "active" : "inactive"}`}>
           <ul className="dropdown-more-ul">
-            {isAdmin ? (
-              <Drop text={admin} path={"home/admin"} />
-            ) : (
-              <></>
-            )}
+            {isAdmin ? <Drop text={admin} path={"home/admin"} /> : <></>}
             <div onClick={handleMode} className="dropdown-more-title">
               <Drop Title={theme} />
             </div>
@@ -209,7 +226,11 @@ function Navigation() {
         </Offcanvas.Header>
         <Offcanvas.Body>
           {/* body */}
-          {checkS === "tim-kiem" ? <Search /> : <Notification />}
+          {checkS === "tim-kiem" ? (
+            <Search />
+          ) : (
+            <Notification closeModal={closeModal} setNum={setNum} />
+          )}
         </Offcanvas.Body>
       </Offcanvas>
       <MyModal
