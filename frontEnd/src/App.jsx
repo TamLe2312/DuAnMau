@@ -14,12 +14,12 @@ import Groups from "./component/group/Groups";
 
 //React Toastify
 
-import { Toaster } from 'sonner'
+import { Toaster } from "sonner";
 
 import "react-toastify/dist/ReactToastify.css";
 import Admin from "./component/ADMIN/Admin";
 import Account from "./component/ADMIN/adminchild/account";
-import GroupsTable from "./component/ADMIN/adminchild/Groups"
+import GroupsTable from "./component/ADMIN/adminchild/Groups";
 import Posts from "./component/ADMIN/adminchild/Posts";
 function App() {
   return (
@@ -48,8 +48,6 @@ function App() {
       </Routes>
 
       <Toaster position="top-right" expand={false} richColors />
-
-
     </div>
   );
 }
