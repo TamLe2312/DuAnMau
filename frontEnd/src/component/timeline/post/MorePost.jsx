@@ -65,7 +65,7 @@ function MorePost(props) {
     try {
       const fetchApi = async () => {
         if (groupPostId) {
-          const res = await axios.post("http://localhost:8080/post/editPost", {
+          const res = await request.post("post/editPost", {
             content: contentNew,
             groupPostId: groupPostId,
           });
@@ -75,7 +75,7 @@ function MorePost(props) {
             toast.success(res.data.success);
           }
         } else {
-          const res = await axios.post("http://localhost:8080/post/editPost", {
+          const res = await request.post("post/editPost", {
             content: contentNew,
             postID: postID,
           });

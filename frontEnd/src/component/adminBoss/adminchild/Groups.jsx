@@ -1,8 +1,8 @@
-import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import Validation from "../../validation/validation";
 import { toast } from "sonner";
+import * as request from "../../../utils/request";
 
 function GroupsTable() {
   const [AllDataGroup, setAllDataGroup] = useState([]);
@@ -79,15 +79,11 @@ function GroupsTable() {
       formData.append("idGroup", IdGroupAdjust);
       formData.append("hasAvatar", hasAvatar);
 
-      const response = await axios.post(
-        "http://localhost:8080/admin/adjustGroupInform",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const response = await request.post("admin/adjustGroupInform", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       if (response.data.success) {
         toast.success(response.data.success);
         fetchDataAllGroup();
@@ -96,8 +92,8 @@ function GroupsTable() {
     } catch (error) {
       if (error.response.data.UpdateNoImg) {
         try {
-          const response = await axios.post(
-            "http://localhost:8080/admin/adjustGroupInformContent",
+          const response = await request.post(
+            "admin/adjustGroupInformContent",
             {
               name: formValues.name,
               moTaNhom: formValues.moTaNhom,
@@ -118,12 +114,9 @@ function GroupsTable() {
   const handleDeleteGroup = async () => {
     setLoading(true);
     try {
-      const response = await axios.post(
-        "http://localhost:8080/admin/deleteGroup",
-        {
-          idGroup: IdGroupDelete,
-        }
-      );
+      const response = await request.post("admin/deleteGroup", {
+        idGroup: IdGroupDelete,
+      });
       if (response.data.pageCount < TotalPage) {
         setTotalPage(response.data.pageCount);
         fetchDataAllGroup(response.data.pageCount);
@@ -176,9 +169,7 @@ function GroupsTable() {
   };
   const fetchDataAllGroup = async (page) => {
     try {
-      const response = await axios.get(
-        `http://localhost:8080/admin/getDataAllGroup/${page}`
-      );
+      const response = await request.get(`admin/getDataAllGroup/${page}`);
       setAllDataGroup(response.data.results);
       setTotalPage(response.data.pageCount);
       setIndexPagination(page);
@@ -194,9 +185,7 @@ function GroupsTable() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(
-          "http://localhost:8080/admin/getDataAllGroup/1"
-        );
+        const response = await request.get("admin/getDataAllGroup/1");
         setTotalPage(response.data.pageCount);
         setAllDataGroup(response.data.results);
         setLoading(false);

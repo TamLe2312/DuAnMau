@@ -1,8 +1,8 @@
-import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import Validation from "../../validation/validation";
 import { toast } from "sonner";
+import * as request from "../../../utils/request";
 
 function Account() {
   const [showModalConfirmDelete, setShowModalConfirmDelete] = useState(false);
@@ -46,15 +46,12 @@ function Account() {
     try {
       setLoading(true);
       const currentPage = indexPagination; // Lưu giá trị trang hiện tại
-      const response = await axios.post(
-        "http://localhost:8080/admin/adjustInformUser",
-        {
-          nameUser: formValuesAdjustUser.nameUser,
-          usernameUser: formValuesAdjustUser.usernameUser,
-          role: formValuesAdjustUser.role.trim(),
-          idUser: IdUserAdjust,
-        }
-      );
+      const response = await request.post("admin/adjustInformUser", {
+        nameUser: formValuesAdjustUser.nameUser,
+        usernameUser: formValuesAdjustUser.usernameUser,
+        role: formValuesAdjustUser.role.trim(),
+        idUser: IdUserAdjust,
+      });
       if (response.data.success) {
         toast.success(response.data.success);
       }
@@ -103,9 +100,7 @@ function Account() {
   };
   const fetchDataAllUser = async (page) => {
     try {
-      const response = await axios.get(
-        `http://localhost:8080/admin/getDataAllUser/${page}`
-      );
+      const response = await request.get(`admin/getDataAllUser/${page}`);
       setAllDataUser(response.data.results);
       setTotalPage(response.data.pageCount);
       setIndexPagination(page);
@@ -118,12 +113,9 @@ function Account() {
   const handleDeleteUser = async () => {
     setLoading(true);
     try {
-      const response = await axios.post(
-        "http://localhost:8080/admin/deleteUser",
-        {
-          idUser: IdUserDelete,
-        }
-      );
+      const response = await request.post("admin/deleteUser", {
+        idUser: IdUserDelete,
+      });
       if (response.data.pageCount < TotalPage) {
         setTotalPage(response.data.pageCount);
         fetchDataAllUser(response.data.pageCount);
@@ -146,16 +138,13 @@ function Account() {
     setError(Validation(formValuesCreateUser));
     try {
       setLoading(true);
-      const response = await axios.post(
-        "http://localhost:8080/admin/createNewUser",
-        {
-          username: formValuesCreateUser.username.trim(),
-          password: formValuesCreateUser.password.trim(),
-          Cpassword: formValuesCreateUser.Cpassword.trim(),
-          email: formValuesCreateUser.email.trim(),
-          role: formValuesCreateUser.role.trim(),
-        }
-      );
+      const response = await request.post("admin/createNewUser", {
+        username: formValuesCreateUser.username.trim(),
+        password: formValuesCreateUser.password.trim(),
+        Cpassword: formValuesCreateUser.Cpassword.trim(),
+        email: formValuesCreateUser.email.trim(),
+        role: formValuesCreateUser.role.trim(),
+      });
       if (response.data.success) {
         toast.success(response.data.success);
       }
@@ -208,9 +197,7 @@ function Account() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:8080/admin/getDataAllUser/1"
-        );
+        const response = await request.get("admin/getDataAllUser/1");
         setTotalPage(response.data.pageCount);
         setAllDataUser(response.data.results);
       } catch (error) {

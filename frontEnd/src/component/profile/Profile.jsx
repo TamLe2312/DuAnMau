@@ -1,4 +1,3 @@
-import axios from "axios";
 import moment from "moment";
 import SettingsIcon from "@mui/icons-material/Settings";
 import GridOnIcon from "@mui/icons-material/GridOn";
@@ -15,6 +14,7 @@ import Validation from "../../component/validation/validation";
 import { toast } from "sonner";
 import "./Profile.css";
 import { Link, useParams } from "react-router-dom";
+import * as request from "../../utils/request";
 
 function Profile() {
   // id user khác
@@ -83,13 +83,10 @@ function Profile() {
     if (e.key === "Enter") {
       e.preventDefault();
       try {
-        const response = await axios.post(
-          "http://localhost:8080/account/searchUserFollower",
-          {
-            searchUser: searchValue,
-            idUser: id,
-          }
-        );
+        const response = await request.post("account/searchUserFollower", {
+          searchUser: searchValue,
+          idUser: id,
+        });
         setSearchUserFollower(response.data);
       } catch (err) {
         console.error(err);
@@ -104,13 +101,10 @@ function Profile() {
     if (e.key === "Enter") {
       e.preventDefault();
       try {
-        const response = await axios.post(
-          "http://localhost:8080/account/searchUserFollowed",
-          {
-            searchFollowed: searchValue,
-            idUser: id,
-          }
-        );
+        const response = await request.post("account/searchUserFollowed", {
+          searchFollowed: searchValue,
+          idUser: id,
+        });
         const updatedData = response.data.map((item) => {
           return { ...item, isFollow: true };
         });
@@ -166,13 +160,10 @@ function Profile() {
     const imagePath = url.pathname.substring("/uploads/".length);
 
     try {
-      const response = await axios.post(
-        "http://localhost:8080/account/removeAvatar",
-        {
-          id,
-          imagePath,
-        }
-      );
+      const response = await request.post("account/removeAvatar", {
+        id,
+        imagePath,
+      });
       if (response.data.success) {
         setUserData((prevUserData) => ({
           ...prevUserData,
@@ -196,15 +187,11 @@ function Profile() {
       formData.append("id", id);
       formData.append("hasAvatar", hasAvatar);
 
-      const response = await axios.post(
-        "http://localhost:8080/account/changeAvatar",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const response = await request.post("account/changeAvatar", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       const newAvatar = response.data.avatar;
       setUserData((prevUserData) => ({
         ...prevUserData,
@@ -231,15 +218,12 @@ function Profile() {
     setError(Validation(formValues));
     try {
       setLoading(true);
-      const response = await axios.post(
-        "http://localhost:8080/account/UpdateInformationProfile",
-        {
-          name: formValues.name.trim(),
-          moTa: formValues.moTa.trim(),
-          date: moment(formValues.birthday).toISOString(),
-          id: id,
-        }
-      );
+      const response = await request.post("account/UpdateInformationProfile", {
+        name: formValues.name.trim(),
+        moTa: formValues.moTa.trim(),
+        date: moment(formValues.birthday).toISOString(),
+        id: id,
+      });
       if (response.data.success) {
         toast.success(response.data.success);
       }
@@ -260,9 +244,7 @@ function Profile() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:8080/account/getDataUser/${id}`
-        ); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
+        const response = await request.get(`account/getDataUser/${id}`); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
         setUserData(response.data[0]);
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -283,9 +265,7 @@ function Profile() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:8080/account/followerData/${id}&1`
-        );
+        const response = await request.get(`account/followerData/${id}&1`);
         setFollowerData(response.data);
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -297,9 +277,7 @@ function Profile() {
     const fetchData = async () => {
       if (id === cookies.userId) {
         try {
-          const response = await axios.get(
-            `http://localhost:8080/account/followedData/${id}&1`
-          );
+          const response = await request.get(`account/followedData/${id}&1`);
           const updatedData = response.data.map((item) => {
             return { ...item, isFollow: true };
           });
@@ -309,9 +287,7 @@ function Profile() {
         }
       } else {
         try {
-          const response = await axios.get(
-            `http://localhost:8080/account/followedData/${id}&1`
-          );
+          const response = await request.get(`account/followedData/${id}&1`);
           const updatedData = response.data.map((item) => {
             if (item.id === cookies.userId) {
               return { ...item, isFollowme: true };
@@ -331,9 +307,7 @@ function Profile() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:8080/account/postProfileUser/${id}&1`
-        ); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
+        const response = await request.get(`account/postProfileUser/${id}&1`); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
         /*  setUserData(response.data[0]); */
         setPostsData(response.data);
       } catch (error) {
@@ -347,9 +321,7 @@ function Profile() {
   const [isMoreDetailFollowed, setIsMoreDetailFollowed] = useState(false);
   const handleMoreDetailFollower = async () => {
     try {
-      const response = await axios.get(
-        `http://localhost:8080/account/followerData/${id}&0`
-      );
+      const response = await request.get(`account/followerData/${id}&0`);
       setFollowerData(response.data);
       setIsMoreDetailFollower(true);
     } catch (error) {
@@ -358,9 +330,7 @@ function Profile() {
   };
   const handleMoreDetailFollowed = async () => {
     try {
-      const response = await axios.get(
-        `http://localhost:8080/account/followedData/${id}&0`
-      );
+      const response = await request.get(`account/followedData/${id}&0`);
       const updatedData = response.data.map((item) => {
         return { ...item, isFollow: true };
       });
@@ -371,48 +341,40 @@ function Profile() {
     }
   };
   const handleAdd = async (idFollowed) => {
-    console.log(id, idFollowed);
     if (id === cookies.userId) {
-      console.log("Bằng ID");
-      /*  try {
-    let res = await axios.post("http://localhost:8080/account/followUser", {
-      follower_id: id,
-      followed_id: idFollowed,
-    });
-    if (res.data.success) {
-      toast.success(res.data.success);
-      if (searchUserFollowed && searchUserFollowed.length > 0) {
-        setSearchUserFollowed((prevData) =>
-          prevData.map((data) =>
-            data.id === idFollowed ? { ...data, isFollow: true } : data
-          )
-        );
+      try {
+        let res = await request.post("account/followUser", {
+          follower_id: id,
+          followed_id: idFollowed,
+        });
+        if (res.data.success) {
+          toast.success(res.data.success);
+          if (searchUserFollowed && searchUserFollowed.length > 0) {
+            setSearchUserFollowed((prevData) =>
+              prevData.map((data) =>
+                data.id === idFollowed ? { ...data, isFollow: true } : data
+              )
+            );
+          }
+          setFollowedData((prevData) =>
+            prevData.map((data) =>
+              data.id === idFollowed ? { ...data, isFollow: true } : data
+            )
+          );
+        }
+      } catch (error) {
+        console.error(error);
       }
-      setFollowedData((prevData) =>
-        prevData.map((data) =>
-          data.id === idFollowed ? { ...data, isFollow: true } : data
-        )
-      );
-    }
-  } catch (error) {
-    console.error(error);
-  } */
-    } else {
-      console.log("Không bằng ID");
     }
   };
 
   const handleRemove = async (idFollowed) => {
-    console.log(id, idFollowed);
     if (id === cookies.userId) {
       try {
-        let res = await axios.post(
-          "http://localhost:8080/account/unfollowUser",
-          {
-            follower_id: id,
-            followed_id: idFollowed,
-          }
-        );
+        let res = await request.post("account/unfollowUser", {
+          follower_id: id,
+          followed_id: idFollowed,
+        });
         if (res.data.success) {
           toast.success(res.data.success);
           if (searchUserFollowed && searchUserFollowed.length > 0) {
@@ -433,13 +395,10 @@ function Profile() {
       }
     } else {
       try {
-        let res = await axios.post(
-          "http://localhost:8080/account/unfollowUser",
-          {
-            follower_id: cookies.userId,
-            followed_id: idFollowed,
-          }
-        );
+        let res = await request.post("account/unfollowUser", {
+          follower_id: cookies.userId,
+          followed_id: idFollowed,
+        });
         if (res.data.success) {
           toast.success(res.data.success);
           if (searchUserFollowed && searchUserFollowed.length > 0) {
@@ -466,8 +425,8 @@ function Profile() {
   const fetchDataNew = () => {
     setpageData(pageData + 1);
     const dataNew = async () => {
-      const response = await axios.get(
-        `http://localhost:8080/account/postProfileUser/${id}&${pageData}`
+      const response = await request.get(
+        `account/postProfileUser/${id}&${pageData}`
       );
       if (response.status === 200) {
         const datas = response.data;
@@ -482,9 +441,7 @@ function Profile() {
     const fetchDataCountPost = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(
-          `http://localhost:8080/account/countPost/${id}`
-        );
+        const response = await request.get(`account/countPost/${id}`);
         setCountPost(response.data[0].CountPosts);
         setLoading(false);
       } catch (error) {
@@ -499,9 +456,7 @@ function Profile() {
     const fetchDataCountFollow = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(
-          `http://localhost:8080/account/countFollow/${id}`
-        );
+        const response = await request.get(`account/countFollow/${id}`);
         setTotalFollower(response.data[0].followerCount);
         setTotalFollowed(response.data[0].followingCount);
         setLoading(false);
