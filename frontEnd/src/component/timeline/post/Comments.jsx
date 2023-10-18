@@ -12,7 +12,17 @@ function Comments(props) {
   const handleRun = props.handlerun;
   const [cookies] = useCookies();
   const myID = cookies.userId;
-  const { img, title, avatar, user, name, id, groupPostId } = props;
+  const {
+    img,
+    title,
+    avatar,
+    user,
+    userid,
+    name,
+    id,
+    groupPostId,
+    notification,
+  } = props;
   const [listComment, setListComment] = useState([]);
   const [userComment, setUserComment] = useState([]);
   const [content, setcontent] = useState("");
@@ -40,8 +50,7 @@ function Comments(props) {
             setListComment([]);
             setUserComment([]);
           }
-        }
-        else {
+        } else {
           const response = await axios.get(
             `http://localhost:8080/post/listCommentPost/${id}&0`
           );
@@ -82,24 +91,32 @@ function Comments(props) {
     try {
       const fetchApi = async () => {
         if (groupPostId) {
-          const res = await axios.post("http://localhost:8080/post/commentPost", {
-            content: content,
-            userID: myID,
-            groupPostId: groupPostId,
-          });
+          const res = await axios.post(
+            "http://localhost:8080/post/commentPost",
+            {
+              content: content,
+              userID: myID,
+              groupPostId: groupPostId,
+            }
+          );
           if (res) {
             setcontent("");
             setdoi((e) => !e);
             handleRun();
           }
-        }
-        else {
-          const res = await axios.post("http://localhost:8080/post/commentPost", {
-            content: content,
-            userID: myID,
-            postID: id,
-          });
+        } else {
+          const res = await axios.post(
+            "http://localhost:8080/post/commentPost",
+            {
+              content: content,
+              userID: myID,
+              postID: id,
+            }
+          );
           if (res) {
+            // console.log(userid);
+            let thongBao = "Đã bình luận bài viết của bạn";
+            await notification(id, myID, thongBao, userid);
             setcontent("");
             setdoi((e) => !e);
             handleRun();
@@ -206,34 +223,34 @@ function Comments(props) {
       >
         {listComment.length > 0
           ? listComment.map((comment, index) => {
-            const user = userComment.find(
-              (user) => user.id === comment.user_id
-            );
-            const username = user ? user.username : null;
+              const user = userComment.find(
+                (user) => user.id === comment.user_id
+              );
+              const username = user ? user.username : null;
 
-            return (
-              <div className="commentschild-once" key={index}>
-                <img
-                  src="https://i.pinimg.com/564x/d7/46/44/d7464475de0dc2550f1ab6d69529ef26.jpg"
-                  alt=""
-                />
-                <span>
-                  <span className="commentschild-usercomment">
-                    {username}
+              return (
+                <div className="commentschild-once" key={index}>
+                  <img
+                    src="https://i.pinimg.com/564x/d7/46/44/d7464475de0dc2550f1ab6d69529ef26.jpg"
+                    alt=""
+                  />
+                  <span>
+                    <span className="commentschild-usercomment">
+                      {username}
+                    </span>
+                    &nbsp; {comment.content}
                   </span>
-                  &nbsp; {comment.content}
-                </span>
-                {myID === comment.user_id && (
-                  <span
-                    className="commentschild-usermore"
-                    onClick={() => commentMore(comment.id)}
-                  >
-                    <MoreHorizIcon />
-                  </span>
-                )}
-              </div>
-            );
-          })
+                  {myID === comment.user_id && (
+                    <span
+                      className="commentschild-usermore"
+                      onClick={() => commentMore(comment.id)}
+                    >
+                      <MoreHorizIcon />
+                    </span>
+                  )}
+                </div>
+              );
+            })
           : "Không có ai bình luận"}
       </div>
 

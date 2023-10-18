@@ -18,6 +18,10 @@ const {
   FollowerData,
   suggestFollow,
   UnfollowUser,
+  FollowedData,
+  countFollow,
+  searchUserFollower,
+  searchUserFollowed,
 } = require("../controllers/account");
 const Router = express.Router();
 const multer = require("multer");
@@ -45,11 +49,15 @@ Router.post("/login", upload.single("avatar"), login);
 Router.post("/forgotPassword", forgotPassword);
 Router.post("/followUser", FollowUser);
 Router.post("/unfollowUser", UnfollowUser);
+Router.post("/searchUserFollower", searchUserFollower);
+Router.post("/searchUserFollowed", searchUserFollowed);
 Router.post("/verifyToken", verifyToken);
 Router.post("/ChangePassword", ChangePassword);
 Router.get("/detail/:id", detail);
 Router.get("/listUsers/:slug", listUsers);
 Router.get("/countPost/:userId", CountPost);
+Router.get("/countFollow/:userId", countFollow);
 Router.get("/followerData/:id&:page", FollowerData);
+Router.get("/followedData/:id&:page", FollowedData);
 Router.get("/suggestFollow/:id&:limit", suggestFollow);
 module.exports = Router;
