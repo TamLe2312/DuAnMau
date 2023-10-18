@@ -56,7 +56,7 @@ function Messenger() {
           <span className="messenger-user-information-mes online">Online</span>
         );
       } else {
-        return <span className="messenger-user-information-mes">OffLine</span>;
+        return <span className="messenger-user-information-mes">Offline</span>;
       }
     }
   };
@@ -144,7 +144,7 @@ function Messenger() {
                   <img
                     src={
                       user.avatar
-                        ? "http://localhost:8080/images/" + user.avatar
+                        ? user.avatar
                         : "https://i.pinimg.com/564x/81/05/9b/81059b2b505bcf50cdbd09b1ca7d4dae.jpg"
                     }
                     alt=""

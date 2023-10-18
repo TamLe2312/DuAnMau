@@ -387,7 +387,9 @@ function Community() {
             </div>
 
             {loading || dataGroup.length < 1 ? (
-              <div className="container">Loading...</div>
+              <div className="container CommunityLoadingTitle">
+                <span>Loading...</span>
+              </div>
             ) : (
               <div></div>
             )}
