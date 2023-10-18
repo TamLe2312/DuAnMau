@@ -17,10 +17,13 @@ import SuggestFollow from "./component/profile/suggestFollow/suggestFollow";
 import { Toaster } from "sonner";
 
 import "react-toastify/dist/ReactToastify.css";
-import Admin from "./component/admin/Admin";
-import Account from "./component/admin/adminchild/account";
-import GroupsTable from "./component/admin/adminchild/Groups";
-import Posts from "./component/admin/adminchild/Posts";
+
+import Admin from "./component/ADMIN/Admin";
+import Account from "./component/ADMIN/adminchild/account";
+import GroupsTable from "./component/ADMIN/adminchild/Groups";
+import Posts from "./component/ADMIN/adminchild/Posts";
+import PostDetail from "./component/postDetail/postDetail";
+
 function App() {
   return (
     <div>
@@ -31,6 +34,7 @@ function App() {
 
         <Route path="/home" element={<Home />}>
           <Route path="/home" element={<Timeline />} />
+          <Route path="/home/post/:post_id/detail" element={<PostDetail />} />
           <Route path="/home/suggestFollow" element={<SuggestFollow />} />
           <Route path="/home/profile/user/:userID" element={<Profile />} />
           <Route path="/home/community/group/:groupID" element={<Groups />} />
