@@ -5,7 +5,10 @@ import { format } from "timeago.js";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 import * as request from "../../utils/request";
 
-function Notification() {
+function Notification(props) {
+  const closeModal = props.closeModal;
+  const setNum = props.setNum;
+  const navigate = useNavigate();
   const [cookies] = useCookies();
   const myID = cookies.userId;
   const [notification, setnotification] = useState([]);
@@ -22,8 +25,26 @@ function Notification() {
     };
     fetchNotification();
   }, [myID]);
-  const handleOffComment = (idNotifi) => {
-    console.log(idNotifi);
+  const handleOffComment = (bao) => {
+    // console.log(bao.postID);
+    const viewNotification = async () => {
+      try {
+        const res = await axios.post(
+          `http://localhost:8080/notification/viewNotifcation`,
+          {
+            notiID: bao.idNotifi,
+          }
+        );
+        if (res) {
+          setNum();
+          closeModal(false);
+          navigate(`/home/post/${bao.postID}/detail`);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    viewNotification();
   };
   return (
     <div className="notification">
@@ -31,7 +52,7 @@ function Notification() {
         notification.map((bao, index) => {
           return (
             <div
-              onClick={() => handleOffComment(bao.idNotifi)}
+              onClick={() => handleOffComment(bao)}
               key={index}
               className={
                 bao.view == 0 ? "notification-child doc" : "notification-child"

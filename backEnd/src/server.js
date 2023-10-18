@@ -45,9 +45,9 @@ io.on("connection", (socket) => {
     const user = activeUsers.find((user) => user.userId == youID);
     if (user) {
       io.to(user.socketId).emit("get_message", data);
-      // console.log("tìm thấy người dùng với youID:", user);
+      console.log("tìm thấy người dùng :", user);
     } else {
-      // console.log("Không tìm thấy người dùng với youID:", youID);
+      // console.log("Không tìm thấy người dùng :", youID);
     }
   });
 
