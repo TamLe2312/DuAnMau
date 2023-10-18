@@ -88,7 +88,7 @@ function Navigation() {
         const response = await axios.get(
           `http://localhost:8080/account/getDataUser/${id}`
         );
-        if (response.data[0].role === 'admin') {
+        if (response.data[0].role === "admin") {
           setIsAdmin(true);
         }
         setUserData(response.data[0]);
@@ -97,10 +97,10 @@ function Navigation() {
       }
     };
     fetchData();
-    // const interval = setInterval(fetchData, 2000); // Chạy hàm fetchData() mỗi 2 giây
-    // return () => {
-    //   clearInterval(interval); // Xóa bỏ interval khi component bị unmount
-    // };
+    const interval = setInterval(fetchData, 2000); // Chạy hàm fetchData() mỗi 2 giây
+    return () => {
+      clearInterval(interval); // Xóa bỏ interval khi component bị unmount
+    };
   }, [id]);
   return (
     <div className="navigation">
@@ -185,14 +185,10 @@ function Navigation() {
         {/* {showMore && ( */}
         <div className={`dropdown-more ${showMore ? "active" : "inactive"}`}>
           <ul className="dropdown-more-ul">
-            {isAdmin ? (
-              <Drop text={admin} path={"home/admin"} />
-            ) : (
-              <></>
-            )}
-            <div onClick={handleMode} className="dropdown-more-title">
+            {isAdmin ? <Drop text={admin} path={"home/admin"} /> : <></>}
+            {/*  <div onClick={handleMode} className="dropdown-more-title">
               <Drop Title={theme} />
-            </div>
+            </div> */}
             <div onClick={handleLogout} className="dropdown-more-title">
               <Drop Title={logout} path={""} />
             </div>

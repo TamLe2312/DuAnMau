@@ -1,3 +1,63 @@
-/* .Heading{
-    color: aqua;
-} */
+.TitleLogoContainerForm {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+}
+
+.LogoImgContainerForm {
+    width: 200px;
+    height: 80px;
+}
+
+.LogoImgContainerForm img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.TitleLogoContainerForm h3 {
+    font-weight: 600;
+}
+
+.FormUser {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+}
+
+.FormContainerRoot {
+    background-color: #fff;
+    padding: 40px 20px;
+    border-radius: 12px;
+}
+
+.form-control {
+    padding: 8px 15px !important;
+    outline: none;
+    border: 1px solid#CACACA !important;
+    font-size: 1rem !important;
+    border-radius: 6px;
+}
+
+.highlightLinkButton {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.highlightLinkButton a {
+    text-decoration: none;
+    color: #0171d3;
+    font-size: 1rem;
+    font-weight: 400;
+}
+
+.buttonFieldFormUser {
+    position: relative;
+    height: 50px;
+    width: 100%;
+    margin-top: 15px;
+    font-weight: 500 !important;
+}
