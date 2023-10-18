@@ -462,6 +462,267 @@ const postProfileUser = (req, res) => {
     }
   );
 };
+const FollowUser = (req, res) => {
+  const { follower_id, followed_id } = req.body;
+  if ((followed_id, follower_id)) {
+    connection.query(
+      `INSERT INTO follows (follower_id,followed_id) VALUES (? , ?)
+    `,
+      [follower_id, followed_id],
+      function (err, results, fields) {
+        if (err) {
+          return res
+            .status(500)
+            .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+        }
+        return res.status(200).json({ success: "Follow thành công" });
+      }
+    );
+  } else {
+    return res
+      .status(400)
+      .json({ error: "Có lỗi xảy ra.Không có follower_id và followed_id" });
+  }
+};
+const UnfollowUser = (req, res) => {
+  const { follower_id, followed_id } = req.body;
+  if ((followed_id, follower_id)) {
+    connection.query(
+      `DELETE FROM follows WHERE follower_id = ? AND followed_id = ?
+    `,
+      [follower_id, followed_id],
+      function (err, results, fields) {
+        if (err) {
+          console.error(err);
+          return res
+            .status(500)
+            .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+        }
+        return res.status(200).json({ success: "Unfollow thành công" });
+      }
+    );
+  } else {
+    return res
+      .status(400)
+      .json({ error: "Có lỗi xảy ra.Không có follower_id và followed_id" });
+  }
+};
+const FollowerData = (req, res) => {
+  const page = req.params.page || 1;
+  const idUser = parseInt(req.params.id);
+  if (idUser) {
+    if (page != 0) {
+      const limit = 5;
+      const offset = (page - 1) * limit;
+      connection.query(
+        `SELECT users.id, users.name, users.username, users.avatar
+FROM follows
+INNER JOIN users ON follows.follower_id = users.id
+WHERE follows.followed_id = ?
+LIMIT ? OFFSET ?`,
+        [idUser, limit, offset],
+        function (err, results, fields) {
+          if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Lỗi máy chủ" });
+          }
+          if (results.length > 0) {
+            return res.status(200).json(results);
+          } else {
+            return res.status(400).json({ error: "Không có người dùng" });
+          }
+        }
+      );
+    } else {
+      connection.query(
+        `SELECT users.id, users.name, users.username, users.avatar
+FROM follows
+INNER JOIN users ON follows.follower_id = users.id
+WHERE follows.followed_id = ?`,
+        [idUser],
+        function (err, results, fields) {
+          if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Lỗi máy chủ" });
+          }
+          if (results.length > 0) {
+            return res.status(200).json(results);
+          } else {
+            return res.status(400).json({ error: "Không có người dùng" });
+          }
+        }
+      );
+    }
+  } else {
+    return res.status(400).json({ error: "Không có Id User" });
+  }
+};
+const FollowedData = (req, res) => {
+  const page = req.params.page || 1;
+  const idUser = parseInt(req.params.id);
+  if (idUser) {
+    if (page != 0) {
+      const limit = 5;
+      const offset = (page - 1) * limit;
+      connection.query(
+        `SELECT users.id, users.name, users.username, users.avatar
+FROM follows
+INNER JOIN users ON follows.followed_id = users.id
+WHERE follows.follower_id = ?
+LIMIT ? OFFSET ?`,
+        [idUser, limit, offset],
+        function (err, results, fields) {
+          if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Lỗi máy chủ" });
+          }
+          if (results.length > 0) {
+            return res.status(200).json(results);
+          } else {
+            return res.status(400).json({ error: "Không có người dùng" });
+          }
+        }
+      );
+    } else {
+      connection.query(
+        `SELECT users.id, users.name, users.username, users.avatar
+FROM follows
+INNER JOIN users ON follows.followed_id = users.id
+WHERE follows.follower_id = ?`,
+        [idUser],
+        function (err, results, fields) {
+          if (err) {
+            console.error(err);
+            return res.status(500).json({ error: "Lỗi máy chủ" });
+          }
+          if (results.length > 0) {
+            return res.status(200).json(results);
+          } else {
+            return res.status(400).json({ error: "Không có người dùng" });
+          }
+        }
+      );
+    }
+  } else {
+    return res.status(400).json({ error: "Không có Id User" });
+  }
+};
+const suggestFollow = (req, res) => {
+  const idUser = parseInt(req.params.id);
+  const limit = parseInt(req.params.limit) || 5;
+  if (idUser) {
+    connection.query(
+      "SELECT id, username, name, avatar FROM users WHERE id <> ? AND id NOT IN (SELECT followed_id FROM follows WHERE follower_id = ?) ORDER BY RAND() LIMIT ?",
+      [idUser, idUser, limit],
+      function (err, results, fields) {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
+        if (results.length > 0) {
+          return res.status(200).json(results);
+        } else {
+          return res.status(400).json({ error: "Không có người dùng" });
+        }
+      }
+    );
+  }
+};
+const countFollow = (req, res) => {
+  const idUser = parseInt(req.params.userId);
+  connection.query(
+    `SELECT
+    (SELECT COUNT(*) FROM follows WHERE followed_id = ?) AS followerCount,
+    (SELECT COUNT(*) FROM follows WHERE follower_id = ?) AS followingCount
+`,
+    [idUser, idUser],
+    function (err, results, fields) {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Lỗi máy chủ" });
+      }
+      if (results.length > 0) {
+        return res.status(200).json(results);
+      } else {
+        return res.status(400).json({ error: "Không có người dùng" });
+      }
+    }
+  );
+};
+const searchUserFollower = (req, res) => {
+  const searchValue = req.body.searchUser.searchUser;
+  const idUser = req.body.idUser;
+  if (searchValue) {
+    connection.query(
+      `SELECT u.* 
+    FROM users u
+    INNER JOIN follows f ON u.id = f.follower_id
+    WHERE (u.name LIKE CONCAT('%', ?, '%') OR u.username LIKE CONCAT('%', ?, '%'))
+    AND f.followed_id = ?`,
+      [searchValue, searchValue, idUser],
+      async function (err, results, fields) {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
+        if (results.length > 0) {
+          return res.status(200).json(results);
+        } else {
+          return res.status(400).json({ error: "Người dùng không tồn tại" });
+        }
+      }
+    );
+  }
+};
+const searchUserFollowed = (req, res) => {
+  const searchFollowed = req.body.searchFollowed.searchFollowed;
+  const idUser = req.body.idUser;
+  if (searchFollowed) {
+    connection.query(
+      `SELECT u.* 
+    FROM users u
+    INNER JOIN follows f ON u.id = f.followed_id
+    WHERE (u.name LIKE CONCAT('%', ?, '%') OR u.username LIKE CONCAT('%', ?, '%'))
+    AND f.follower_id = ?`,
+      [searchFollowed, searchFollowed, idUser],
+      function (err, results, fields) {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
+        if (results.length > 0) {
+          return res.status(200).json(results);
+        } else {
+          return res.status(400).json({ error: "Người dùng không tồn tại" });
+        }
+      }
+    );
+  }
+};
+const searchUserProfile = (req, res) => {
+  const searchValue = req.params.value;
+  const excludedUserId = req.params.id;
+
+  if (searchValue) {
+    connection.query(
+      `SELECT * FROM users
+       WHERE (username LIKE CONCAT('%', ?, '%') OR name LIKE CONCAT('%', ?, '%'))
+       AND id <> ?`,
+      [searchValue, searchValue, excludedUserId],
+      async function (err, results, fields) {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
+        if (results.length > 0) {
+          return res.status(200).json(results);
+        } else {
+          return res.status(400).json({ error: "Người dùng không tồn tại" });
+        }
+      }
+    );
+  }
+};
 
 module.exports = {
   login,
@@ -477,4 +738,13 @@ module.exports = {
   ChangePassword,
   postProfileUser,
   CountPost,
+  FollowUser,
+  UnfollowUser,
+  FollowerData,
+  FollowedData,
+  suggestFollow,
+  countFollow,
+  searchUserFollower,
+  searchUserFollowed,
+  searchUserProfile,
 };

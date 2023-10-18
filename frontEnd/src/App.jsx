@@ -11,16 +11,19 @@ import Profile from "./component/profile/Profile";
 import Community from "./component/community/Community";
 import Messenger from "./component/messenger/Messenger";
 import Groups from "./component/group/Groups";
-
+import SuggestFollow from "./component/profile/suggestFollow/suggestFollow";
 //React Toastify
 
-import { Toaster } from 'sonner'
+import { Toaster } from "sonner";
 
 import "react-toastify/dist/ReactToastify.css";
+
 import Admin from "./component/ADMIN/Admin";
 import Account from "./component/ADMIN/adminchild/account";
-import GroupsTable from "./component/ADMIN/adminchild/Groups"
+import GroupsTable from "./component/ADMIN/adminchild/Groups";
 import Posts from "./component/ADMIN/adminchild/Posts";
+import PostDetail from "./component/postDetail/postDetail";
+
 function App() {
   return (
     <div>
@@ -31,6 +34,8 @@ function App() {
 
         <Route path="/home" element={<Home />}>
           <Route path="/home" element={<Timeline />} />
+          <Route path="/home/post/:post_id/detail" element={<PostDetail />} />
+          <Route path="/home/suggestFollow" element={<SuggestFollow />} />
           <Route path="/home/profile/user/:userID" element={<Profile />} />
           <Route path="/home/community/group/:groupID" element={<Groups />} />
           <Route path="/home/profile" element={<Profile />} />
@@ -48,8 +53,6 @@ function App() {
       </Routes>
 
       <Toaster position="top-right" expand={false} richColors />
-
-
     </div>
   );
 }

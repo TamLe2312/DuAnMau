@@ -7,11 +7,21 @@ import Comments from "./Comments";
 import { useState } from "react";
 function ListComment(props) {
   //  user(tk), , avatar, , name, id, userid
-  const img = props.img;
-  const title = props.title;
-  const avatar = props.avatar;
-  const user = props.user;
-  const name = props.name;
+  // const img = props.img;
+  // const title = props.title;
+  // const avatar = props.avatar;
+  // const user = props.user;
+  // const name = props.name;
+  const {
+    name,
+    user,
+    userid,
+    avatar,
+    title,
+    img,
+    notification,
+    unNotification,
+  } = props;
   // console.log(props.handlerun);
 
   const [indexImg, setindexImg] = useState(0);
@@ -83,7 +93,10 @@ function ListComment(props) {
           user={user}
           avatar={avatar}
           name={name}
+          userid={userid}
           handlerun={props.handlerun}
+          notification={notification}
+          unNotification={unNotification}
         />
       </div>
     </div>

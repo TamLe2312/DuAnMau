@@ -1,37 +1,83 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import "./notification.css";
+import { useCookies } from "react-cookie";
+import axios from "axios";
+import { format } from "timeago.js";
+import { Link, NavLink, useNavigate } from "react-router-dom";
 
-function Notification() {
-  const [thongBao, setThongBao] = useState([
-    {
-      name: "kinomi",
-      img: "https://i.pinimg.com/564x/cf/bd/73/cfbd73d81e0eca56870d457adb92f667.jpg",
-      title: "đã thích hình ảnh của bạn",
-      time: 12,
-    },
-    {
-      name: "girl",
-      img: "https://i.pinimg.com/564x/90/7b/23/907b236e0b16b593e9802c030f821fce.jpg",
-      title: "đã Bình luận hình ảnh của bạn",
-      time: 60,
-    },
-  ]);
-
+function Notification(props) {
+  const closeModal = props.closeModal;
+  const setNum = props.setNum;
+  const navigate = useNavigate();
+  const [cookies] = useCookies();
+  const myID = cookies.userId;
+  const [notification, setnotification] = useState([]);
+  useEffect(() => {
+    const fetchNotification = async () => {
+      try {
+        const res = await axios.get(
+          `http://localhost:8080/notification/listNotification/${myID}`
+        );
+        if (res) {
+          setnotification(res.data);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    fetchNotification();
+  }, [myID]);
+  const handleOffComment = (bao) => {
+    // console.log(bao.postID);
+    const viewNotification = async () => {
+      try {
+        const res = await axios.post(
+          `http://localhost:8080/notification/viewNotifcation`,
+          {
+            notiID: bao.idNotifi,
+          }
+        );
+        if (res) {
+          setNum();
+          closeModal(false);
+          navigate(`/home/post/${bao.postID}/detail`);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    viewNotification();
+  };
   return (
     <div className="notification">
-      {thongBao.length !== 0 ? (
-        thongBao.map((bao, index) => {
+      {notification.length > 0 ? (
+        notification.map((bao, index) => {
           return (
-            <div key={index} className="notification-child doc">
+            <div
+              onClick={() => handleOffComment(bao)}
+              key={index}
+              className={
+                bao.view == 0 ? "notification-child doc" : "notification-child"
+              }
+            >
               <div className="notification-img">
-                <img src={bao.img} alt="" />
+                <img
+                  src={
+                    bao.avatar === null
+                      ? "https://i.pinimg.com/564x/ff/27/74/ff2774007991b9edb1dfa27dcbac9278.jpg"
+                      : bao.avatar
+                  }
+                  alt=""
+                />
               </div>
               <div className="notification-title">
                 <p>
-                  <span>{bao.name} </span>
+                  <Link to={`/home/profile/user/${bao.userID}`}>
+                    {bao.name === null ? bao.username : bao.name}{" "}
+                  </Link>
                   {bao.title}
                 </p>
-                <span>{bao.time} giờ trước</span>
+                <span>{format(bao.timepost)}</span>
               </div>
             </div>
           );

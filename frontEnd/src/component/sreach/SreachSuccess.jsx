@@ -1,19 +1,27 @@
-import { useState } from "react";
+import axios from "axios";
+import { useEffect, useState } from "react";
 import ClearIcon from "@mui/icons-material/Clear";
+import { useCookies } from "react-cookie";
+import { Link } from "react-router-dom";
+import { toast } from "sonner";
 
 function SreachSuccess({ search }) {
-  const [users, setUsers] = useState([
-    {
-      name: "play soccer",
-      img: "https://i.pinimg.com/564x/ba/4c/58/ba4c58b78578bac140ed6ea1886d6b65.jpg",
-      title: "gái đẹp nhất",
-    },
-    {
-      name: "gái vip nhất",
-      img: "https://i.pinimg.com/736x/68/12/92/68129202dda9dd80d4e3ac4715ba39d8.jpg",
-      title: "gái đẹp nhất",
-    },
-  ]);
+  const [users, setUsers] = useState([]);
+  const [cookies] = useCookies(["session"]);
+  const id = cookies.userId;
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          `http://localhost:8080/account/searchUserProfile/${search}&${id}`
+        ); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
+        setUsers(response.data);
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+    fetchData();
+  }, [search]);
 
   return (
     <div>
@@ -23,11 +31,31 @@ function SreachSuccess({ search }) {
           <div key={index} className="SreachSuccess-parent">
             <div className="SreachSuccess">
               <div className="SreachSuccess-title-img">
-                <img src={user.img} alt="" />
+                <Link to={`/home/profile/user/${user.id}`}>
+                  {user.avatar ? (
+                    <img
+                      className="ProfileAvatarImg"
+                      src={user.avatar}
+                      alt="Avatar"
+                    />
+                  ) : (
+                    <img
+                      className="ProfileAvatarImg"
+                      src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg"
+                      alt="Avatar"
+                    />
+                  )}
+                </Link>
               </div>
               <div className="SreachSuccess-title">
-                <span className="SreachSuccess-title-name">{user.name}</span>
-                <span className="SreachSuccess-title-name2">{user.title}</span>
+                <Link to={`/home/profile/user/${user.id}`}>
+                  <span className="SreachSuccess-title-name">{user.name}</span>
+                </Link>
+                <Link to={`/home/profile/user/${user.id}`}>
+                  <span className="SreachSuccess-title-name2">
+                    {user.username}
+                  </span>
+                </Link>
               </div>
             </div>
             <button>

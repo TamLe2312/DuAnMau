@@ -172,14 +172,14 @@ function ContextNews(props) {
               >
                 Bài viết
               </button>
-              <button
+              {/*   <button
                 // onClick={dataa}
                 disabled={!content}
                 type="button"
                 className="btn btn-primary"
               >
                 Tin
-              </button>
+              </button> */}
             </div>
           ) : (
             <div>
