@@ -14,7 +14,7 @@ import MyModal from "../../modal/Modal";
 import MorePost from "./MorePost";
 import { useCookies } from "react-cookie";
 import ListComment from "./ListComment";
-
+import { APP_WEB } from "../../../utils/config";
 function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
   const focusInput = useRef();
   const [cookies] = useCookies();
@@ -431,7 +431,7 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
             <>
               <img
                 src={
-                  "http://localhost:8080/images/" +
+                  `${APP_WEB}images/` +
                   (img.length === 1 ? img[0].img : img[run].img)
                 }
                 alt=""
