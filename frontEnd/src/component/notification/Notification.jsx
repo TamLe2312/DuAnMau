@@ -24,12 +24,16 @@ function Notification() {
     };
     fetchNotification();
   }, [myID]);
+  const handleOffComment = (idNotifi) => {
+    console.log(idNotifi);
+  };
   return (
     <div className="notification">
       {notification.length > 0 ? (
         notification.map((bao, index) => {
           return (
             <div
+              onClick={() => handleOffComment(bao.idNotifi)}
               key={index}
               className={
                 bao.view == 0 ? "notification-child doc" : "notification-child"
