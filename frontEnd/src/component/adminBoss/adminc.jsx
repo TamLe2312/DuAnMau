@@ -1,7 +1,7 @@
 import { Link, Outlet } from "react-router-dom";
 import "./admin.css";
 
-function Admin() {
+function Adminn() {
   return (
     <div className="admin">
       <div className="admin-nav">
@@ -25,4 +25,4 @@ function Admin() {
   );
 }
 
-export default Admin;
+export default Adminn;
