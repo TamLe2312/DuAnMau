@@ -14,6 +14,7 @@ const connection = require("./config/database");
 const session = require("express-session");
 const messenger = require("./routes/messengerApi");
 const adminApi = require("./routes/adminApi");
+const notification = require("./routes/notificationApi");
 const app = express();
 // ---------------------------
 // const http = require("http");
@@ -35,7 +36,7 @@ io.on("connection", (socket) => {
         userId: newUserID,
         socketId: socket.id,
       });
-      // console.log("Người online:", activeUsers);
+      console.log("Người online:", activeUsers);
       io.emit("get_user", activeUsers);
     }
   });
@@ -93,6 +94,8 @@ app.use("/groups", groups);
 app.use("/messenger", messenger);
 
 app.use("/admin", adminApi);
+
+app.use("/notification", notification);
 
 server.listen(port, () => {
   console.log(`Sever app listening on port ${port}`);

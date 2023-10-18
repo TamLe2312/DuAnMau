@@ -19,12 +19,18 @@
   border-radius: 50%;
   object-fit: cover;
 }
-.notification-title > p span {
+.notification-title > p a {
   font-weight: 500;
+  text-decoration: none;
+  color: black;
 }
 .notification-title > p {
   margin-bottom: 8px;
 }
 .notification-title > span {
   font-size: 0.9rem;
+}
+.notification-child:hover {
+  cursor: pointer;
+  background: rgb(220, 213, 213);
 }
