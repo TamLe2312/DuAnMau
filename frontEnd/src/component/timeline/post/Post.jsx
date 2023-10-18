@@ -181,6 +181,24 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
     }
   };
 
+  const unNotification = async (postID, sender_id, notifi) => {
+    try {
+      const res = await axios.post(
+        `http://localhost:8080/notification/unNotifcation`,
+        {
+          postID: postID,
+          sender_id: sender_id,
+          title: notifi,
+        }
+      );
+      if (res) {
+        console.log("Bạn đã hủy thông báo tới bài viết: " + postID);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const handleLikePost = () => {
     setlike((pre) => pre - 1);
     setliked(false);
@@ -206,7 +224,9 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
             }
           );
           if (res) {
-            console.log("bạn đã bỏ thích post: " + id);
+            const thongBao = "Đã thích bài viết của bạn";
+            await unNotification(id, myID, thongBao);
+            // console.log("bạn đã bỏ thích post: " + id);
           }
         }
       };
@@ -580,6 +600,7 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
               handlerun={handlerun}
               //      await notification(id, userid, thongBao, myID);
               notification={notification}
+              unNotification={unNotification}
             />
           ) : (
             <MorePost

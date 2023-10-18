@@ -17,11 +17,13 @@ import SuggestFollow from "./component/profile/suggestFollow/suggestFollow";
 import { Toaster } from "sonner";
 
 import "react-toastify/dist/ReactToastify.css";
+
 import Admin from "./component/ADMIN/Admin";
 import Account from "./component/ADMIN/adminchild/account";
 import GroupsTable from "./component/ADMIN/adminchild/Groups";
 import Posts from "./component/ADMIN/adminchild/Posts";
 import PostDetail from "./component/postDetail/postDetail";
+
 function App() {
   return (
     <div>
