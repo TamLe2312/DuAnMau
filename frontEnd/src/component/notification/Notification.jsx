@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
 import "./notification.css";
 import { useCookies } from "react-cookie";
-import axios from "axios";
 import { format } from "timeago.js";
 import { Link, NavLink, useNavigate } from "react-router-dom";
+import * as request from "../../utils/request";
 
 function Notification() {
   const [cookies] = useCookies();
@@ -12,9 +12,7 @@ function Notification() {
   useEffect(() => {
     const fetchNotification = async () => {
       try {
-        const res = await axios.get(
-          `http://localhost:8080/notification/listNotification/${myID}`
-        );
+        const res = await request.get(`notification/listNotification/${myID}`);
         if (res) {
           setnotification(res.data);
         }

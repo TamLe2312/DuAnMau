@@ -1,7 +1,7 @@
-import axios from "axios";
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useCookies } from "react-cookie";
+import * as request from "../../../utils/request";
 
 function SuggestFollow() {
   const [cookies] = useCookies(["session"]);
@@ -14,8 +14,8 @@ function SuggestFollow() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(
-          `http://localhost:8080/account/suggestFollow/${idUser}&20`
+        const response = await request.get(
+          `account/suggestFollow/${idUser}&20`
         );
         setLoading(false);
         setDataSuggestFollow(response.data);
@@ -29,7 +29,7 @@ function SuggestFollow() {
 
   const handleAdd = async (id) => {
     try {
-      let res = await axios.post("http://localhost:8080/account/followUser", {
+      let res = await request.post("account/followUser", {
         follower_id: idUser,
         followed_id: id,
       });
@@ -52,7 +52,7 @@ function SuggestFollow() {
 
   const handleRemove = async (id) => {
     try {
-      let res = await axios.post("http://localhost:8080/account/unfollowUser", {
+      let res = await request.post("account/unfollowUser", {
         follower_id: idUser,
         followed_id: id,
       });

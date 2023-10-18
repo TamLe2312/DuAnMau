@@ -3,12 +3,12 @@ import Post from "./post/Post";
 import Suggestions from "./Suggestions";
 import "./timeline.css";
 import Tin from "./tin/Tin";
-import axios from "axios";
 import { Context } from "../../page/home/home";
 import { useContext } from "react";
 import InfiniteScroll from "react-infinite-scroll-component";
 import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt";
 import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
+import * as request from "../../utils/request";
 function Timeline() {
   const [pageData, setpageData] = useState(2);
 
@@ -17,7 +17,7 @@ function Timeline() {
 
   const fetchData = async () => {
     try {
-      const response = await axios.get(`http://localhost:8080/post/datapost/1`);
+      const response = await request.get(`post/datapost/1`);
       if (response.status === 200) {
         const datas = response.data;
         setPostsData(datas);
@@ -50,9 +50,7 @@ function Timeline() {
   const fetchDataNew = () => {
     setpageData(pageData + 1);
     const dataNew = async () => {
-      const response = await axios.get(
-        `http://localhost:8080/post/datapost/${pageData}`
-      );
+      const response = await request.get(`post/datapost/${pageData}`);
       if (response.status === 200) {
         const datas = response.data;
         setPostsData(postsData.concat(datas));

@@ -4,6 +4,7 @@ import ClearIcon from "@mui/icons-material/Clear";
 import { useCookies } from "react-cookie";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import * as request from "../../utils/request";
 
 function SreachSuccess({ search }) {
   const [users, setUsers] = useState([]);
@@ -12,8 +13,8 @@ function SreachSuccess({ search }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:8080/account/searchUserProfile/${search}&${id}`
+        const response = await request.get(
+          `account/searchUserProfile/${search}&${id}`
         ); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
         setUsers(response.data);
       } catch (error) {

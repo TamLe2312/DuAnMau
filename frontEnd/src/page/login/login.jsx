@@ -4,6 +4,7 @@ import { useCookies } from "react-cookie";
 import { Link, useNavigate } from "react-router-dom";
 import Validation from "../../component/validation/validation";
 import Logo from "../../../uploads/Logo1.png";
+import * as request from "../../utils/request";
 
 import { toast } from "sonner";
 
@@ -22,7 +23,7 @@ function Login() {
 
   const [error, setError] = useState({});
   const [loading, setLoading] = useState(false);
-  const [cookies, setCookie] = useCookies(["userId"]);
+  const [cookies, setCookie] = useCookies(["session"]);
   const [checkLogin, setCheckLogin] = useState("");
 
   const handleChange = (e) => {
@@ -35,7 +36,7 @@ function Login() {
     setError(Validation(values));
     try {
       setLoading(true);
-      let res = await axios.post("http://localhost:8080/account/login", {
+      let res = await request.post("account/login", {
         username: values.username.trim(),
         password: values.password,
       });

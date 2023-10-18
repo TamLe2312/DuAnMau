@@ -2,9 +2,9 @@ import "./detailmess.css";
 import InputEmoji from "react-input-emoji";
 import SendIcon from "@mui/icons-material/Send";
 import { useEffect, useRef, useState } from "react";
-import axios from "axios";
 import { format } from "timeago.js";
 import { io } from "socket.io-client";
+import * as request from "../../utils/request";
 
 function DetailMess(props) {
   const socket = useRef();
@@ -23,9 +23,7 @@ function DetailMess(props) {
   // data user
   const FetchDataUser = async (yID) => {
     try {
-      const res = await axios.get(
-        `http://localhost:8080/account/detail/${yID}`
-      );
+      const res = await request.get(`account/detail/${yID}`);
       if (res) {
         setuser(res.data[0]);
       }
@@ -37,9 +35,7 @@ function DetailMess(props) {
   // data mess
   const fetchListMess = async (me, you) => {
     try {
-      const res = await axios.get(
-        `http://localhost:8080/messenger/listMes/${me}/${you}`
-      );
+      const res = await request.get(`messenger/listMes/${me}/${you}`);
       if (res) {
         setListmess(res.data);
       }
@@ -66,7 +62,7 @@ function DetailMess(props) {
     const textMes = text.trim();
     try {
       setLoading(true);
-      const res = await axios.post(`http://localhost:8080/messenger/create`, {
+      const res = await request.post(`messenger/create`, {
         sender_id: myID,
         recipient_id: user.id,
         message: textMes,
@@ -135,7 +131,7 @@ function DetailMess(props) {
               <img
                 src={
                   user.avatar
-                    ? "http://localhost:8080/images/" + user.avatar
+                    ? "images/" + user.avatar
                     : "https://i.pinimg.com/564x/81/05/9b/81059b2b505bcf50cdbd09b1ca7d4dae.jpg"
                 }
                 alt=""

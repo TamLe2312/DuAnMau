@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Link, useNavigate } from "react-router-dom";
 import Validation from "../../component/validation/validation";
 import Logo from "../../../uploads/Logo1.png";
+import * as request from "../../utils/request";
 import "./register.css";
 
 function Register() {
@@ -34,7 +35,7 @@ function Register() {
     setError(Validation(values));
     try {
       setLoading(true);
-      const res = await axios.post("http://localhost:8080/account/register", {
+      const res = await request.post("account/register", {
         username: values.username.trim(),
         password: values.password,
         email: values.email,

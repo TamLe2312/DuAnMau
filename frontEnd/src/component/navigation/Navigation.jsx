@@ -21,6 +21,7 @@ import ImgNews from "../createNews/ImgNews";
 import ContentNews from "../createNews/ContentNews";
 import { useCookies } from "react-cookie";
 import imageLogo from "../../../uploads/Logo1.png";
+import request from "../../utils/request";
 
 function Navigation() {
   const Navigate = useNavigate();
@@ -85,9 +86,7 @@ function Navigation() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:8080/account/getDataUser/${id}`
-        );
+        const response = await request.get(`account/getDataUser/${id}`);
         if (response.data[0].role === "admin") {
           setIsAdmin(true);
         }

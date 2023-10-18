@@ -3,9 +3,9 @@ import "./new.scss";
 import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useCookies } from "react-cookie";
-import axios from "axios";
 import { Context } from "../../page/home/home";
 import { useContext } from "react";
+import * as request from "../../utils/request";
 function ContextNews(props) {
   const dataa = useContext(Context);
   const location = useLocation();
@@ -43,9 +43,7 @@ function ContextNews(props) {
       const fetchData = async () => {
         // console.log(id);
         try {
-          const response = await axios.get(
-            `http://localhost:8080/account/getDataUser/${id}`
-          ); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
+          const response = await request.get(`account/getDataUser/${id}`); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
           setUserData(response.data[0]);
         } catch (error) {
           console.error("Error fetching user data:", error);
@@ -70,15 +68,12 @@ function ContextNews(props) {
     const formData = new FormData();
     if (imgs.length > 0) {
       try {
-        const response = await axios.post(
-          "http://localhost:8080/post/create",
-          postData
-        );
+        const response = await request.post("post/create", postData);
         imgs.forEach((img, index) => {
           formData.append(`image${index}`, img);
         });
         formData.append("post_id", response.data.lastID);
-        await axios.post("http://localhost:8080/post/upimgs", formData);
+        await request.post("post/upimgs", formData);
         setSuccess(false);
       } catch (error) {
         setE(true);
@@ -86,7 +81,7 @@ function ContextNews(props) {
       }
     } else {
       try {
-        await axios.post("http://localhost:8080/post/create", postData);
+        await request.post("post/create", postData);
         setSuccess(false);
       } catch (error) {
         setE(true);
