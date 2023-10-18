@@ -21,12 +21,9 @@ function Profile() {
   const { userID } = useParams();
   const [postsData, setPostsData] = useState([]);
 
-  // useEffect(() => {
-  //   console.log("Khách: " + userID);
-  // }, []);
-
   const [showModalAvatar, setShowModalAvatar] = useState(false);
   const [showModalFollower, setShowModalFollower] = useState(false);
+  const [showModalFollowed, setShowModalFollowed] = useState(false);
   const [showModalInformationProfile, setShowModalInformationProfile] =
     useState(false);
   const [selectedImage, setSelectedImage] = useState(null);
@@ -43,6 +40,7 @@ function Profile() {
   const [searchValue, setSearchValue] = useState("");
   const [userData, setUserData] = useState("");
   const [followerData, setFollowerData] = useState([]);
+  const [followedData, setFollowedData] = useState([]);
   // id account
   const id = userID ? userID : cookies.userId;
   const [CountPost, setCountPost] = useState(0);
@@ -54,10 +52,21 @@ function Profile() {
     setShowModalAvatar(true);
   };
   const handleCloseModalFollower = () => {
+    setSearchValue((preSearchValue) => ({
+      ...preSearchValue,
+      searchUser: "",
+    }));
+    setSearchUserFollower([]);
     setShowModalFollower(false);
   };
   const handleShowModalFollower = () => {
     setShowModalFollower(true);
+  };
+  const handleCloseModalFollowed = () => {
+    setShowModalFollowed(false);
+  };
+  const handleShowModalFollowed = () => {
+    setShowModalFollowed(true);
   };
   const handleCloseModalInformationProfile = () => {
     setShowModalInformationProfile(false);
@@ -68,38 +77,51 @@ function Profile() {
       [e.target.name]: e.target.value,
     }));
   };
-  const handleKeyEnter = async (e) => {
+  const [searchUserFollower, setSearchUserFollower] = useState([]);
+  const [searchUserFollowed, setSearchUserFollowed] = useState([]);
+  const handleKeyEnterSearchFollower = async (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
-      console.log("Hello");
-      /*    try {
+      try {
         const response = await axios.post(
-          "http://localhost:8080/groups/searchGroup",
-          searchValue
+          "http://localhost:8080/account/searchUserFollower",
+          {
+            searchUser: searchValue,
+            idUser: id,
+          }
         );
-        console.log(response);
-        if (response && response.data) {
-          const formattedData = response.data.map((item) => {
-            const createdAt = item.createdAt;
-            const formattedDate = moment(createdAt).format("MMMM Do, YYYY");
-            return {
-              ...item,
-              created_at: formattedDate,
-            };
-          });
-          setSearchGroup(formattedData);
-        } else {
-          setSearchGroup([]);
-        }
+        setSearchUserFollower(response.data);
       } catch (err) {
-        if (err.response && err.response.status === 400) {
-          toast.error("Đã xảy ra lỗi khi tìm kiếm");
-        }
+        console.error(err);
+        toast.error(err.response.data.error);
       }
     }
     if (e.key === "Backspace" || e.key === "Delete") {
-      setSearchGroup([]);
-    } */
+      setSearchUserFollower([]);
+    }
+  };
+  const handleKeyEnterSearchFollowed = async (e) => {
+    if (e.key === "Enter") {
+      e.preventDefault();
+      try {
+        const response = await axios.post(
+          "http://localhost:8080/account/searchUserFollowed",
+          {
+            searchFollowed: searchValue,
+            idUser: id,
+          }
+        );
+        const updatedData = response.data.map((item) => {
+          return { ...item, isFollow: true };
+        });
+        setSearchUserFollowed(updatedData);
+      } catch (err) {
+        console.error(err);
+        toast.error(err.response.data.error);
+      }
+    }
+    if (e.key === "Backspace" || e.key === "Delete") {
+      setSearchUserFollowed([]);
     }
   };
   const handleShowModalInformationProfile = () => {
@@ -264,10 +286,44 @@ function Profile() {
         const response = await axios.get(
           `http://localhost:8080/account/followerData/${id}&1`
         );
-        console.log(response);
         setFollowerData(response.data);
       } catch (error) {
         console.error("Error fetching user data:", error);
+      }
+    };
+    fetchData();
+  }, [id]);
+  useEffect(() => {
+    const fetchData = async () => {
+      if (id === cookies.userId) {
+        try {
+          const response = await axios.get(
+            `http://localhost:8080/account/followedData/${id}&1`
+          );
+          const updatedData = response.data.map((item) => {
+            return { ...item, isFollow: true };
+          });
+          setFollowedData(updatedData);
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
+      } else {
+        try {
+          const response = await axios.get(
+            `http://localhost:8080/account/followedData/${id}&1`
+          );
+          const updatedData = response.data.map((item) => {
+            if (item.id === cookies.userId) {
+              return { ...item, isFollowme: true };
+            } else {
+              return { ...item, isFollow: true };
+            }
+          });
+
+          setFollowedData(updatedData);
+        } catch (error) {
+          console.error("Error fetching user data:", error);
+        }
       }
     };
     fetchData();
@@ -287,25 +343,123 @@ function Profile() {
     fetchData();
   }, [id]);
   const [pageData, setpageData] = useState(2);
-  const [isMoreDetail, setIsMoreDetail] = useState(false);
+  const [isMoreDetailFollower, setIsMoreDetailFollower] = useState(false);
+  const [isMoreDetailFollowed, setIsMoreDetailFollowed] = useState(false);
   const handleMoreDetailFollower = async () => {
     try {
       const response = await axios.get(
         `http://localhost:8080/account/followerData/${id}&0`
       );
       setFollowerData(response.data);
-      setIsMoreDetail(true);
+      setIsMoreDetailFollower(true);
     } catch (error) {
       console.error("Error fetching user data:", error);
     }
   };
-  /*     const fetchDataFollowerNew = (res) => {
-      const dataNew = async () => {
-        setFollowerData(res);
-        console.log(followerData);
-      };
-      dataNew();
-    }; */
+  const handleMoreDetailFollowed = async () => {
+    try {
+      const response = await axios.get(
+        `http://localhost:8080/account/followedData/${id}&0`
+      );
+      const updatedData = response.data.map((item) => {
+        return { ...item, isFollow: true };
+      });
+      setFollowedData(updatedData);
+      setIsMoreDetailFollowed(true);
+    } catch (error) {
+      console.error("Error fetching user data:", error);
+    }
+  };
+  const handleAdd = async (idFollowed) => {
+    console.log(id, idFollowed);
+    if (id === cookies.userId) {
+      console.log("Bằng ID");
+      /*  try {
+    let res = await axios.post("http://localhost:8080/account/followUser", {
+      follower_id: id,
+      followed_id: idFollowed,
+    });
+    if (res.data.success) {
+      toast.success(res.data.success);
+      if (searchUserFollowed && searchUserFollowed.length > 0) {
+        setSearchUserFollowed((prevData) =>
+          prevData.map((data) =>
+            data.id === idFollowed ? { ...data, isFollow: true } : data
+          )
+        );
+      }
+      setFollowedData((prevData) =>
+        prevData.map((data) =>
+          data.id === idFollowed ? { ...data, isFollow: true } : data
+        )
+      );
+    }
+  } catch (error) {
+    console.error(error);
+  } */
+    } else {
+      console.log("Không bằng ID");
+    }
+  };
+
+  const handleRemove = async (idFollowed) => {
+    console.log(id, idFollowed);
+    if (id === cookies.userId) {
+      try {
+        let res = await axios.post(
+          "http://localhost:8080/account/unfollowUser",
+          {
+            follower_id: id,
+            followed_id: idFollowed,
+          }
+        );
+        if (res.data.success) {
+          toast.success(res.data.success);
+          if (searchUserFollowed && searchUserFollowed.length > 0) {
+            setSearchUserFollowed((prevData) =>
+              prevData.map((data) =>
+                data.id === idFollowed ? { ...data, isFollow: false } : data
+              )
+            );
+          }
+          setFollowedData((prevData) =>
+            prevData.map((data) =>
+              data.id === idFollowed ? { ...data, isFollow: false } : data
+            )
+          );
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      try {
+        let res = await axios.post(
+          "http://localhost:8080/account/unfollowUser",
+          {
+            follower_id: cookies.userId,
+            followed_id: idFollowed,
+          }
+        );
+        if (res.data.success) {
+          toast.success(res.data.success);
+          if (searchUserFollowed && searchUserFollowed.length > 0) {
+            setSearchUserFollowed((prevData) =>
+              prevData.map((data) =>
+                data.id === idFollowed ? { ...data, isFollow: false } : data
+              )
+            );
+          }
+          setFollowedData((prevData) =>
+            prevData.map((data) =>
+              data.id === idFollowed ? { ...data, isFollow: false } : data
+            )
+          );
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    }
+  };
   useEffect(() => {
     setFollowerData(followerData);
   }, [followerData]);
@@ -338,6 +492,24 @@ function Profile() {
       }
     };
     fetchDataCountPost();
+  }, [id]);
+  const [totalFollower, setTotalFollower] = useState(0);
+  const [totalFollowed, setTotalFollowed] = useState(0);
+  useEffect(() => {
+    const fetchDataCountFollow = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get(
+          `http://localhost:8080/account/countFollow/${id}`
+        );
+        setTotalFollower(response.data[0].followerCount);
+        setTotalFollowed(response.data[0].followingCount);
+        setLoading(false);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchDataCountFollow();
   }, [id]);
   return (
     <>
@@ -563,7 +735,8 @@ function Profile() {
                     </span>
                     <span className="ProfileFollowButtonLink">
                       <a onClick={handleShowModalFollower}>
-                        Có <b>12</b> người theo dõi
+                        Có <b>{totalFollower ? totalFollower : 0}</b> người theo
+                        dõi
                       </a>
                     </span>
                     <Modal
@@ -584,10 +757,10 @@ function Profile() {
                             <Form.Control
                               type="text"
                               placeholder="Searching Group"
-                              name="searchGroup"
-                              value={searchValue.searchGroup || ""}
+                              name="searchUser"
+                              value={searchValue.searchUser || ""}
                               onChange={handleSearchChange}
-                              onKeyDown={handleKeyEnter}
+                              onKeyDown={handleKeyEnterSearchFollower}
                             />
                             <SearchIcon
                               style={{
@@ -618,7 +791,69 @@ function Profile() {
                                 position: "relative",
                               }}
                             >
-                              {followerData && followerData.length > 0 ? (
+                              {searchUserFollower &&
+                              searchUserFollower.length > 0 &&
+                              followerData ? (
+                                searchUserFollower &&
+                                searchUserFollower.length > 0 ? (
+                                  searchUserFollower.map(
+                                    (dataSearch, index) => {
+                                      return (
+                                        <>
+                                          <div
+                                            className="ProfileFollowRowContent"
+                                            key={index}
+                                          >
+                                            <div className="ProfileFollowImgContent">
+                                              {dataSearch.avatar ? (
+                                                <>
+                                                  <Link
+                                                    to={`/home/profile/user/${dataSearch.id}`}
+                                                    className="suggestionFriend-title-link"
+                                                  >
+                                                    <img
+                                                      src={dataSearch.avatar}
+                                                    />
+                                                  </Link>
+                                                </>
+                                              ) : (
+                                                <>
+                                                  <Link
+                                                    to={`/home/profile/user/${dataSearch.id}`}
+                                                    className="ProfileFollowLink"
+                                                    onClick={
+                                                      handleCloseModalFollower
+                                                    }
+                                                  >
+                                                    <img src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg" />
+                                                  </Link>
+                                                </>
+                                              )}
+                                            </div>
+                                            <span>
+                                              <Link
+                                                to={`/home/profile/user/${dataSearch.id}`}
+                                                className="ProfileFollowLink"
+                                                onClick={
+                                                  handleCloseModalFollower
+                                                }
+                                              >
+                                                {dataSearch.name
+                                                  ? dataSearch.name
+                                                  : dataSearch.username}
+                                              </Link>
+                                            </span>
+                                          </div>
+                                        </>
+                                      );
+                                    }
+                                  )
+                                ) : (
+                                  <div className="ProfileFollowRowContent">
+                                    <span>Không có ai theo dõi</span>
+                                  </div>
+                                )
+                              ) : followerData && followerData.length > 0 ? (
                                 followerData.map((dataFollower, index) => {
                                   return (
                                     <>
@@ -675,8 +910,14 @@ function Profile() {
                             </div>
                           </div>
                         </div>
-                        {followerData && followerData.length > 0 ? (
-                          !isMoreDetail && (
+                        {searchUserFollower && searchUserFollower.length > 0 ? (
+                          <></>
+                        ) : followerData &&
+                          followerData.length > 0 &&
+                          followerData.length < 5 ? (
+                          <></>
+                        ) : (
+                          !isMoreDetailFollower && (
                             <div
                               className="ProfileFollowButtonMoreDetail"
                               onClick={handleMoreDetailFollower}
@@ -684,17 +925,243 @@ function Profile() {
                               <button>Xem thêm</button>
                             </div>
                           )
-                        ) : (
-                          <></>
                         )}
                       </Modal.Body>
                     </Modal>
                     <span className="ProfileFollowButtonLink">
-                      <a>
-                        Đang theo dõi <b>12</b> người
+                      <a onClick={handleShowModalFollowed}>
+                        Đang theo dõi <b>{totalFollowed ? totalFollowed : 0}</b>{" "}
+                        người
                       </a>
                     </span>
-                    {/* userID */}
+                    <Modal
+                      centered
+                      show={showModalFollowed}
+                      onHide={handleCloseModalFollowed}
+                    >
+                      <Modal.Header closeButton>
+                        <Modal.Title>Người đang theo dõi</Modal.Title>
+                      </Modal.Header>
+                      <Modal.Body className="CreateGroupModalBody">
+                        <Form>
+                          <Form.Group
+                            className="mb-3"
+                            controlId="exampleForm.ControlInput1"
+                            style={{ position: "relative" }}
+                          >
+                            <Form.Control
+                              type="text"
+                              placeholder="Searching Group"
+                              name="searchFollowed"
+                              value={searchValue.searchFollowed || ""}
+                              onChange={handleSearchChange}
+                              onKeyDown={handleKeyEnterSearchFollowed}
+                            />
+                            <SearchIcon
+                              style={{
+                                position: "absolute",
+                                right: "10px",
+                                top: "50%",
+                                transform: "translateY(-50%)",
+                              }}
+                            />
+                          </Form.Group>
+                        </Form>
+                        <div className="ProfileFollowerHeader">
+                          <span>Người đang theo dõi</span>
+                          <span>
+                            <Link to={`/home/suggestFollow`}>Gợi ý</Link>
+                          </span>
+                        </div>
+                        <div className="ProfileFollowerContainer">
+                          <div
+                            style={{ height: "auto", overflow: "hidden auto" }}
+                          >
+                            <div
+                              style={{
+                                display: "flex",
+                                flexDirection: "column",
+                                paddingBottom: 0,
+                                paddingTop: 0,
+                                position: "relative",
+                              }}
+                            >
+                              {searchUserFollowed &&
+                              searchUserFollowed.length > 0 ? (
+                                searchUserFollowed &&
+                                searchUserFollowed.length > 0 ? (
+                                  searchUserFollowed.map(
+                                    (searchUserFollowed, index) => {
+                                      return (
+                                        <>
+                                          <div
+                                            className="ProfileFollowRowContent"
+                                            key={index}
+                                          >
+                                            <div className="ProfileFollowImgContent">
+                                              {searchUserFollowed.avatar ? (
+                                                <>
+                                                  <Link
+                                                    to={`/home/profile/user/${searchUserFollowed.id}`}
+                                                    className="suggestionFriend-title-link"
+                                                  >
+                                                    <img
+                                                      src={
+                                                        searchUserFollowed.avatar
+                                                      }
+                                                    />
+                                                  </Link>
+                                                </>
+                                              ) : (
+                                                <>
+                                                  <Link
+                                                    to={`/home/profile/user/${searchUserFollowed.id}`}
+                                                    className="ProfileFollowLink"
+                                                    onClick={
+                                                      handleCloseModalFollowed
+                                                    }
+                                                  >
+                                                    <img src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg" />
+                                                  </Link>
+                                                </>
+                                              )}
+                                            </div>
+                                            <span>
+                                              <Link
+                                                to={`/home/profile/user/${searchUserFollowed.id}`}
+                                                className="ProfileFollowLink"
+                                                onClick={
+                                                  handleCloseModalFollowed
+                                                }
+                                              >
+                                                {searchUserFollowed.name
+                                                  ? searchUserFollowed.name
+                                                  : searchUserFollowed.username}
+                                              </Link>
+                                            </span>
+                                            {searchUserFollowed.isFollow ? (
+                                              <button
+                                                onClick={() =>
+                                                  handleRemove(
+                                                    searchUserFollowed.id
+                                                  )
+                                                }
+                                              >
+                                                Unfollow
+                                              </button>
+                                            ) : (
+                                              <button
+                                                onClick={() =>
+                                                  handleAdd(
+                                                    searchUserFollowed.id
+                                                  )
+                                                }
+                                              >
+                                                Follow
+                                              </button>
+                                            )}
+                                          </div>
+                                        </>
+                                      );
+                                    }
+                                  )
+                                ) : (
+                                  <div className="ProfileFollowRowContent">
+                                    <span>Không có ai theo dõi</span>
+                                  </div>
+                                )
+                              ) : followedData && followedData.length > 0 ? (
+                                followedData.map((followedData, index) => {
+                                  return (
+                                    <>
+                                      <div
+                                        className="ProfileFollowRowContent"
+                                        key={index}
+                                      >
+                                        <div className="ProfileFollowImgContent">
+                                          {followedData.avatar ? (
+                                            <>
+                                              <Link
+                                                to={`/home/profile/user/${followedData.id}`}
+                                                className="suggestionFriend-title-link"
+                                              >
+                                                <img
+                                                  src={followedData.avatar}
+                                                />
+                                              </Link>
+                                            </>
+                                          ) : (
+                                            <>
+                                              <Link
+                                                to={`/home/profile/user/${followedData.id}`}
+                                                className="ProfileFollowLink"
+                                                onClick={
+                                                  handleCloseModalFollowed
+                                                }
+                                              >
+                                                <img src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg" />
+                                              </Link>
+                                            </>
+                                          )}
+                                        </div>
+                                        <span>
+                                          <Link
+                                            to={`/home/profile/user/${followedData.id}`}
+                                            className="ProfileFollowLink"
+                                            onClick={handleCloseModalFollowed}
+                                          >
+                                            {followedData.name
+                                              ? followedData.name
+                                              : followedData.username}
+                                          </Link>
+                                        </span>
+                                        {followedData.isFollowme ? null : followedData.isFollow ? (
+                                          <button
+                                            onClick={() =>
+                                              handleRemove(followedData.id)
+                                            }
+                                          >
+                                            Unfollow
+                                          </button>
+                                        ) : (
+                                          <button
+                                            onClick={() =>
+                                              handleAdd(followedData.id)
+                                            }
+                                          >
+                                            Follow
+                                          </button>
+                                        )}
+                                      </div>
+                                    </>
+                                  );
+                                })
+                              ) : (
+                                <div className="ProfileFollowRowContent">
+                                  <span>Không có ai theo dõi</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                        {searchUserFollowed && searchUserFollowed.length > 0 ? (
+                          <></>
+                        ) : followedData &&
+                          followedData.length > 0 &&
+                          followedData.length < 5 ? (
+                          <></>
+                        ) : (
+                          !isMoreDetailFollowed && (
+                            <div
+                              className="ProfileFollowButtonMoreDetail"
+                              onClick={handleMoreDetailFollowed}
+                            >
+                              <button>Xem thêm</button>
+                            </div>
+                          )
+                        )}
+                      </Modal.Body>
+                    </Modal>
                     <span>
                       <Link to={`/home/messenger/${userID}`}>Nhắn tin</Link>
                     </span>
