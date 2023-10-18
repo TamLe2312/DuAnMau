@@ -4,6 +4,7 @@ import Validation from "../../component/validation/validation";
 import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Logo from "../../../uploads/Logo1.png";
+import * as request from "../../utils/request";
 
 function ForgotPassword() {
   const style = {
@@ -28,13 +29,10 @@ function ForgotPassword() {
     setError(Validation(values));
     try {
       setLoading(true);
-      const response = await axios.post(
-        "http://localhost:8080/account/forgotPassword",
-        {
-          username: values.username.trim(),
-          email: values.email,
-        }
-      );
+      const response = await request.post("account/forgotPassword", {
+        username: values.username.trim(),
+        email: values.email,
+      });
       toast.success(response.data.success);
       setLoading(false);
     } catch (error) {

@@ -1,10 +1,10 @@
-import axios from "axios";
 import { useEffect, useState } from "react";
 import { Avatar } from "@mui/material";
 import { useCookies } from "react-cookie";
 import "./suggestionFriend.css";
 import { Link } from "react-router-dom";
 import { toast } from "sonner";
+import * as request from "../../../utils/request";
 function SuggestionFriend() {
   const [listU, setListU] = useState([]);
   const [cookies] = useCookies(["session"]);
@@ -12,9 +12,7 @@ function SuggestionFriend() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:8080/account/suggestFollow/${idUser}&5`
-        );
+        const response = await request.get(`account/suggestFollow/${idUser}&5`);
         setListU(response.data);
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -25,7 +23,7 @@ function SuggestionFriend() {
 
   const handleAdd = async (id) => {
     try {
-      let res = await axios.post("http://localhost:8080/account/followUser", {
+      let res = await request.post("account/followUser", {
         follower_id: idUser,
         followed_id: id,
       });
@@ -48,7 +46,7 @@ function SuggestionFriend() {
 
   const handleRemove = async (id) => {
     try {
-      let res = await axios.post("http://localhost:8080/account/unfollowUser", {
+      let res = await request.post("account/unfollowUser", {
         follower_id: idUser,
         followed_id: id,
       });
