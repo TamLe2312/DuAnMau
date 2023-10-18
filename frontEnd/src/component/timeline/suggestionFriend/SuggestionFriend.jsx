@@ -1,29 +1,76 @@
 import axios from "axios";
 import { useEffect, useState } from "react";
 import { Avatar } from "@mui/material";
+import { useCookies } from "react-cookie";
 import "./suggestionFriend.css";
 import { Link } from "react-router-dom";
+import { toast } from "sonner";
 function SuggestionFriend() {
   const [listU, setListU] = useState([]);
+  const [cookies] = useCookies(["session"]);
+  const idUser = cookies.userId;
   useEffect(() => {
     const fetchData = async () => {
       try {
-        let res = await axios.get("http://localhost:8080/account/listUsers/1");
-        // console.log(res.data);
-        setListU(res.data);
+        const response = await axios.get(
+          `http://localhost:8080/account/suggestFollow/${idUser}&5`
+        );
+        setListU(response.data);
       } catch (error) {
-        // Handle the error here
+        console.error("Error fetching user data:", error);
       }
     };
     fetchData();
-  }, []);
+  }, [idUser]);
 
-  const handleAdd = (e) => {
-    console.log(e);
+  const handleAdd = async (id) => {
+    try {
+      let res = await axios.post("http://localhost:8080/account/followUser", {
+        follower_id: idUser,
+        followed_id: id,
+      });
+      if (res.data.success) {
+        toast.success(res.data.success);
+        setListU((prevData) =>
+          prevData.map((data) => {
+            if (data.id === id) {
+              return { ...data, isFollow: true };
+            } else {
+              return data;
+            }
+          })
+        );
+      }
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleRemove = async (id) => {
+    try {
+      let res = await axios.post("http://localhost:8080/account/unfollowUser", {
+        follower_id: idUser,
+        followed_id: id,
+      });
+      if (res.data.success) {
+        toast.success(res.data.success);
+        setListU((prevData) =>
+          prevData.map((data) => {
+            if (data.id === id) {
+              return { ...data, isFollow: false };
+            } else {
+              return data;
+            }
+          })
+        );
+      }
+    } catch (error) {
+      console.error(error);
+    }
   };
   return (
     <>
-      {listU &&
+      {listU && listU.length > 0 ? (
         listU.map((user, index) => {
           return (
             <div className="suggestionFriend" key={index}>
@@ -51,20 +98,31 @@ function SuggestionFriend() {
                       {user.name || user.username}
                     </span>
                   </Link>
-                  <span>
-                    <span>{user.moTa || user.name || user.username}</span>
-                  </span>
                 </div>
               </div>
-              <span
-                onClick={() => handleAdd(user)}
-                className="suggestionFriend-add-friend"
-              >
-                Follow
-              </span>
+              {user.isFollow ? (
+                <span
+                  className="suggestionFriend-add-friend"
+                  onClick={() => handleRemove(user.id)}
+                >
+                  Unfollow
+                </span>
+              ) : (
+                <span
+                  className="suggestionFriend-add-friend"
+                  onClick={() => handleAdd(user.id)}
+                >
+                  Follow
+                </span>
+              )}
             </div>
           );
-        })}
+        })
+      ) : (
+        <div className="suggestionFriend">
+          <span>Hiện tại không có gợi ý theo dõi nào</span>
+        </div>
+      )}
     </>
   );
 }

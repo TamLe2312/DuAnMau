@@ -11,7 +11,7 @@ import Profile from "./component/profile/Profile";
 import Community from "./component/community/Community";
 import Messenger from "./component/messenger/Messenger";
 import Groups from "./component/group/Groups";
-
+import SuggestFollow from "./component/profile/suggestFollow/suggestFollow";
 //React Toastify
 
 import { Toaster } from "sonner";
@@ -31,6 +31,7 @@ function App() {
 
         <Route path="/home" element={<Home />}>
           <Route path="/home" element={<Timeline />} />
+          <Route path="/home/suggestFollow" element={<SuggestFollow />} />
           <Route path="/home/profile/user/:userID" element={<Profile />} />
           <Route path="/home/community/group/:groupID" element={<Groups />} />
           <Route path="/home/profile" element={<Profile />} />

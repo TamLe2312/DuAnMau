@@ -5,28 +5,42 @@
   gap: 10px;
   align-items: center;
 }
+
 .suggestions-user-img {
   width: 48px;
   height: 48px;
   object-fit: cover;
   border-radius: 50%;
 }
+
 .suggestions-title {
   display: flex;
   flex-direction: column;
 }
+
 .suggestions-title-name {
   font-weight: 600;
 }
+
 .suggestions-friend {
   padding-right: 60px;
 }
+
 .suggestions-friend-title {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
 }
+
 .suggestions-link {
   text-decoration: none;
+}
+
+#suggestFollowLink {
+  text-decoration: none;
+}
+
+#suggestFollowLink:hover {
+  color: #0095f6;
 }
