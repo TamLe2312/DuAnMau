@@ -14,8 +14,8 @@ const sendNotifcation = (req, res) => {
           connection.query(
             `UPDATE notification
             SET view = 0
-            WHERE  WHERE sender_id =? AND post_id =? AND title =? `,
-            [userID, postID, title],
+            WHERE sender_id =? AND post_id =? AND title =? `,
+            [parseInt(userID), parseInt(postID), title],
             function (err, results, fields) {
               if (err) {
                 console.log(err);
@@ -36,6 +36,7 @@ const sendNotifcation = (req, res) => {
             [postID, recipient_id, userID, title],
             function (err, results, fields) {
               if (err) {
+                console.log(err);
                 return res
                   .status(500)
                   .json({ err: "Có lỗi Send xin thử lại sau" });
@@ -57,7 +58,7 @@ const unNotifcation = (req, res) => {
   const { postID, sender_id, title } = req.body;
   connection.query(
     `DELETE FROM notification
-    WHERE post_id
+    WHERE post_id = ? AND sender_id=? AND title =?
     `,
     [postID, sender_id, title],
 
@@ -66,9 +67,26 @@ const unNotifcation = (req, res) => {
         return res.status(500).json({ err: "Có lỗi xảy ra xin thử lại sau" });
       }
       if (results) {
-        return res
-          .status(200)
-          .json({ success: "Bạn đã gửi thông báo thành công" });
+        return res.status(200).json({ success: "Bạn đã hủy thông báo" });
+      }
+    }
+  );
+};
+
+const viewNotifcation = (req, res) => {
+  const { notiID } = req.body;
+  connection.query(
+    `UPDATE notification
+    SET view = 1
+    WHERE id = ?
+    `,
+    [notiID],
+    function (err, results, fields) {
+      if (err) {
+        return res.status(500).json({ err: "Có lỗi xảy ra xin thử lại sau" });
+      }
+      if (results) {
+        return res.status(200).json({ success: "Bạn đã đọc thông báo" });
       }
     }
   );
@@ -78,7 +96,7 @@ const listNotifcation = (req, res) => {
   const myID = parseInt(req.params.myID);
 
   connection.query(
-    `SELECT posts.id as postID, notification.title,notification.view, notification.created_ad as timepost, users.id as userID, users.username, users.name, users.avatar
+    `SELECT notification.id as idNotifi ,posts.id as postID, notification.title,notification.view, notification.created_ad as timepost, users.id as userID, users.username, users.name, users.avatar
   FROM notification
   JOIN posts ON notification.post_id = posts.id
   JOIN users ON notification.sender_id = users.id
@@ -103,4 +121,5 @@ module.exports = {
   sendNotifcation,
   listNotifcation,
   unNotifcation,
+  viewNotifcation,
 };

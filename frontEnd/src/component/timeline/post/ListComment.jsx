@@ -12,7 +12,16 @@ function ListComment(props) {
   // const avatar = props.avatar;
   // const user = props.user;
   // const name = props.name;
-  const { name, user, userid, avatar, title, img, notification } = props;
+  const {
+    name,
+    user,
+    userid,
+    avatar,
+    title,
+    img,
+    notification,
+    unNotification,
+  } = props;
   // console.log(props.handlerun);
 
   const [indexImg, setindexImg] = useState(0);
@@ -87,6 +96,7 @@ function ListComment(props) {
           userid={userid}
           handlerun={props.handlerun}
           notification={notification}
+          unNotification={unNotification}
         />
       </div>
     </div>

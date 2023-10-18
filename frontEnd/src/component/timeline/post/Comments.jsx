@@ -22,6 +22,7 @@ function Comments(props) {
     id,
     groupPostId,
     notification,
+    unNotification,
   } = props;
   const [listComment, setListComment] = useState([]);
   const [userComment, setUserComment] = useState([]);
@@ -168,6 +169,8 @@ function Comments(props) {
             }
           );
           if (res.data) {
+            const thongBao = "Đã bình luận bài viết của bạn";
+            await unNotification(id, myID, thongBao);
             setdoi((e) => !e);
             handleRun();
             // toast.success("Bạn đã xóa bình luận");
