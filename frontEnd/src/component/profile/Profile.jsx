@@ -371,39 +371,34 @@ function Profile() {
     }
   };
   const handleAdd = async (idFollowed) => {
-    console.log(id, idFollowed);
     if (id === cookies.userId) {
-      console.log("Bằng ID");
-      /*  try {
-    let res = await axios.post("http://localhost:8080/account/followUser", {
-      follower_id: id,
-      followed_id: idFollowed,
-    });
-    if (res.data.success) {
-      toast.success(res.data.success);
-      if (searchUserFollowed && searchUserFollowed.length > 0) {
-        setSearchUserFollowed((prevData) =>
-          prevData.map((data) =>
-            data.id === idFollowed ? { ...data, isFollow: true } : data
-          )
-        );
+      try {
+        let res = await axios.post("http://localhost:8080/account/followUser", {
+          follower_id: id,
+          followed_id: idFollowed,
+        });
+        if (res.data.success) {
+          toast.success(res.data.success);
+          if (searchUserFollowed && searchUserFollowed.length > 0) {
+            setSearchUserFollowed((prevData) =>
+              prevData.map((data) =>
+                data.id === idFollowed ? { ...data, isFollow: true } : data
+              )
+            );
+          }
+          setFollowedData((prevData) =>
+            prevData.map((data) =>
+              data.id === idFollowed ? { ...data, isFollow: true } : data
+            )
+          );
+        }
+      } catch (error) {
+        console.error(error);
       }
-      setFollowedData((prevData) =>
-        prevData.map((data) =>
-          data.id === idFollowed ? { ...data, isFollow: true } : data
-        )
-      );
-    }
-  } catch (error) {
-    console.error(error);
-  } */
-    } else {
-      console.log("Không bằng ID");
     }
   };
 
   const handleRemove = async (idFollowed) => {
-    console.log(id, idFollowed);
     if (id === cookies.userId) {
       try {
         let res = await axios.post(
