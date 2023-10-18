@@ -1,4 +1,3 @@
-import axios from "axios";
 import { useState, useRef, useEffect } from "react";
 import { Link, useParams } from "react-router-dom";
 import { useCookies } from "react-cookie";
@@ -11,6 +10,7 @@ import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import FavoriteIcon from "@mui/icons-material/Favorite";
+import * as request from "../../utils/request";
 
 function PostDetail() {
   const postId = useParams();
@@ -40,8 +40,8 @@ function PostDetail() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:8080/post/postimg/${PostInform.id}`
+        const response = await request.get(
+          `post/postimg/${PostInform.id}`
         );
         if (response.data.length > 0) {
           setImgs(response.data);
@@ -71,16 +71,13 @@ function PostDetail() {
     const fetchApi = async () => {
       try {
         const id = postId.post_id;
-        const res = await axios.post(
-          "http://localhost:8080/post/onCommentPostLast",
-          {
-            postID: id,
-          }
-        );
+        const res = await request.post("post/onCommentPostLast", {
+          postID: id,
+        });
         if (res.data) {
           if (res.data.user_id) {
-            const resUser = await axios.get(
-              `http://localhost:8080/account/getDataUser/${res.data.user_id}`
+            const resUser = await request.get(
+              `account/getDataUser/${res.data.user_id}`
             );
             setcommentew({
               comment: res.data.content,
@@ -105,9 +102,7 @@ function PostDetail() {
     const fetchApi = async () => {
       try {
         const id = postId.post_id;
-        const res = await axios.get(
-          ` http://localhost:8080/post/countCommentPost/${id}&0`
-        );
+        const res = await request.get(` post/countCommentPost/${id}&0`);
         if (res.data[0].countcomment > 1) {
           sethasComment(true);
         } else {
@@ -123,8 +118,8 @@ function PostDetail() {
     try {
       const fetchApi = async () => {
         /*  if (groupPostId) {
-          const res = await axios.post(
-            "http://localhost:8080/post/commentPost",
+          const res = await request.post(
+            "post/commentPost",
             {
               groupPostId: groupPostId,
               userID: myID,
@@ -141,7 +136,7 @@ function PostDetail() {
         } else {
          
         } */
-        const res = await axios.post("http://localhost:8080/post/commentPost", {
+        const res = await request.post("post/commentPost", {
           postID: postId,
           userID: myID,
           content: comment.trim(),
@@ -169,7 +164,7 @@ function PostDetail() {
     setliked(false);
     try {
       const fetchApi = async () => {
-        const res = await axios.post("http://localhost:8080/post/UnLikePost", {
+        const res = await request.post("post/UnLikePost", {
           postID: postId,
           otherUserID: myID,
         });
@@ -187,7 +182,7 @@ function PostDetail() {
     setliked(true);
     try {
       const fetchApi = async () => {
-        const res = await axios.post("http://localhost:8080/post/likePost", {
+        const res = await request.post("post/likePost", {
           postID: postId,
           otherUserID: myID,
         });
@@ -217,9 +212,7 @@ function PostDetail() {
     const fetchData = async () => {
       try {
         const id = postId.post_id;
-        const response = await axios.get(
-          `http://localhost:8080/post/dataPostAndUser/${id}`
-        );
+        const response = await request.get(`post/dataPostAndUser/${id}`);
         const now = new Date();
         const targetDate = new Date(response.data[0].created_at);
         const milliseconds = now - targetDate;
@@ -235,9 +228,7 @@ function PostDetail() {
     const fetchData = async () => {
       try {
         const id = postId.post_id;
-        const response = await axios.get(
-          `http://localhost:8080/post/postimg/${id}`
-        );
+        const response = await request.get(`post/postimg/${id}`);
         if (response.status === 200) {
           setImg(response.data);
         } else {
@@ -298,10 +289,7 @@ function PostDetail() {
           {img && img.length > 0 ? (
             <>
               <img
-                src={
-                  "http://localhost:8080/images/" +
-                  (img.length === 1 ? img[0].img : img[run].img)
-                }
+                src={"images/" + (img.length === 1 ? img[0].img : img[run].img)}
                 alt=""
               />
               {img.length > 1 && (

@@ -1,10 +1,9 @@
-import axios from "axios";
 import { Link } from "react-router-dom";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import { useEffect, useState } from "react";
-
+import * as request from "../../../utils/request";
 function PostProfile(props) {
   const PostInform = props.data;
   const [Index, setIndex] = useState(2);
@@ -12,9 +11,7 @@ function PostProfile(props) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:8080/post/postimg/${PostInform.id}`
-        ); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
+        const response = await request.get(`post/postimg/${PostInform.id}`); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
         if (response.data.length > 0) {
           /*         console.log((response.data)); */
           setImgs(response.data);

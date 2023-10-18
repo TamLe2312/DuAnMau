@@ -4,6 +4,7 @@ import Validation from "../../component/validation/validation";
 import { toast } from "sonner";
 import { useLocation, Link, useNavigate } from "react-router-dom";
 import Logo from "../../../uploads/Logo1.png";
+import * as request from "../../utils/request";
 
 function VerifyToken() {
   const Navigate = useNavigate();
@@ -50,16 +51,12 @@ function VerifyToken() {
     setError(Validation(values));
     try {
       setLoading(true);
-      const response = await axios.post(
-        "http://localhost:8080/account/verifyToken",
-        {
-          username: values.username.trim(),
-          password: values.password,
-          Cpassword: values.Cpassword,
-          email: email,
-        }
-      );
-      console.log(response);
+      const response = await request.post("account/verifyToken", {
+        username: values.username.trim(),
+        password: values.password,
+        Cpassword: values.Cpassword,
+        email: email,
+      });
       toast.success(response.data.success);
       Navigate("/", { replace: true });
       setLoading(false);

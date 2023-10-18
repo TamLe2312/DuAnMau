@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 import "./comments.css";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
-import axios from "axios";
 import { useCookies } from "react-cookie";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import { Avatar } from "@mui/material";
 // import { Toaster, toast } from "sonner";
+import * as request from "../../../utils/request";
 
 function Comments(props) {
   const handleRun = props.handlerun;
@@ -37,8 +37,8 @@ function Comments(props) {
     const fetchComments = async () => {
       try {
         if (groupPostId) {
-          const response = await axios.get(
-            `http://localhost:8080/post/listCommentPost/${id}&${groupPostId}`
+          const response = await request.get(
+            `post/listCommentPost/${id}&${groupPostId}`
           );
           console.log(response.data);
           if (response.data.length > 0) {
@@ -52,9 +52,7 @@ function Comments(props) {
             setUserComment([]);
           }
         } else {
-          const response = await axios.get(
-            `http://localhost:8080/post/listCommentPost/${id}&0`
-          );
+          const response = await request.get(`post/listCommentPost/${id}&0`);
           if (response.data.length > 0) {
             setListComment(response.data);
             const userIds = response.data.map((comment) => comment.user_id);
@@ -73,9 +71,7 @@ function Comments(props) {
     const fetchUserDetails = async (userIds) => {
       try {
         const requests = userIds.map(async (userId) => {
-          const response = await axios.get(
-            `http://localhost:8080/account/getDataUser/${userId}`
-          );
+          const response = await request.get(`account/getDataUser/${userId}`);
           return response.data[0];
         });
         const userDetails = await Promise.all(requests);
@@ -92,28 +88,22 @@ function Comments(props) {
     try {
       const fetchApi = async () => {
         if (groupPostId) {
-          const res = await axios.post(
-            "http://localhost:8080/post/commentPost",
-            {
-              content: content,
-              userID: myID,
-              groupPostId: groupPostId,
-            }
-          );
+          const res = await request.post("post/commentPost", {
+            content: content,
+            userID: myID,
+            groupPostId: groupPostId,
+          });
           if (res) {
             setcontent("");
             setdoi((e) => !e);
             handleRun();
           }
         } else {
-          const res = await axios.post(
-            "http://localhost:8080/post/commentPost",
-            {
-              content: content,
-              userID: myID,
-              postID: id,
-            }
-          );
+          const res = await request.post("post/commentPost", {
+            content: content,
+            userID: myID,
+            postID: id,
+          });
           if (res) {
             // console.log(userid);
             let thongBao = "Đã bình luận bài viết của bạn";
@@ -135,9 +125,7 @@ function Comments(props) {
     setModalShow(true);
     try {
       const fetchApi = async () => {
-        const res = await axios.get(
-          `http://localhost:8080/post/oneCommentPost/${commentID}`
-        );
+        const res = await request.get(`post/oneCommentPost/${commentID}`);
         if (res.data) {
           // console.log(res.data[0].content);
           setcontentEdit(res.data[0].content);
@@ -162,12 +150,9 @@ function Comments(props) {
       // console.log("Xóa: " + cmtID);
       try {
         const fetchApi = async () => {
-          const res = await axios.post(
-            `http://localhost:8080/post/deleteCommentPost`,
-            {
-              commentID: cmtID,
-            }
-          );
+          const res = await request.post(`post/deleteCommentPost`, {
+            commentID: cmtID,
+          });
           if (res.data) {
             const thongBao = "Đã bình luận bài viết của bạn";
             await unNotification(id, myID, thongBao);
@@ -183,14 +168,11 @@ function Comments(props) {
     } else {
       try {
         const fetchApi = async () => {
-          const res = await axios.post(
-            `http://localhost:8080/post/editCommentPost`,
-            {
-              content: contentEdit,
-              commentID: cmtID,
-              userID: myID,
-            }
-          );
+          const res = await request.post(`post/editCommentPost`, {
+            content: contentEdit,
+            commentID: cmtID,
+            userID: myID,
+          });
           if (res.data) {
             setdoi((e) => !e);
             handleRun();

@@ -3,8 +3,8 @@ import DetailMess from "./DetailMess";
 import "./messenger.css";
 import { useCookies } from "react-cookie";
 import { useEffect, useRef, useState } from "react";
-import axios from "axios";
 import { io } from "socket.io-client";
+import * as request from "../../utils/request";
 function Messenger() {
   const socket = useRef();
   const [online, setonline] = useState([]);
@@ -17,9 +17,7 @@ function Messenger() {
 
   const fetchListFriendMess = async () => {
     try {
-      const res = await axios.get(
-        `http://localhost:8080/messenger/recipient/${myID}`
-      );
+      const res = await request.get(`messenger/recipient/${myID}`);
       if (res) {
         setlistUserMess(res.data);
       }
@@ -63,8 +61,8 @@ function Messenger() {
 
   // const [listMesEnd, setlistMessEnd] = useState([]);
   // const handleIsView = (id) => {
-  //   return axios
-  //     .get(`http://localhost:8080/messenger/lastedMess/${myID}/${id}`)
+  //   return request
+  //     .get(`messenger/lastedMess/${myID}/${id}`)
   //     .then((res) => {
   //       if (res.data) {
   //         return res.data[0];
@@ -109,8 +107,8 @@ function Messenger() {
   // const handleView = (user) => {
   //   try {
   //     const fetchView = async () => {
-  //       const res = await axios.post(
-  //         "http://localhost:8080/messenger/viewMes",
+  //       const res = await request.post(
+  //         "messenger/viewMes",
   //         {
   //           sender_id: user.id,
   //           recipient_id: myID,
