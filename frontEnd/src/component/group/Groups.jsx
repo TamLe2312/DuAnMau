@@ -1,4 +1,3 @@
-import axios from "axios";
 import React, { useState, useEffect } from "react";
 import SettingsIcon from "@mui/icons-material/Settings";
 import GridOnIcon from "@mui/icons-material/GridOn";
@@ -13,6 +12,7 @@ import { Modal, Button, Form } from "react-bootstrap";
 import { toast } from "sonner";
 import { useParams, useNavigate } from "react-router-dom";
 import Post from "../timeline/post/Post";
+import * as request from "../../utils/request";
 import "./Groups.css";
 
 function Groups() {
@@ -47,9 +47,7 @@ function Groups() {
 
   const fetchDataCountPostGroup = async (groupId) => {
     try {
-      const response = await axios.get(
-        `http://localhost:8080/groups/CountPostGroup/${groupId}`
-      ); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
+      const response = await request.get(`groups/CountPostGroup/${groupId}`); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
       setCountPostGroup(response.data.results[0].countPostGroup);
     } catch (error) {
       console.error("Error fetching user data:", error);
@@ -78,18 +76,12 @@ function Groups() {
     const formData = new FormData();
     if (imgsPostGroup.length > 0) {
       try {
-        const response = await axios.post(
-          "http://localhost:8080/post/createGroupPost",
-          postData
-        );
+        const response = await request.post("post/createGroupPost", postData);
         listiPostGroup.forEach((img, index) => {
           formData.append(`image${index}`, img);
         });
         formData.append("postGroupId", response.data.lastID);
-        const responseImg = await axios.post(
-          "http://localhost:8080/post/groupUpImgs",
-          formData
-        );
+        const responseImg = await request.post("post/groupUpImgs", formData);
         toast.success(responseImg.data.success);
         fetchData(groupID.groupID);
         fetchDataCountPostGroup(groupID.groupID);
@@ -99,10 +91,7 @@ function Groups() {
       }
     } else {
       try {
-        const res = await axios.post(
-          "http://localhost:8080/post/createGroupPost",
-          postData
-        );
+        const res = await request.post("post/createGroupPost", postData);
         toast.success(res.data.success);
         fetchData(groupID.groupID);
         fetchDataCountPostGroup(groupID.groupID);
@@ -195,13 +184,10 @@ function Groups() {
     const imagePath = url.pathname.substring("/uploads/".length);
 
     try {
-      const response = await axios.post(
-        "http://localhost:8080/groups/removeAvatarGroup",
-        {
-          groupIdProfile,
-          imagePath,
-        }
-      );
+      const response = await request.post("groups/removeAvatarGroup", {
+        groupIdProfile,
+        imagePath,
+      });
       if (response.data.success) {
         setGroupDataProfile((prevUserData) => ({
           ...prevUserData,
@@ -226,8 +212,8 @@ function Groups() {
       formData.append("groupId", groupIdProfile);
       formData.append("hasAvatarGroup", hasAvatarGroup);
 
-      const response = await axios.post(
-        "http://localhost:8080/groups/changeAvatarGroup",
+      const response = await request.post(
+        "groups/changeAvatarGroup",
         formData,
         {
           headers: {
@@ -264,8 +250,8 @@ function Groups() {
     try {
       setLoading(true);
       const groupIdProfile = groupID.groupID;
-      const response = await axios.post(
-        "http://localhost:8080/groups/UpdateInformationProfileGroup",
+      const response = await request.post(
+        "groups/UpdateInformationProfileGroup",
         {
           name: formValues.name.trim(),
           moTaNhom: formValues.moTaNhom.trim(),
@@ -296,13 +282,10 @@ function Groups() {
     const groupIdProfile = groupID.groupID;
     console.log(groupIdProfile);
     try {
-      const response = await axios.post(
-        "http://localhost:8080/groups/removeGroup",
-        {
-          groupIdProfile,
-          hasAvatarGroup,
-        }
-      );
+      const response = await request.post("groups/removeGroup", {
+        groupIdProfile,
+        hasAvatarGroup,
+      });
       Navigate("/home/community", { replace: true });
       toast.success(response.data.success);
       handleCloseModalAvatar();
@@ -317,9 +300,7 @@ function Groups() {
     const fetchDataCountPostGroup = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(
-          `http://localhost:8080/groups/group/${groupIdProfile}`
-        );
+        const response = await request.get(`groups/group/${groupIdProfile}`);
         setGroupDataProfile(response.data[0]);
         setLoading(false);
       } catch (error) {
@@ -334,8 +315,8 @@ function Groups() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(
-          `http://localhost:8080/groups/TotalMembers/${groupIdProfile}&${idUser}`
+        const response = await request.get(
+          `groups/TotalMembers/${groupIdProfile}&${idUser}`
         );
         if (response.data.hasJoined) {
           setHasJoined(true);
@@ -361,9 +342,7 @@ function Groups() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:8080/account/getDataUser/${idUser}`
-        ); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
+        const response = await request.get(`account/getDataUser/${idUser}`); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
         setUserData(response.data[0]);
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -375,9 +354,7 @@ function Groups() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:8080/account/getDataUser/${idUser}`
-        ); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
+        const response = await request.get(`account/getDataUser/${idUser}`); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
         setUserData(response.data[0]);
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -389,8 +366,8 @@ function Groups() {
     const fetchData = async () => {
       const groupPostId = groupID.groupID;
       try {
-        const response = await axios.get(
-          `http://localhost:8080/groups/CountPostGroup/${groupPostId}`
+        const response = await request.get(
+          `groups/CountPostGroup/${groupPostId}`
         ); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
         setCountPostGroup(response.data.results[0].countPostGroup);
       } catch (error) {
@@ -402,9 +379,7 @@ function Groups() {
 
   const fetchData = async (groupId) => {
     try {
-      const response = await axios.get(
-        `http://localhost:8080/groups/postGroupData/${groupId}&1`
-      );
+      const response = await request.get(`groups/postGroupData/${groupId}&1`);
       setpostsDataGroup(response.data);
     } catch (error) {
       console.error("Error fetching user data:", error);
@@ -432,8 +407,8 @@ function Groups() {
     setpageData(pageData + 1);
     const dataNew = async () => {
       const groupId = groupID.groupID;
-      const response = await axios.get(
-        `http://localhost:8080/groups/postGroupData/${groupId}&${pageData}`
+      const response = await request.get(
+        `groups/postGroupData/${groupId}&${pageData}`
       );
       if (response.status === 200) {
         const datas = response.data;

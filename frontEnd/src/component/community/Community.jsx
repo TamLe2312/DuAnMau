@@ -1,4 +1,3 @@
-import axios from "axios";
 import React, { useState, useEffect } from "react";
 import Validation from "../../component/validation/validation";
 import { Modal, Button, Form } from "react-bootstrap";
@@ -8,6 +7,7 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import SearchIcon from "@mui/icons-material/Search";
 import moment from "moment";
 import "./Community.css";
+import * as request from "../../utils/request";
 
 function Community() {
   const [dataGroup, setDataGroup] = useState([]);
@@ -27,9 +27,7 @@ function Community() {
   const id = cookies.userId;
   const fetchDataJoined = async () => {
     try {
-      const response = await axios.get(
-        `http://localhost:8080/groups/getDataGroupJoined/${id}`
-      );
+      const response = await request.get(`groups/getDataGroupJoined/${id}`);
       if (response && response.data) {
         setHasJoined(response.data);
       } else {
@@ -58,10 +56,7 @@ function Community() {
     if (e.key === "Enter") {
       e.preventDefault();
       try {
-        const response = await axios.post(
-          "http://localhost:8080/groups/searchGroup",
-          searchValue
-        );
+        const response = await request.post("groups/searchGroup", searchValue);
         console.log(response);
         if (response && response.data) {
           const formattedData = response.data.map((item) => {
@@ -138,15 +133,11 @@ function Community() {
       formData.append("moTa", formValues.moTa.trim());
       formData.append("idCreatedGroup", id);
 
-      const response = await axios.post(
-        "http://localhost:8080/groups/createGroup",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const response = await request.post("groups/createGroup", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       if (response.data.success) {
         toast.success(response.data.success);
         const formattedData = response.data.results.map((item) => {
@@ -171,13 +162,10 @@ function Community() {
   };
   const handleJoinGroup = async (groupId) => {
     try {
-      const response = await axios.post(
-        "http://localhost:8080/groups/joinGroup",
-        {
-          groupId: groupId,
-          idUser: id,
-        }
-      );
+      const response = await request.post("groups/joinGroup", {
+        groupId: groupId,
+        idUser: id,
+      });
       if (response.data.success) {
         toast.success(response.data.success);
         fetchDataJoined();
@@ -188,13 +176,10 @@ function Community() {
   };
   const handleOutGroup = async (groupId) => {
     try {
-      const response = await axios.post(
-        `http://localhost:8080/groups/outGroup`,
-        {
-          groupId: groupId,
-          idUser: id,
-        }
-      );
+      const response = await request.post(`groups/outGroup`, {
+        groupId: groupId,
+        idUser: id,
+      });
       if (response.data.success) {
         toast.success(response.data.success);
         fetchDataJoined();
@@ -209,9 +194,7 @@ function Community() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(
-          `http://localhost:8080/groups/getDataGroup`
-        );
+        const response = await request.get(`groups/getDataGroup`);
         if (response && response.data) {
           const formattedData = response.data.map((item) => {
             const createdAt = item.createdAt;
@@ -239,9 +222,7 @@ function Community() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:8080/groups/getDataGroupJoined/${id}`
-        );
+        const response = await request.get(`groups/getDataGroupJoined/${id}`);
         if (response && response.data) {
           setHasJoined(response.data);
         } else {

@@ -21,6 +21,7 @@ import ImgNews from "../createNews/ImgNews";
 import ContentNews from "../createNews/ContentNews";
 import { useCookies } from "react-cookie";
 import imageLogo from "../../../uploads/Logo1.png";
+import request from "../../utils/request";
 
 function Navigation() {
   const Navigate = useNavigate();
@@ -88,9 +89,9 @@ function Navigation() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:8080/account/getDataUser/${id}`
-        );
+
+        const response = await request.get(`account/getDataUser/${id}`);
+
         if (response.data[0].role === "admin") {
           setIsAdmin(true);
         }
@@ -100,6 +101,12 @@ function Navigation() {
       }
     };
     fetchData();
+
+    const interval = setInterval(fetchData, 2000); // Chạy hàm fetchData() mỗi 2 giây
+    return () => {
+      clearInterval(interval); // Xóa bỏ interval khi component bị unmount
+    };
+
   }, [id]);
   const [number, setNumber] = useState(0);
   useEffect(() => {
@@ -207,9 +214,11 @@ function Navigation() {
         <div className={`dropdown-more ${showMore ? "active" : "inactive"}`}>
           <ul className="dropdown-more-ul">
             {isAdmin ? <Drop text={admin} path={"home/admin"} /> : <></>}
-            <div onClick={handleMode} className="dropdown-more-title">
+
+            {/*  <div onClick={handleMode} className="dropdown-more-title">
+
               <Drop Title={theme} />
-            </div>
+            </div> */}
             <div onClick={handleLogout} className="dropdown-more-title">
               <Drop Title={logout} path={""} />
             </div>

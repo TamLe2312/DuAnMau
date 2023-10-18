@@ -1,4 +1,3 @@
-import axios from "axios";
 import React, { useState, useEffect } from "react";
 import moment from "moment";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
@@ -6,6 +5,7 @@ import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { Modal, Button, Form } from "react-bootstrap";
 import Validation from "../../validation/validation";
 import { toast } from "sonner";
+import * as request from "../../../utils/request";
 
 function Posts() {
   const [AllDataPost, setAllDataPost] = useState([]);
@@ -35,10 +35,8 @@ function Posts() {
       content: content,
     });
     try {
-      setIdPostDetail(id); // Cập nhật id trước khi gọi yêu cầu axios
-      const response = await axios.get(
-        `http://localhost:8080/admin/postImgs/${id}`
-      );
+      setIdPostDetail(id); // Cập nhật id trước khi gọi yêu cầu request
+      const response = await request.get(`admin/postImgs/${id}`);
       setImgs(response.data);
     } catch (err) {
       console.error(err);
@@ -51,10 +49,10 @@ function Posts() {
   const handleDeletePost = async () => {
     setLoading(true);
     try {
-      await axios.post("http://localhost:8080/admin/deletePostImgs", {
+      await request.post("admin/deletePostImgs", {
         idPost: IdPostDelete,
       });
-      const res = await axios.post("http://localhost:8080/admin/deletePost", {
+      const res = await request.post("admin/deletePost", {
         idPost: IdPostDelete,
       });
       if (res.data.pageCount < TotalPage) {
@@ -109,9 +107,7 @@ function Posts() {
   };
   const fetchDataAllPost = async (page) => {
     try {
-      const response = await axios.get(
-        `http://localhost:8080/admin/getDataAllPost/${page}`
-      );
+      const response = await request.get(`admin/getDataAllPost/${page}`);
       if (response && response.data) {
         const formattedData = response.data.results.map((item) => {
           const createdAt = item.created_at;
@@ -147,9 +143,7 @@ function Posts() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          "http://localhost:8080/admin/getDataAllPost/1"
-        );
+        const response = await request.get("admin/getDataAllPost/1");
         if (response && response.data) {
           setTotalPage(response.data.pageCount);
           const formattedData = response.data.results.map((item) => {
