@@ -75,7 +75,7 @@ const getDataGroup = (req, res) => {
       if (results.length > 0) {
         return res.status(200).json(results);
       } else {
-        return res.status(400).json({ error: "Không tồn tại group nào" });
+        return res.status(200).json([]);
       }
     }
   );
@@ -276,7 +276,7 @@ const getDataGroupJoined = (req, res) => {
       if (results.length > 0) {
         return res.status(200).json(results);
       } else {
-        return res.status(400).json({ error: "Không có dữ liệu Member Group" });
+        return res.status(400).json([]);
       }
     }
   );
@@ -380,12 +380,10 @@ const TotalMembers = (req, res) => {
               if (results1.length > 0) {
                 return res.status(200).json({ hasJoined: true, results });
               } else {
-                return res
-                  .status(400)
-                  .json({
-                    hasJoined: false,
-                    error: "Không có dữ liệu Member Group",
-                  });
+                return res.status(400).json({
+                  hasJoined: false,
+                  error: "Không có dữ liệu Member Group",
+                });
               }
             }
           );

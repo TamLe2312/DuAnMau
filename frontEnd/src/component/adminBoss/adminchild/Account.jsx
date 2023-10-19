@@ -59,7 +59,7 @@ function Account() {
       setLoading(false);
       handleCloseModalAdjustInformation();
     } catch (error) {
-      console.log(error);
+      /*     console.log(error); */
       toast.error(error.response.data.error);
       setLoading(false);
     }
@@ -105,7 +105,7 @@ function Account() {
       setTotalPage(response.data.pageCount);
       setIndexPagination(page);
     } catch (error) {
-      console.error(error);
+      /* console.error(error); */
       setAllDataUser([]);
     }
   };
@@ -130,7 +130,7 @@ function Account() {
       handleCloseModalConfirmDelete();
       setLoading(false);
     } catch (error) {
-      console.error(error);
+      /*   console.error(error); */
     }
   };
   const handleSubmitCreateUser = async (e) => {
@@ -201,7 +201,7 @@ function Account() {
         setTotalPage(response.data.pageCount);
         setAllDataUser(response.data.results);
       } catch (error) {
-        console.error(error);
+        /*       */
         setAllDataUser([]);
       }
     };

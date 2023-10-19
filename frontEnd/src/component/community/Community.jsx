@@ -30,11 +30,8 @@ function Community() {
       const response = await request.get(`groups/getDataGroupJoined/${id}`);
       if (response && response.data) {
         setHasJoined(response.data);
-      } else {
-        setHasJoined([]);
       }
     } catch (error) {
-      console.error(error);
       if (error.response && error.response.status === 400) {
         setHasJoined([]);
       }
@@ -213,7 +210,6 @@ function Community() {
         if (error.response && error.response.status === 400) {
           setDataGroup([]);
         }
-        console.error("Error fetching group data:", error);
         setLoading(false);
       }
     };
@@ -229,7 +225,6 @@ function Community() {
           setHasJoined([]);
         }
       } catch (error) {
-        console.error(error);
         if (error.response && error.response.status === 400) {
           setHasJoined([]);
         }

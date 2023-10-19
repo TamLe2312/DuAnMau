@@ -283,7 +283,7 @@ function Profile() {
           });
           setFollowedData(updatedData);
         } catch (error) {
-          console.error("Error fetching user data:", error);
+          setFollowedData([]);
         }
       } else {
         try {
@@ -298,7 +298,7 @@ function Profile() {
 
           setFollowedData(updatedData);
         } catch (error) {
-          console.error("Error fetching user data:", error);
+          setFollowedData([]);
         }
       }
     };
