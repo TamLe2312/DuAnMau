@@ -62,7 +62,7 @@ function Notification(props) {
                 <img
                   src={
                     bao.avatar === null
-                      ? "https://i.pinimg.com/564x/ff/27/74/ff2774007991b9edb1dfa27dcbac9278.jpg"
+                      ? "https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg"
                       : bao.avatar
                   }
                   alt=""

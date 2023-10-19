@@ -131,7 +131,7 @@ function GroupsTable() {
       handleCloseModalConfirmDelete();
       setLoading(false);
     } catch (error) {
-      console.error(error);
+      /* console.error(error); */
     }
   };
   const handlePaginationClick = (pageIndex) => {
@@ -174,7 +174,7 @@ function GroupsTable() {
       setTotalPage(response.data.pageCount);
       setIndexPagination(page);
     } catch (error) {
-      console.error(error);
+      /*  console.error(error); */
       setAllDataGroup([]);
     }
   };
@@ -190,7 +190,7 @@ function GroupsTable() {
         setAllDataGroup(response.data.results);
         setLoading(false);
       } catch (error) {
-        console.error(error);
+        /*    console.error(error); */
         setLoading(false);
       }
     };
