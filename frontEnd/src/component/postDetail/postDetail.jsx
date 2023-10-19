@@ -102,7 +102,7 @@ function PostDetail() {
     const fetchApi = async () => {
       try {
         const id = postId.post_id;
-        const res = await request.get(` post/countCommentPost/${id}&0`);
+        const res = await request.get(`post/countCommentPost/${id}&0`);
         if (res.data[0].countcomment > 1) {
           sethasComment(true);
         } else {
@@ -183,11 +183,11 @@ function PostDetail() {
     try {
       const fetchApi = async () => {
         const res = await request.post("post/likePost", {
-          postID: postId,
+          postID: postId.post_id,
           otherUserID: myID,
         });
         if (res) {
-          console.log("bạn đã thích post: " + postId);
+          console.log("bạn đã thích post: " + postId.post_id);
         }
       };
       fetchApi();
@@ -289,7 +289,10 @@ function PostDetail() {
           {img && img.length > 0 ? (
             <>
               <img
-                src={"images/" + (img.length === 1 ? img[0].img : img[run].img)}
+                src={
+                  "http://localhost:8080/images/" +
+                  (img.length === 1 ? img[0].img : img[run].img)
+                }
                 alt=""
               />
               {img.length > 1 && (
@@ -386,7 +389,7 @@ function PostDetail() {
           </>
         )}
 
-        <div className="post-footer-input">
+        {/* <div className="post-footer-input">
           <input
             ref={focusInput}
             type="text"
@@ -394,7 +397,6 @@ function PostDetail() {
             value={comment}
             onChange={(e) => setcomment(e.target.value)}
           />
-          {/* <SentimentSatisfiedAltIcon /> */}
           <button
             disabled={!comment}
             className={comment && "post-comment"}
@@ -402,7 +404,7 @@ function PostDetail() {
           >
             Đăng
           </button>
-        </div>
+        </div> */}
         <hr />
       </div>
       <MyModal

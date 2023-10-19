@@ -18,10 +18,10 @@ import { Toaster } from "sonner";
 
 import "react-toastify/dist/ReactToastify.css";
 
-import Admin from "./component/adminBoss/Admin";
-import Account from "./component/adminBoss/adminchild/account";
-import GroupsTable from "./component/adminBoss/adminchild/Groups";
-import Posts from "./component/adminBoss/adminchild/Posts";
+import Adminn from "./component/adminboss/adminchild/adminc";
+import Account from "./component/adminboss/adminchild/account";
+import GroupsTable from "./component/adminboss/adminchild/Groups";
+import Posts from "./component/adminboss/adminchild/Posts";
 import PostDetail from "./component/postDetail/postDetail";
 
 function App() {
@@ -42,7 +42,7 @@ function App() {
           <Route path="/home/community" element={<Community />} />
           <Route path="/home/messenger" element={<Messenger />} />
           <Route path="/home/messenger/:id" element={<Messenger />} />
-          <Route path="/home/admin" element={<Admin />}>
+          <Route path="/home/admin" element={<Adminn />}>
             <Route path="/home/admin/account" element={<Account />} />
             <Route path="/home/admin/groups" element={<GroupsTable />} />
             <Route path="/home/admin/posts" element={<Posts />} />

@@ -208,11 +208,7 @@ function Register() {
                   </div>
                 )}
               </div>
-              <div className="mt-2 highlightLinkButton">
-                <Link className="mt-4" to="/forgotPassword">
-                  Quên mật khẩu
-                </Link>
-              </div>
+
               <button
                 onClick={handleClick}
                 type="submit"
@@ -229,6 +225,11 @@ function Register() {
                 )}
                 Đăng ký
               </button>
+              <div className="mt-2 highlightLinkButton">
+                <Link className="mt-4" to="/forgotPassword">
+                  Quên mật khẩu
+                </Link>
+              </div>
               <div className="highlightLinkButton">
                 <span>Đã có tài khoản?</span>
                 <Link className="mt-4" to="/">

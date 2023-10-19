@@ -5,6 +5,7 @@ import { useCookies } from "react-cookie";
 import { useEffect, useRef, useState } from "react";
 import { io } from "socket.io-client";
 import * as request from "../../utils/request";
+import { APP_WEB, HOST_NAME } from "../../utils/config";
 function Messenger() {
   const socket = useRef();
   const [online, setonline] = useState([]);
@@ -36,7 +37,7 @@ function Messenger() {
   }, [chay]);
 
   useEffect(() => {
-    const socket = io("http://localhost:8080");
+    const socket = io(HOST_NAME);
     socket.emit("add_new_user", myID);
     socket.on("get_user", (userOl) => {
       setonline(userOl);
