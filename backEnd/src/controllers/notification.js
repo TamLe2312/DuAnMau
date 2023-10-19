@@ -94,7 +94,6 @@ const viewNotifcation = (req, res) => {
 
 const listNotifcation = (req, res) => {
   const myID = parseInt(req.params.myID);
-
   connection.query(
     `SELECT notification.id as idNotifi ,posts.id as postID, notification.title,notification.view, notification.created_ad as timepost, users.id as userID, users.username, users.name, users.avatar
   FROM notification
@@ -116,10 +115,29 @@ const listNotifcation = (req, res) => {
     }
   );
 };
+const countNotifcation = (req, res) => {
+  const myID = parseInt(req.params.myID);
+  connection.query(
+    `SELECT COUNT(*) as countNoti FROM notification 
+  WHERE recipient_id = ? AND view = 0`,
+    [myID],
+
+    function (err, results, fields) {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ err: "Có lỗi xảy ra xin thử lại sau" });
+      }
+      if (results) {
+        return res.status(200).json(results);
+      }
+    }
+  );
+};
 
 module.exports = {
   sendNotifcation,
   listNotifcation,
   unNotifcation,
   viewNotifcation,
+  countNotifcation,
 };
