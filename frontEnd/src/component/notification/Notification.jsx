@@ -29,12 +29,9 @@ function Notification(props) {
     // console.log(bao.postID);
     const viewNotification = async () => {
       try {
-        const res = await axios.post(
-          `http://localhost:8080/notification/viewNotifcation`,
-          {
-            notiID: bao.idNotifi,
-          }
-        );
+        const res = await request.post(`notification/viewNotifcation`, {
+          notiID: bao.idNotifi,
+        });
         if (res) {
           setNum();
           closeModal(false);

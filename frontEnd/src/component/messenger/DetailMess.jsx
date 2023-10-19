@@ -5,7 +5,7 @@ import { useEffect, useRef, useState } from "react";
 import { format } from "timeago.js";
 import { io } from "socket.io-client";
 import * as request from "../../utils/request";
-import { APP_WEB } from "../../utils/config";
+import { APP_WEB, HOST_NAME } from "../../utils/config";
 function DetailMess(props) {
   const socket = useRef();
   const scroll = useRef();
@@ -95,7 +95,7 @@ function DetailMess(props) {
   // socket-----------------------------
   useEffect(() => {
     if (socket) {
-      const socket = io({ APP_WEB });
+      const socket = io(HOST_NAME);
       socket.emit("add_new_user", myID);
       socket.on("get_user", (userOl) => {
         setOnline(userOl);

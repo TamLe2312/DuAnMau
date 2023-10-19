@@ -116,11 +116,7 @@ function Login() {
                 </div>
               )}
             </div>
-            <div className="mt-2 highlightLinkButton">
-              <Link className="mt-4" to="/forgotPassword">
-                Quên mật khẩu?
-              </Link>
-            </div>
+
             <button
               onClick={handleClick}
               type="submit"
@@ -137,6 +133,11 @@ function Login() {
               )}
               Đăng nhập
             </button>
+            <div className="mt-2 highlightLinkButton">
+              <Link className="mt-4" to="/forgotPassword">
+                Quên mật khẩu?
+              </Link>
+            </div>
             <div className="highlightLinkButton">
               <span>Không có tài khoản?</span>
               <Link className="mt-4" to="/register">
