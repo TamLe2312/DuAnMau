@@ -39,7 +39,7 @@ function Posts() {
       const response = await request.get(`admin/postImgs/${id}`);
       setImgs(response.data);
     } catch (err) {
-      console.error(err);
+      /*       console.error(err); */
     }
     setShowModalMoreDetailPost(true);
   };
@@ -69,7 +69,7 @@ function Posts() {
       handleCloseModalConfirmDelete();
       setLoading(false);
     } catch (error) {
-      console.error(error);
+      /*     console.error(error); */
     }
   };
   const handlePaginationClick = (pageIndex) => {
@@ -122,7 +122,7 @@ function Posts() {
         setAllDataPost([]);
       }
     } catch (error) {
-      console.error(error);
+      /*    console.error(error); */
       setAllDataPost([]);
     }
   };
@@ -159,7 +159,7 @@ function Posts() {
           setAllDataPost([]);
         }
       } catch (error) {
-        console.error(error);
+        /*     console.error(error); */
       }
     };
     fetchData();

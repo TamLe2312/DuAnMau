@@ -14,7 +14,7 @@ function Suggestions() {
     if (id) {
       const fetchData = async () => {
         try {
-          const response = await request.get(`account/getDataUser/${id}`); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
+          const response = await request.get(`account/getDataUser/${id}`);
           setUserData(response.data[0]);
           setIsLoading(false);
         } catch (error) {

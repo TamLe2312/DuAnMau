@@ -13,12 +13,14 @@ function SreachSuccess({ search }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await request.get(
-          `account/searchUserProfile/${search}&${id}`
-        ); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
-        setUsers(response.data);
+        if (search) {
+          const response = await request.get(
+            `account/searchUserProfile/${search}&${id}`
+          ); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
+          setUsers(response.data);
+        }
       } catch (error) {
-        console.error("Error fetching user data:", error);
+        setUsers([]);
       }
     };
     fetchData();
