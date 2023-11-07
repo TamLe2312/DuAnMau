@@ -36,7 +36,7 @@ function Messenger() {
     fetchApi();
   }, [chay]);
 
-  useEffect(() => {
+  /*   useEffect(() => {
     const socket = io(HOST_NAME);
     socket.emit("add_new_user", myID);
     socket.on("get_user", (userOl) => {
@@ -46,7 +46,7 @@ function Messenger() {
     return () => {
       socket.disconnect();
     };
-  }, [socket]);
+  }, [socket]); */
   const isOnline = (data, yourID) => {
     if (data.length > 0) {
       const isOl = data.find((user) => user.userId === yourID);
