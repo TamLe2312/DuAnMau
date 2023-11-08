@@ -54,7 +54,12 @@ function Suggestions() {
               </span>
             )}
           </Link>
-          {userData.moTa ? <span>{userData.moTa}</span> : <span></span>}
+          <span>
+            {userData.moTa && userData.moTa.length > 20
+              ? userData.moTa.slice(0, 20) + "..."
+              : userData.moTa}
+          </span>
+          {/*    {userData.moTa ? <span>{userData.moTa}</span> : <span></span>} */}
         </div>
       </div>
 

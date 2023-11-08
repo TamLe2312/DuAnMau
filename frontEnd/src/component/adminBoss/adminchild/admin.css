@@ -63,3 +63,21 @@
 .page-link {
   cursor: pointer;
 }
+
+.btn-featureHandle {
+  padding: 5px 15px !important;
+}
+
+.fa-trash,
+.fa-wrench,
+.fa-info {
+  width: 15px;
+  height: 15px;
+  color: #ffffff;
+}
+
+.AdminDescription span {
+  word-break: break-all;
+  display: inline-block;
+  max-width: 500px;
+}

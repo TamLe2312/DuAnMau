@@ -164,6 +164,10 @@ function Posts() {
     };
     fetchData();
   }, []);
+  const [showMore, setShowMore] = useState(false);
+  const handleClickShowMore = () => {
+    setShowMore(!showMore);
+  };
   return (
     <>
       <div>Bài viết</div>
@@ -184,23 +188,41 @@ function Posts() {
                 <>
                   <tr key={index}>
                     <th scope="row">{index + 1}</th>
-                    <td>{dataPost.content}</td>
+                    <td className="AdminDescription">
+                      {/* <span>{dataPost.content}</span> */}
+                      <span>
+                        {dataPost.content &&
+                        dataPost.content.length > 100 &&
+                        !showMore
+                          ? dataPost.content.slice(0, 100) + "..."
+                          : dataPost.content}
+                      </span>
+                      <br />
+                      {dataPost.content && dataPost.content.length > 100 && (
+                        <span
+                          className="read-more"
+                          onClick={handleClickShowMore}
+                        >
+                          {showMore ? "Rút gọn" : "Xem thêm"}
+                        </span>
+                      )}
+                    </td>
                     <td>{dataPost.name ? dataPost.name : dataPost.username}</td>
                     <td>{dataPost.created_at}</td>
                     <td>
                       <button
                         type="button"
-                        className="btn btn-danger"
+                        className="btn btn-danger btn-featureHandle"
                         onClick={() =>
                           handleShowModalConfirmDelete(dataPost.id)
                         }
                       >
-                        Xóa
+                        <i className="fa-solid fa-trash"></i>
                       </button>
                       &nbsp;
                       <button
                         type="button"
-                        className="btn btn-primary"
+                        className="btn btn-primary btn-featureHandle"
                         onClick={() =>
                           handleShowModalMoreDetailPost(
                             dataPost.id,
@@ -209,7 +231,7 @@ function Posts() {
                           )
                         }
                       >
-                        Chi tiết
+                        <i className="fa-solid fa-info"></i>
                       </button>
                       <Modal
                         centered

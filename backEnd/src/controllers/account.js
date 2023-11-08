@@ -6,6 +6,7 @@ const Mustache = require("mustache");
 const fs = require("fs");
 const path = require("path");
 const moment = require("moment");
+require("dotenv").config();
 
 // api account
 const register = (req, res) => {
@@ -211,36 +212,39 @@ const verifyToken = (req, res) => {
 
 const changeAvatar = (req, res) => {
   const { hasAvatar, id } = req.body;
-  const fileName = req.file.filename;
-  const filePath = "/uploads/" + fileName;
-  const baseURL = "http://localhost:5173/";
-  const imageURL = `${baseURL.slice(0, -1)}${filePath}`;
-  const uploadDir = path.join(__dirname, "../../../frontEnd/uploads");
-  const filePathOldAvatar = path.join(uploadDir, hasAvatar);
-  connection.query(
-    "UPDATE Users SET avatar = ? WHERE id = ?",
-    [imageURL, id],
-    function (err, results, fields) {
-      if (err) {
-        return res.status(500).json({ error: "Lỗi máy chủ" });
-      }
-      if (fs.existsSync(filePathOldAvatar)) {
-        // Xóa tệp tin cũ
-        try {
-          fs.unlinkSync(filePathOldAvatar);
-        } catch (error) {
-          return res.status(500).json({ error: "Lỗi khi cập nhật avatar" });
+  if (req.file) {
+    const fileName = req.file.filename;
+    const filePath = "/uploads/" + fileName;
+    const baseURL = process.env.APP_URL;
+    const imageURL = `${baseURL.slice(0, -1)}${filePath}`;
+    const uploadDir = path.join(__dirname, "../../../frontEnd/uploads");
+    const filePathOldAvatar = path.join(uploadDir, hasAvatar);
+    connection.query(
+      "UPDATE Users SET avatar = ? WHERE id = ?",
+      [imageURL, id],
+      function (err, results, fields) {
+        if (err) {
+          console.log(err);
+          return res.status(500).json({ error: "Lỗi máy chủ" });
         }
+        if (fs.existsSync(filePathOldAvatar)) {
+          // Xóa tệp tin cũ
+          try {
+            fs.unlinkSync(filePathOldAvatar);
+          } catch (error) {
+            return res.status(500).json({ error: "Lỗi khi cập nhật avatar" });
+          }
+        }
+        return res.status(200).json({
+          success: "Cập nhật avatar thành công",
+          avatar: imageURL,
+          fileName: fileName,
+          filePath: filePath,
+          id: id,
+        });
       }
-      return res.status(200).json({
-        success: "Cập nhật avatar thành công",
-        avatar: imageURL,
-        fileName: fileName,
-        filePath: filePath,
-        id: id,
-      });
-    }
-  );
+    );
+  }
 };
 
 const RemoveAvatar = (req, res) => {
@@ -314,25 +318,103 @@ const CountPost = (req, res) => {
 
 const UpdateInformationProfile = (req, res) => {
   const { name, moTa, date, id } = req.body;
-  if (!name || !moTa || !date) {
-    return res.status(400).json({ error: "Vui lòng nhập đủ thông tin" });
-  }
-  const formattedDate = moment(date).format("YYYY-MM-DD");
-  connection.query(
-    "UPDATE Users SET name = ?, birddate = ?, moTa = ? WHERE id = ?",
-    [name, formattedDate, moTa, id],
-    function (err, results, fields) {
-      if (err) {
-        console.error(err);
-        return res.status(500).json({ error: "Lỗi máy chủ" });
+  if (!name && !moTa) {
+    const formattedDate = moment(date).format("YYYY-MM-DD");
+    connection.query(
+      "UPDATE Users SET birddate = ? WHERE id = ?",
+      [formattedDate, id],
+      function (err, results, fields) {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
+        connection.query(
+          "SELECT name,username,moTa FROM Users WHERE id = ?",
+          [id],
+          function (err, results, fields) {
+            if (err) {
+              console.error(err);
+              return res.status(500).json({ error: "Lỗi máy chủ" });
+            }
+            return res.status(200).json({
+              name: results[0].name,
+              moTa: results[0].moTa,
+              username: results[0].username,
+              success: "Cập nhật thông tin thành công",
+            });
+          }
+        );
       }
-      return res.status(200).json({
-        name: name,
-        moTa: moTa,
-        success: "Cập nhật thông tin thành công",
-      });
-    }
-  );
+    );
+  } else if (!name) {
+    connection.query(
+      "UPDATE Users SET moTa = ? WHERE id = ?",
+      [moTa, id],
+      function (err, results, fields) {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
+        connection.query(
+          "SELECT name,username,moTa FROM Users WHERE id = ?",
+          [id],
+          function (err, results, fields) {
+            if (err) {
+              console.error(err);
+              return res.status(500).json({ error: "Lỗi máy chủ" });
+            }
+            return res.status(200).json({
+              name: results[0].name,
+              moTa: results[0].moTa,
+              username: results[0].username,
+              success: "Cập nhật thông tin thành công",
+            });
+          }
+        );
+      }
+    );
+  } else {
+    connection.query(
+      "SELECT * FROM Users WHERE name = ?",
+      [name],
+      function (err, results, fields) {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
+        if (results.length > 0) {
+          return res.status(400).json({ error: "Tên người dùng đã tồn tại" });
+        } else {
+          connection.query(
+            "UPDATE Users SET name = ? WHERE id = ?",
+            [name, id],
+            function (err, results, fields) {
+              if (err) {
+                console.error(err);
+                return res.status(500).json({ error: "Lỗi máy chủ" });
+              }
+              connection.query(
+                "SELECT name,username,moTa FROM Users WHERE id = ?",
+                [id],
+                function (err, results, fields) {
+                  if (err) {
+                    console.error(err);
+                    return res.status(500).json({ error: "Lỗi máy chủ" });
+                  }
+                  return res.status(200).json({
+                    name: results[0].name,
+                    moTa: results[0].moTa,
+                    username: results[0].username,
+                    success: "Cập nhật thông tin thành công",
+                  });
+                }
+              );
+            }
+          );
+        }
+      }
+    );
+  }
 };
 
 const detail = (req, res) => {
@@ -650,7 +732,8 @@ const countFollow = (req, res) => {
   );
 };
 const searchUserFollower = (req, res) => {
-  const searchValue = req.body.searchUser.searchUser;
+  console.log(req.body);
+  const searchValue = req.body.searchUser || null;
   const idUser = req.body.idUser;
   if (searchValue) {
     connection.query(
@@ -668,14 +751,16 @@ const searchUserFollower = (req, res) => {
         if (results.length > 0) {
           return res.status(200).json(results);
         } else {
-          return res.status(400).json({ error: "Người dùng không tồn tại" });
+          return res.status(200).json([]);
         }
       }
     );
+  } else {
+    return res.status(200).json([]);
   }
 };
 const searchUserFollowed = (req, res) => {
-  const searchFollowed = req.body.searchFollowed.searchFollowed;
+  const searchFollowed = req.body.searchFollowed;
   const idUser = req.body.idUser;
   if (searchFollowed) {
     connection.query(
@@ -693,10 +778,12 @@ const searchUserFollowed = (req, res) => {
         if (results.length > 0) {
           return res.status(200).json(results);
         } else {
-          return res.status(400).json({ error: "Người dùng không tồn tại" });
+          return res.status(200).json([]);
         }
       }
     );
+  } else {
+    return res.status(200).json([]);
   }
 };
 const searchUserProfile = (req, res) => {

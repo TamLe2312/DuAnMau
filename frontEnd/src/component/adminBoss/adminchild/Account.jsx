@@ -249,22 +249,22 @@ function Account() {
                     <td>
                       <button
                         type="button"
-                        className="btn btn-primary"
+                        className="btn btn-primary btn-featureHandle"
                         onClick={() =>
                           handleShowModalAdjustInformatione(dataUser.id)
                         }
                       >
-                        Sửa
+                        <i className="fa-solid fa-wrench"></i>
                       </button>
                       &nbsp;
                       <button
                         type="button"
-                        className="btn btn-danger"
+                        className="btn btn-danger btn-featureHandle"
                         onClick={() =>
                           handleShowModalConfirmDelete(dataUser.id)
                         }
                       >
-                        Xóa
+                        <i className="fa-solid fa-trash"></i>
                       </button>
                     </td>
                   </tr>

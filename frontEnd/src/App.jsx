@@ -18,10 +18,10 @@ import { Toaster } from "sonner";
 
 import "react-toastify/dist/ReactToastify.css";
 
-import Adminn from "./component/adminboss/adminchild/adminc";
-import Account from "./component/adminboss/adminchild/account";
-import GroupsTable from "./component/adminboss/adminchild/Groups";
-import Posts from "./component/adminboss/adminchild/Posts";
+import Adminn from "./component/adminBoss/adminchild/Adminc";
+import Account from "./component/adminBoss/adminchild/Account";
+import GroupsTable from "./component/adminBoss/adminchild/Groups";
+import Posts from "./component/adminBoss/adminchild/Posts";
 import PostDetail from "./component/postDetail/postDetail";
 
 function App() {
