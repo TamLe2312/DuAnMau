@@ -7,6 +7,10 @@ import { format } from "timeago.js";
 import * as request from "../../utils/request";
 // import { HOST_NAME } from "../../utils/config";
 import { userOnline } from "../../page/home/home";
+import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
+import HighlightOffIcon from "@mui/icons-material/HighlightOff";
+import PhoneIcon from "@mui/icons-material/Phone";
+import VideocamIcon from "@mui/icons-material/Videocam";
 function DetailMess(props) {
   let value = useContext(userOnline);
   const socket = value.socket;
@@ -108,11 +112,26 @@ function DetailMess(props) {
   }, [loading, yourID, socket]);
 
   useEffect(() => {
-    //   // console.log(`datamessid ${dataMessID} - youid ${youID} `);
     if (dataMessID !== null && !isNaN(youID) && dataMessID === youID) {
       setListmess(newMess);
     }
   }, [newMess, yourID]);
+  const [imgBlob, setImgBlob] = useState(null);
+  const handleImgMessage = (img) => {
+    let imgm = URL.createObjectURL(img[0]);
+    console.log(imgm);
+    setImgBlob(imgm);
+  };
+  const handleDelImgBlob = () => {
+    setImgBlob(null);
+    console.log("đã xóa thành công");
+  };
+  const handleCallVideo = (user) => {
+    console.log("call video", user);
+  };
+  const handleCall = (user) => {
+    console.log("call", user);
+  };
   return (
     <>
       {yourID ? (
@@ -131,8 +150,15 @@ function DetailMess(props) {
               <span className="detailMess-user-name">
                 {user.name !== null ? user.name : user.username}
               </span>
+              <div className="detailMess_call">
+                <span onClick={() => handleCall(user)}>
+                  <PhoneIcon sx={{ fontSize: 20 }} />
+                </span>
+                <span onClick={() => handleCallVideo(user)}>
+                  <VideocamIcon />
+                </span>
+              </div>
             </div>
-
             <div
               style={{
                 backgroundImage:
@@ -158,6 +184,18 @@ function DetailMess(props) {
                     }
                   >
                     <span>{listmess[0].message}</span>
+                    {/* <span className="detailMess_imgs">
+                      <img
+                        className="detailMess_img"
+                        src="https://i.pinimg.com/736x/25/36/56/253656e97ca398c9a2f78dcd774a6c7b.jpg"
+                        alt=""
+                      />
+                      <img
+                        className="detailMess_img"
+                        src="https://i.pinimg.com/736x/25/36/56/253656e97ca398c9a2f78dcd774a6c7b.jpg"
+                        alt=""
+                      />
+                    </span> */}
                     <span className="detailMessContainer-time">
                       {format(listmess[0].created_at)}
                     </span>
@@ -183,7 +221,41 @@ function DetailMess(props) {
               </div>
               {/* ------------------------------------------ */}
             </div>
+            {imgBlob && (
+              <div className="detailMess_blob_imgs">
+                <div className="detailMess_blob_imgs_list">
+                  <img className="detailMess_blob_img" src={imgBlob} alt="" />
+                  <span
+                    className="detailMess_blob_imgs_del"
+                    onClick={handleDelImgBlob}
+                  >
+                    <HighlightOffIcon />
+                  </span>
+                </div>
+                <div className="detailMess_blob_imgs_list">
+                  <img
+                    className="detailMess_blob_img"
+                    src="https://i.pinimg.com/564x/75/d5/fe/75d5fe22bfc2ee37667c98f0b1b4ec06.jpg"
+                    alt=""
+                  />
+                </div>
+              </div>
+            )}
+            {/* ----------------------------------- */}
             <div className="detailMess-imput">
+              <div className="detailMess_imgs">
+                <input
+                  type="file"
+                  id="imgs_detail"
+                  name="imgMessage"
+                  onChange={(e) => handleImgMessage(e.target.files)}
+                />
+                <label className="imgs_detail_for" htmlFor="imgs_detail">
+                  <AddPhotoAlternateIcon />
+                </label>
+              </div>
+
+              {/* -------------------------------------------- */}
               <InputEmoji
                 ref={input}
                 value={text}

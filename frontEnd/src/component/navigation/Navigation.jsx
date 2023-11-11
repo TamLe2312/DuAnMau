@@ -18,7 +18,7 @@ import DarkModeIcon from "@mui/icons-material/DarkMode";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import MyModal from "../modal/Modal";
 import ImgNews from "../createNews/ImgNews";
-import ContentNews from "../createNews/ContentNews";
+// import ContentNews from "../createNews/ContentNews";
 import { useCookies } from "react-cookie";
 import imageLogo from "../../../uploads/Logo1.png";
 import request from "../../utils/request";
@@ -89,7 +89,6 @@ function Navigation() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-
         const response = await request.get(`account/getDataUser/${id}`);
 
         if (response.data[0].role === "admin") {
@@ -106,7 +105,6 @@ function Navigation() {
     return () => {
       clearInterval(interval); // Xóa bỏ interval khi component bị unmount
     };
-
   }, [id]);
   const [number, setNumber] = useState(0);
   useEffect(() => {
