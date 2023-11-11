@@ -22,15 +22,15 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: "*",
     methods: ["GET", "POST"],
   },
 });
 let activeUsers = [];
+let ols = [];
 io.on("connection", (socket) => {
   socket.on("add_new_user", (newUserID) => {
     const userExists = activeUsers.some((user) => user.userId === newUserID);
-
     if (!userExists) {
       activeUsers.push({
         userId: newUserID,
@@ -40,20 +40,37 @@ io.on("connection", (socket) => {
       io.emit("get_user", activeUsers);
     }
   });
+  // --------------------
+  socket.on("add_ols", (newUserID) => {
+    const userExists = ols.some((user) => user.userId === newUserID);
+    if (!userExists) {
+      ols.push({
+        userId: newUserID,
+        socketId: socket.id,
+      });
+      io.emit("get_ol", ols);
+    }
+  });
+  // ------------------
   socket.on("add_message", (data) => {
     const { youID } = data;
     const user = activeUsers.find((user) => user.userId == youID);
+
     if (user) {
       io.to(user.socketId).emit("get_message", data);
-      console.log("tìm thấy người dùng :", user);
-    } else {
-      // console.log("Không tìm thấy người dùng :", youID);
+      io.to(user.socketId).emit("recibir", [
+        "Bạn có một tin nhắn mới : ",
+        youID,
+      ]);
+      console.log("Đã gửi :", user);
     }
   });
 
   socket.on("disconnect", () => {
     activeUsers = activeUsers.filter((user) => user.socketId !== socket.id);
+    ols = ols.filter((user) => user.socketId !== socket.id);
     io.emit("get_user", activeUsers);
+    io.emit("get_ol", ols);
   });
 });
 

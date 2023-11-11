@@ -1,24 +1,25 @@
 import "./detailmess.css";
 import InputEmoji from "react-input-emoji";
 import SendIcon from "@mui/icons-material/Send";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useContext } from "react";
 import { format } from "timeago.js";
-import { io } from "socket.io-client";
+// import { io } from "socket.io-client";
 import * as request from "../../utils/request";
-import { APP_WEB, HOST_NAME } from "../../utils/config";
+// import { HOST_NAME } from "../../utils/config";
+import { userOnline } from "../../page/home/home";
 function DetailMess(props) {
-  const socket = useRef();
+  let value = useContext(userOnline);
+  const socket = value.socket;
   const scroll = useRef();
   const input = useRef();
-  const { myID, yourID, handleChay, listUserMess, handleLastedMess } = props;
+  const { myID, yourID, handleChay, listUserMess, setonline } = props;
   const youID = parseInt(yourID);
-
+  // console.log(yourID);
   const [text, setText] = useState("");
   const [user, setuser] = useState([]);
   const [listmess, setListmess] = useState([]);
   const [newMess, setnewMess] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [online, setOnline] = useState([]);
   const [dataMessID, setDataMessID] = useState(null);
   // data user
   const FetchDataUser = async (yID) => {
@@ -43,7 +44,7 @@ function DetailMess(props) {
       console.log(e);
     }
   };
-  // console.log(youID);
+
   useEffect(() => {
     const fetchApi = async () => {
       await FetchDataUser(youID);
@@ -75,7 +76,6 @@ function DetailMess(props) {
           const addUserLisst = listUserMess?.find((user) => user.id === youID);
           !addUserLisst && handleChay();
         }
-        // console.log(listUserMess);
         const data = res.data[0];
         await setListmess([...listmess, data]);
         setLoading(false);
@@ -91,37 +91,28 @@ function DetailMess(props) {
     scroll.current?.scrollIntoView({ behavior: "smooth" });
     input.current?.focus();
   }, [listmess]);
-  // -------------------------------------------
-  // socket-----------------------------
   useEffect(() => {
-    if (socket) {
-      const socket = io(HOST_NAME);
-      socket.emit("add_new_user", myID);
-      socket.on("get_user", (userOl) => {
-        setOnline(userOl);
-      });
-
-      if (listmess.length > 0) {
-        socket.emit("add_message", { mes: listmess, youID, myID });
-      }
-      socket.on("get_message", (data) => {
-        const { mes, myID } = data;
-        // const receiverID = data.youID;
-        setDataMessID(myID);
-        setnewMess(mes);
-      });
-      return () => {
-        socket.disconnect();
-      };
+    socket.emit("add_new_user", myID);
+    // socket.on("get_user", (userOl) => {
+    //   console.log("online", userOl);
+    //   setonline(userOl);
+    // });
+    if (listmess.length > 0) {
+      socket.emit("add_message", { mes: listmess, youID, myID });
     }
-  }, [socket, loading]);
-  // ---------------------------------------------------------
-  // console.log(listmess);
+    socket.on("get_message", (data) => {
+      const { mes, myID } = data;
+      setDataMessID(myID);
+      setnewMess(mes);
+    });
+  }, [loading, yourID, socket]);
+
   useEffect(() => {
+    //   // console.log(`datamessid ${dataMessID} - youid ${youID} `);
     if (dataMessID !== null && !isNaN(youID) && dataMessID === youID) {
       setListmess(newMess);
     }
-  }, [newMess]);
+  }, [newMess, yourID]);
   return (
     <>
       {yourID ? (
@@ -131,7 +122,7 @@ function DetailMess(props) {
               <img
                 src={
                   user.avatar
-                    ? "images/" + user.avatar
+                    ? user.avatar
                     : "https://i.pinimg.com/564x/81/05/9b/81059b2b505bcf50cdbd09b1ca7d4dae.jpg"
                 }
                 alt=""
