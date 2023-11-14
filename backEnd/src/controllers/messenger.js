@@ -20,55 +20,55 @@ const upload = multer({
   storage: storage,
 });
 
-const deletePostImgsMess = async (req, res) => {
-  const uploadDir = path.join(__dirname, "../public/images/");
-  const { mess_id } = req.body;
-  if (mess_id) {
-    const listImg = await new Promise((resolve, reject) => {
-      connection.query(
-        "SELECT * FROM listdata WHERE mess_id = ?",
-        [mess_id],
-        (err, results, fields) => {
-          if (err) {
-            reject(err);
-          } else {
-            const imgPaths = results.map((re) => path.join(uploadDir, re.img));
-            resolve(imgPaths);
-          }
-        }
-      );
-    });
-    if (listImg.length === 0) {
-      return res.status(200).json({ success: "Bài viết không có hình ảnh" });
-    }
-    try {
-      await Promise.all(
-        listImg.map((imgdel) => {
-          return new Promise((resolve, reject) => {
-            fs.unlink(imgdel, (err) => {
-              if (err) {
-                reject(err);
-              } else {
-                resolve();
-              }
-            });
-          });
-        })
-      );
-      return res.status(200).json({
-        successWithImgs: "Bạn đã xóa img mess",
-      });
-    } catch (err) {
-      console.log(err);
-      return res.status(400).json({ error: "Lỗi xóa hình ảnh" });
-    }
-  }
-};
+// const deletePostImgsMess = async (req, res) => {
+//   const uploadDir = path.join(__dirname, "../public/images/");
+//   const { mess_id } = req.body;
+//   if (mess_id) {
+//     const listImg = await new Promise((resolve, reject) => {
+//       connection.query(
+//         "SELECT * FROM listdata WHERE mess_id = ?",
+//         [mess_id],
+//         (err, results, fields) => {
+//           if (err) {
+//             reject(err);
+//           } else {
+//             const imgPaths = results.map((re) => path.join(uploadDir, re.img));
+//             resolve(imgPaths);
+//           }
+//         }
+//       );
+//     });
+//     if (listImg.length === 0) {
+//       return res.status(200).json({ success: "Bài viết không có hình ảnh" });
+//     }
+//     try {
+//       await Promise.all(
+//         listImg.map((imgdel) => {
+//           return new Promise((resolve, reject) => {
+//             fs.unlink(imgdel, (err) => {
+//               if (err) {
+//                 reject(err);
+//               } else {
+//                 resolve();
+//               }
+//             });
+//           });
+//         })
+//       );
+//       return res.status(200).json({
+//         successWithImgs: "Bạn đã xóa img mess",
+//       });
+//     } catch (err) {
+//       console.log(err);
+//       return res.status(400).json({ error: "Lỗi xóa hình ảnh" });
+//     }
+//   }
+// };
 
-const test = async (req, res) => {
+const test = async (sender_id, recipient_id) => {
   const uploadDir = path.join(__dirname, "../public/images/");
-  const sender_id = parseInt(req.params.sender_id);
-  const recipient_id = parseInt(req.params.recipient_id);
+  // const sender_id = parseInt(req.params.sender_id);
+  // const recipient_id = parseInt(req.params.recipient_id);
   if (sender_id === recipient_id) {
     return res.status(400).json({ error: "không có tin nhắn với bản thân??" });
   } else {
@@ -89,7 +89,8 @@ const test = async (req, res) => {
       );
     });
     if (listImg.length === 0) {
-      return res.status(200).json({ success: "Bài viết không có hình ảnh" });
+      // return res.status(200).json({ success: "Bài viết không có hình ảnh" });
+      console.log("Bài viết không có hình ảnh");
     }
     try {
       await Promise.all(
@@ -105,12 +106,14 @@ const test = async (req, res) => {
           });
         })
       );
-      return res.status(200).json({
-        successWithImgs: "Bạn đã xóa img mess",
-      });
+      // return res.status(200).json({
+      //   successWithImgs: "Bạn đã xóa img mess",
+      // });
+      console.log("Bạn đã xóa img mess");
     } catch (err) {
       console.log(err);
-      return res.status(400).json({ error: "Lỗi xóa hình ảnh" });
+      // return res.status(400).json({ error: "Lỗi xóa hình ảnh" });
+      console.log("Lỗi xóa hình ảnh");
     }
   }
 };
@@ -371,6 +374,8 @@ const delMess = (req, res) => {
             }
           );
         } else {
+          //Xóaimg img trong public tại đây
+          test(sender_id, recipient_id);
           // delete
           connection.query(
             "DELETE FROM messenger WHERE (sender_id = ? AND recipient_id = ?) OR (sender_id = ? AND recipient_id = ?)",
@@ -382,7 +387,9 @@ const delMess = (req, res) => {
                   .status(500)
                   .json({ error: "Có lỗi xảy ra xin thử lại sau" });
               }
-              return res.status(200).json({ success: "Đã xóa tin nhắn" });
+              if (results) {
+                return res.status(200).json({ success: "Đã xóa tin nhắn" });
+              }
             }
           );
         }
@@ -400,6 +407,6 @@ module.exports = {
   delMess,
   upImgsMes,
   listMessImg,
-  deletePostImgsMess,
+  // deletePostImgsMess,
   test,
 };
