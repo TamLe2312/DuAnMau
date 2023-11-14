@@ -11,6 +11,8 @@ import { userOnline } from "../../page/home/home";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 function Messenger() {
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
@@ -43,14 +45,10 @@ function Messenger() {
     };
     fetchApi();
   }, [chay]);
-  // useEffect(() => {
-  //   setonline(value.online);
-  // }, [value]);
 
   useEffect(() => {
     socket.on("get_ol", (userOl) => {
       setonline(userOl);
-      // console.log(userOl);
     });
   }, [online, socket]);
   const isOnline = (data, yourID) => {
@@ -77,10 +75,24 @@ function Messenger() {
   const handleShowdel = () => {
     setShow(true);
   };
+  // xóa end
   const handleDelOK = () => {
-    console.log("Người nhận: " + hienUser);
-    console.log("Người gửi: " + myID);
-    setShow(false);
+    const fetchDel = async () => {
+      try {
+        const res = await request.post(`messenger/delMes`, {
+          sender_id: myID,
+          recipient_id: hienUser,
+        });
+        if (res) {
+          toast.success("Xóa thành công!");
+        }
+      } catch (e) {
+        console.log(e);
+      }
+      setShow(false);
+      handleChay();
+    };
+    fetchDel();
   };
   const delRef = useRef();
   useEffect(() => {
@@ -181,8 +193,21 @@ function Messenger() {
           handleChay={handleChay}
           listUserMess={listUserMess}
           setonline={setonline}
+          chay={chay}
         />
       </div>
+      <ToastContainer
+        position="top-right"
+        autoClose={2000}
+        hideProgressBar
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="light"
+      />
     </div>
   );
 }

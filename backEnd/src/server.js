@@ -53,9 +53,8 @@ io.on("connection", (socket) => {
   });
   // ------------------
   socket.on("add_message", (data) => {
-    const { youID } = data;
+    const { youID, myID } = data;
     const user = activeUsers.find((user) => user.userId == youID);
-
     if (user) {
       io.to(user.socketId).emit("get_message", data);
       io.to(user.socketId).emit("recibir", [

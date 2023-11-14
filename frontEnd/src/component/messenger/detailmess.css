@@ -36,6 +36,7 @@
   align-items: center;
 }
 .detailMess-imput-send {
+  margin-top: 3px;
   margin-right: 12px;
 }
 .detailMess-imput-send * {
@@ -44,6 +45,7 @@
 }
 .detailMess-imput-send-success {
   margin-right: 12px;
+  margin-top: 3px;
 }
 .detailMess-imput-send-success:hover {
   cursor: pointer;
@@ -134,6 +136,7 @@
 }
 .detailMess_call * {
   margin-left: 8px;
+  color: gray;
 }
 .detailMess_call:hover * {
   cursor: pointer;
@@ -146,8 +149,25 @@
 }
 .detailMess_img {
   width: 179px;
+  /* width: 48%; */
   height: 240px;
   border-radius: 8px;
   padding-top: 12px;
   object-fit: cover;
+}
+
+.detailMess_Mic {
+  padding: 2px 8px 0 0;
+  /* padding-right: 8px; */
+}
+
+.detailMess_Mic * {
+  color: gray;
+}
+.detailMess_Mic:hover {
+  cursor: pointer;
+  color: rgb(34, 126, 144);
+}
+.detailMess_Mic:hover * {
+  color: rgb(34, 126, 144);
 }
