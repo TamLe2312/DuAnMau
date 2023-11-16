@@ -46,11 +46,13 @@ function Messenger() {
     fetchApi();
   }, [chay]);
 
+
   useEffect(() => {
     socket.on("get_ol", (userOl) => {
       setonline(userOl);
     });
   }, [online, socket]);
+
   const isOnline = (data, yourID) => {
     // if (data.length > 0) {
     const isOl = data.some((user) => user.userId == yourID);

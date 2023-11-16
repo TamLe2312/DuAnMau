@@ -448,7 +448,7 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
               )}
             </>
           ) : (
-            title
+            <span style={{ wordBreak: "break-all" }}>{title}</span>
           )}
         </div>
         <div className="post-footer">

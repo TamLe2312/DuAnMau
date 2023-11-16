@@ -6,7 +6,7 @@ import FavoriteIcon from "@mui/icons-material/Favorite";
 import SearchIcon from "@mui/icons-material/Search";
 import InfiniteScroll from "react-infinite-scroll-component";
 import "bootstrap/dist/css/bootstrap.min.css";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import { useCookies } from "react-cookie";
 import Post from "../timeline/post/Post";
@@ -20,14 +20,12 @@ function Profile() {
   // id user khác
   const { userID } = useParams();
   const [postsData, setPostsData] = useState([]);
-
+  const refSearch = useRef();
   const [showModalAvatar, setShowModalAvatar] = useState(false);
   const [showModalFollower, setShowModalFollower] = useState(false);
   const [showModalFollowed, setShowModalFollowed] = useState(false);
   const [showModalInformationProfile, setShowModalInformationProfile] =
     useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [Images, setImages] = useState(null);
   const [hasAvatar, setHasAvatar] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState({});
@@ -37,25 +35,31 @@ function Profile() {
     moTa: "",
     birthday: "",
   });
-  const [searchValue, setSearchValue] = useState("");
+  const [isHaveInform, setIsHaveInform] = useState(false);
+  const [searchValueFollower, setSearchValueFollower] = useState("");
+  const [searchValueFollowed, setSearchValueFollowed] = useState("");
   const [userData, setUserData] = useState("");
   const [followerData, setFollowerData] = useState([]);
   const [followedData, setFollowedData] = useState([]);
+  const [showMore, setShowMore] = useState(false);
+  const handleClickShowMore = () => {
+    setShowMore(!showMore);
+  };
   // id account
   const id = userID ? userID : cookies.userId;
   const [CountPost, setCountPost] = useState(0);
   const handleCloseModalAvatar = () => {
-    setSelectedImage(null);
     setShowModalAvatar(false);
   };
   const handleShowModalAvatar = () => {
     setShowModalAvatar(true);
   };
   const handleCloseModalFollower = () => {
-    setSearchValue((preSearchValue) => ({
+    /* setSearchValue((preSearchValue) => ({
       ...preSearchValue,
       searchUser: "",
-    }));
+    })); */
+    setSearchValueFollower("");
     setSearchUserFollower([]);
     setShowModalFollower(false);
   };
@@ -63,23 +67,69 @@ function Profile() {
     setShowModalFollower(true);
   };
   const handleCloseModalFollowed = () => {
+    setSearchValueFollowed("");
+    setSearchUserFollowed([]);
     setShowModalFollowed(false);
   };
   const handleShowModalFollowed = () => {
     setShowModalFollowed(true);
   };
   const handleCloseModalInformationProfile = () => {
+    setIsHaveInform(false);
     setShowModalInformationProfile(false);
-  };
-  const handleSearchChange = (e) => {
-    setSearchValue((preSearchValue) => ({
-      ...preSearchValue,
-      [e.target.name]: e.target.value,
-    }));
   };
   const [searchUserFollower, setSearchUserFollower] = useState([]);
   const [searchUserFollowed, setSearchUserFollowed] = useState([]);
-  const handleKeyEnterSearchFollower = async (e) => {
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await request.post("account/searchUserFollower", {
+          searchUser: searchValueFollower,
+          idUser: id,
+        });
+        if (response.data.length === 0) {
+          setSearchUserFollower([]);
+        } else {
+          setSearchUserFollower(response.data);
+        }
+      } catch (err) {
+        setSearchUserFollower([]);
+        console.error(err);
+      }
+    };
+    if (searchValueFollower) {
+      fetchData();
+    } else {
+      setSearchUserFollower([]);
+    }
+  }, [searchValueFollower, id]);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await request.post("account/searchUserFollowed", {
+          searchFollowed: searchValueFollowed,
+          idUser: id,
+        });
+        if (response.data.length === 0) {
+          setSearchUserFollower([]);
+        } else {
+          const updatedData = response.data.map((item) => {
+            return { ...item, isFollow: true };
+          });
+          setSearchUserFollowed(updatedData);
+        }
+      } catch (err) {
+        console.error(err);
+        setSearchUserFollowed([]);
+      }
+    };
+    if (searchValueFollowed) {
+      fetchData();
+    } else {
+      setSearchUserFollowed([]);
+    }
+  }, [searchValueFollowed, id]);
+  /*  const handleKeyEnterSearchFollower = async (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
       try {
@@ -96,13 +146,13 @@ function Profile() {
     if (e.key === "Backspace" || e.key === "Delete") {
       setSearchUserFollower([]);
     }
-  };
-  const handleKeyEnterSearchFollowed = async (e) => {
+  }; */
+  /* const handleKeyEnterSearchFollowed = async (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
       try {
         const response = await request.post("account/searchUserFollowed", {
-          searchFollowed: searchValue,
+          searchFollowed: searchValueFollowed,
           idUser: id,
         });
         const updatedData = response.data.map((item) => {
@@ -117,7 +167,7 @@ function Profile() {
     if (e.key === "Backspace" || e.key === "Delete") {
       setSearchUserFollowed([]);
     }
-  };
+  }; */
   const handleShowModalInformationProfile = () => {
     setFormValues({
       name: "",
@@ -130,8 +180,6 @@ function Profile() {
   const handleInputChange = async (event) => {
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
-      setImages(null);
-      setSelectedImage(null);
       toast.error("Chưa có ảnh");
       return; // Dừng việc xử lý nếu không có file được chọn
     }
@@ -149,9 +197,8 @@ function Profile() {
       event.target.value = null;
       return;
     }
-    const imageUrl = URL.createObjectURL(selectedFile);
-    setSelectedImage(imageUrl);
-    setImages(selectedFile);
+    handleUploadImage(selectedFile);
+    handleCloseModalAvatar();
   };
   const handleRemoveImage = async () => {
     setLoading(true);
@@ -179,11 +226,10 @@ function Profile() {
     }
   };
 
-  const handleUploadImage = async () => {
-    setLoading(true);
+  const handleUploadImage = async (selectedFile) => {
     try {
       const formData = new FormData();
-      formData.append("avatar", Images);
+      formData.append("avatar", selectedFile);
       formData.append("id", id);
       formData.append("hasAvatar", hasAvatar);
 
@@ -199,9 +245,7 @@ function Profile() {
       }));
       toast.success(response.data.success);
       handleCloseModalAvatar();
-      setLoading(false);
     } catch (error) {
-      setLoading(false);
       console.error(error);
     }
   };
@@ -211,16 +255,27 @@ function Profile() {
       ...formValues,
       [e.target.name]: e.target.value,
     });
+    if (e.target.value !== "") {
+      setIsHaveInform(true);
+    } else {
+      setIsHaveInform(false);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(Validation(formValues));
+    const currentDateTime = moment().toISOString();
+    const selectedDateTime = moment(formValues.birthday).toISOString();
+    if (moment(selectedDateTime).isAfter(currentDateTime)) {
+      toast.error("Ngày sinh không thể ở tương lai.");
+      return;
+    }
     try {
       setLoading(true);
       const response = await request.post("account/UpdateInformationProfile", {
-        name: formValues.name.trim(),
-        moTa: formValues.moTa.trim(),
+        name: formValues.name,
+        moTa: formValues.moTa,
         date: moment(formValues.birthday).toISOString(),
         id: id,
       });
@@ -230,13 +285,16 @@ function Profile() {
       setLoading(false);
       const nameUser = response.data.name;
       const moTaUser = response.data.moTa;
+      const usernameU = response.data.username;
       setUserData((prevUserData) => ({
         ...prevUserData,
         name: nameUser,
         moTa: moTaUser,
+        username: usernameU,
       }));
       handleCloseModalInformationProfile();
     } catch (error) {
+      toast.error(error.response.data.error);
       setLoading(false);
     }
   };
@@ -244,7 +302,7 @@ function Profile() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await request.get(`account/getDataUser/${id}`); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
+        const response = await request.get(`account/getDataUser/${id}`);
         setUserData(response.data[0]);
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -508,21 +566,13 @@ function Profile() {
                       show={showModalAvatar}
                       onHide={handleCloseModalAvatar}
                     >
-                      <Modal.Header closeButton>
+                      {/*   <Modal.Header closeButton>
                         <Modal.Title>Thay đổi ảnh đại diện</Modal.Title>
-                      </Modal.Header>
+                      </Modal.Header> */}
                       <Modal.Body className="ProfileAvatarModalBody">
-                        {selectedImage ? (
-                          <div className="ProfileShowImageContainer">
-                            <img
-                              className="ShowImageWhenUpload"
-                              src={selectedImage}
-                              alt="Avatar"
-                            />
-                          </div>
-                        ) : (
-                          <div></div>
-                        )}
+                        <div className="ProfileTitleChangeAvatar">
+                          <span>Thay đổi ảnh đại diện</span>
+                        </div>
                         <Form encType="multipart/form-data">
                           <Form.Group>
                             <Form.Label
@@ -551,22 +601,15 @@ function Profile() {
                         ) : (
                           <div></div>
                         )}
+                        <div className="ProfileButtonHandleClose">
+                          <Button
+                            variant="secondary"
+                            onClick={handleCloseModalAvatar}
+                          >
+                            Close
+                          </Button>
+                        </div>
                       </Modal.Body>
-                      <Modal.Footer>
-                        <Button
-                          variant="secondary"
-                          onClick={handleCloseModalAvatar}
-                        >
-                          Close
-                        </Button>
-                        <Button
-                          variant="primary"
-                          disabled={!selectedImage || loading}
-                          onClick={handleUploadImage}
-                        >
-                          {loading ? "Uploading..." : "Upload Avatar"}
-                        </Button>
-                      </Modal.Footer>
                     </Modal>
                   </div>
                 </div>
@@ -604,22 +647,9 @@ function Profile() {
                               name="name"
                               value={formValues.name}
                               onChange={handleChange}
-                              className={
-                                error.name
-                                  ? "form-control is-invalid"
-                                  : "form-control"
-                              }
+                              className="form-control"
                             />
-                            {error.name && (
-                              <div
-                                id="validationServerUsernameFeedback"
-                                className="invalid-feedback"
-                              >
-                                {error.name}
-                              </div>
-                            )}
                           </Form.Group>
-
                           <Form.Group controlId="formDescription">
                             <Form.Label>Description</Form.Label>
                             <Form.Control
@@ -627,22 +657,9 @@ function Profile() {
                               name="moTa"
                               value={formValues.moTa}
                               onChange={handleChange}
-                              className={
-                                error.moTa
-                                  ? "form-control is-invalid"
-                                  : "form-control"
-                              }
+                              className="form-control"
                             />
-                            {error.moTa && (
-                              <div
-                                id="validationServerUsernameFeedback"
-                                className="invalid-feedback"
-                              >
-                                {error.moTa}
-                              </div>
-                            )}
                           </Form.Group>
-
                           <Form.Group controlId="formBirthday">
                             <Form.Label>Birthday</Form.Label>
                             <Form.Control
@@ -650,32 +667,26 @@ function Profile() {
                               name="birthday"
                               value={formValues.birthday}
                               onChange={handleChange}
-                              className={
-                                error.birthday
-                                  ? "form-control is-invalid"
-                                  : "form-control"
-                              }
+                              className="form-control"
                             />
-                            {error.birthday && (
-                              <div
-                                id="validationServerUsernameFeedback"
-                                className="invalid-feedback"
-                              >
-                                {error.birthday}
-                              </div>
-                            )}
                           </Form.Group>
                           <br />
                         </Form>
                       </Modal.Body>
                       <Modal.Footer>
-                        <Button
-                          variant="primary"
-                          type="submit"
-                          onClick={handleSubmit}
-                        >
-                          {loading ? "Submit..." : "Submit"}
-                        </Button>
+                        {isHaveInform ? (
+                          <Button
+                            variant="primary"
+                            type="submit"
+                            onClick={handleSubmit}
+                          >
+                            {loading ? "Submit..." : "Submit"}
+                          </Button>
+                        ) : (
+                          <Button variant="secondary" type="submit">
+                            {loading ? "Submit..." : "Submit"}
+                          </Button>
+                        )}
                       </Modal.Footer>
                     </Modal>
                   </div>
@@ -710,12 +721,13 @@ function Profile() {
                             style={{ position: "relative" }}
                           >
                             <Form.Control
+                              ref={refSearch}
                               type="text"
-                              placeholder="Searching Group"
-                              name="searchUser"
-                              value={searchValue.searchUser || ""}
-                              onChange={handleSearchChange}
-                              onKeyDown={handleKeyEnterSearchFollower}
+                              placeholder="Nhập tên follower cần tìm..."
+                              name="searchFollower"
+                              onChange={(e) =>
+                                setSearchValueFollower(e.target.value)
+                              }
                             />
                             <SearchIcon
                               style={{
@@ -750,7 +762,7 @@ function Profile() {
                               searchUserFollower.length > 0 &&
                               followerData ? (
                                 searchUserFollower &&
-                                searchUserFollower.length > 0 ? (
+                                searchUserFollower.length !== 0 ? (
                                   searchUserFollower.map(
                                     (dataSearch, index) => {
                                       return (
@@ -905,12 +917,13 @@ function Profile() {
                             style={{ position: "relative" }}
                           >
                             <Form.Control
+                              ref={refSearch}
                               type="text"
-                              placeholder="Searching Group"
+                              placeholder="Nhập tên người đang theo dõi cần tìm..."
                               name="searchFollowed"
-                              value={searchValue.searchFollowed || ""}
-                              onChange={handleSearchChange}
-                              onKeyDown={handleKeyEnterSearchFollowed}
+                              onChange={(e) =>
+                                setSearchValueFollowed(e.target.value)
+                              }
                             />
                             <SearchIcon
                               style={{
@@ -1122,10 +1135,21 @@ function Profile() {
                     </span>
                   </div>
                 </div>
-                <div className="ProfileRow">
-                  <p>{userData.moTa}</p>
-                </div>
               </div>
+            </div>
+            <div className="ProfileRowDescription">
+              <p className="ProfileDescriptionUser">
+                <span>
+                  {userData.moTa && userData.moTa.length > 100 && !showMore
+                    ? userData.moTa.slice(0, 100) + "..."
+                    : userData.moTa}
+                </span>
+                {userData.moTa && userData.moTa.length > 100 && (
+                  <span className="read-more" onClick={handleClickShowMore}>
+                    {showMore ? "Rút gọn" : "Xem thêm"}
+                  </span>
+                )}
+              </p>
             </div>
           </header>
           <div className="container containerFeature">
