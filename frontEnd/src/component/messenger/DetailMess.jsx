@@ -12,7 +12,15 @@ import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import PhoneIcon from "@mui/icons-material/Phone";
 import VideocamIcon from "@mui/icons-material/Videocam";
 import MicNoneIcon from "@mui/icons-material/MicNone";
+import Recoder from "../recoder/recoder";
+import ClearIcon from "@mui/icons-material/Clear";
+import { mirage } from "ldrs";
+
+// Default values shown
+
 function DetailMess(props) {
+  mirage.register();
+
   let value = useContext(userOnline);
   const socket = value.socket;
   const scroll = useRef();
@@ -28,7 +36,7 @@ function DetailMess(props) {
   const [dataMessID, setDataMessID] = useState(null);
   const [imgBlob, setImgBlob] = useState([]);
   const [imgsMes, setImgsMes] = useState([]);
-
+  const [banghi, setBanghi] = useState(null);
   // data user
   const FetchDataUser = async (yID) => {
     try {
@@ -85,14 +93,37 @@ function DetailMess(props) {
   const handleSendMess = async () => {
     const textMes = text.trim();
     const formData = new FormData();
+
     try {
       setLoading(true);
-      const res = await request.post(`messenger/create`, {
-        sender_id: myID,
-        recipient_id: user.id,
-        message: textMes,
-        listimg: imgsMes,
-      });
+      const formDataRecord = new FormData();
+      let res = "";
+      if (banghi !== null) {
+        // console.log(banghi);
+        formDataRecord.append(`audio`, banghi);
+        formDataRecord.append(`youID`, youID);
+        formDataRecord.append(`myID`, myID);
+        res = await request.post(`messenger/upRecord`, formDataRecord);
+      } else {
+        res = await request.post(
+          `messenger/create`,
+          banghi
+            ? {
+                sender_id: myID,
+                recipient_id: user.id,
+                message: textMes,
+                listimg: imgsMes,
+                recoder: banghi.size,
+              }
+            : {
+                sender_id: myID,
+                recipient_id: user.id,
+                message: textMes,
+                listimg: imgsMes,
+              }
+        );
+      }
+
       if (res) {
         if (listUserMess.length === 0) {
           handleChay();
@@ -120,6 +151,8 @@ function DetailMess(props) {
     setText("");
     setImgBlob([]);
     setImgsMes([]);
+    setBanghi(null);
+    setMic(false);
   };
 
   useEffect(() => {
@@ -172,9 +205,12 @@ function DetailMess(props) {
   const handleCall = (user) => {
     console.log("call", user);
   };
+  const [mic, setMic] = useState(false);
   const handleMic = () => {
-    // console.log(typeof youID);
-    // console.log(youID);
+    setMic((pre) => !pre);
+    if (mic) {
+      setBanghi(null);
+    }
   };
   useEffect(() => {
     let a = [];
@@ -191,14 +227,6 @@ function DetailMess(props) {
       });
   }, [imgsMes, listmess]);
 
-  // useEffect(() => {
-  //   if (listImgMess.length > 0) {
-  //     let a = listImgMess.find((img) => img && img.mesID == 171);
-  //     if (a) {
-  //       console.log(a.data);
-  //     }
-  //   }
-  // }, [listImgMess]);
   const test = (id) => {
     if (listImgMess && listImgMess.length > 0) {
       let a = listImgMess.find((img) => img && img.mesID == id);
@@ -214,6 +242,13 @@ function DetailMess(props) {
       }
     }
   };
+  //delBlob
+  useEffect(() => {
+    setImgBlob([]);
+    setMic(false);
+    setImgsMes([]);
+    setBanghi(null);
+  }, [youID]);
   return (
     <>
       {yourID ? (
@@ -270,19 +305,18 @@ function DetailMess(props) {
                           key={index}
                         >
                           <span>{mes.message}</span>
-                          {/* <span>{mes.id}</span> */}
+
                           <span className="detailMess_imgs">
                             {test(mes.id)}
-                            {/* <img
-                              className="detailMess_img"
-                              src="https://i.pinimg.com/736x/25/36/56/253656e97ca398c9a2f78dcd774a6c7b.jpg"
-                              alt=""
-                            />
-                            <img
-                              className="detailMess_img"
-                              src="https://i.pinimg.com/736x/25/36/56/253656e97ca398c9a2f78dcd774a6c7b.jpg"
-                              alt=""
-                            /> */}
+                          </span>
+                          <span>
+                            {mes.recorder && (
+                              <audio
+                                className="detailMess_record"
+                                src={HOST_NAME + `/audio/` + mes.recorder}
+                                controls
+                              ></audio>
+                            )}
                           </span>
                           <span className="detailMessContainer-time">
                             {format(mes.created_at)}
@@ -294,6 +328,12 @@ function DetailMess(props) {
 
               {/* ------------------------------------------ */}
             </div>
+            <span>
+              {mic && (
+                <Recoder youID={youID} myID={myID} setBanghi={setBanghi} />
+              )}
+            </span>
+
             {imgBlob && imgBlob.length > 0 && (
               <div className="detailMess_blob_imgs">
                 {imgBlob.map((img, index) => (
@@ -335,11 +375,15 @@ function DetailMess(props) {
                 placeholder="Type a message"
               />
               <span className="detailMess_Mic" onClick={handleMic}>
-                <MicNoneIcon sx={{ fontSize: 26 }} />
+                {!mic ? (
+                  <MicNoneIcon sx={{ fontSize: 26 }} />
+                ) : (
+                  <ClearIcon sx={{ fontSize: 30 }} />
+                )}
               </span>
               <span
                 className={
-                  text || imgBlob.length > 0
+                  text || imgBlob.length > 0 || banghi
                     ? "detailMess-imput-send-success"
                     : "detailMess-imput-send"
                 }

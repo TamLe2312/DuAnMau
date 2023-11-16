@@ -20,55 +20,29 @@ const upload = multer({
   storage: storage,
 });
 
-// const deletePostImgsMess = async (req, res) => {
-//   const uploadDir = path.join(__dirname, "../public/images/");
-//   const { mess_id } = req.body;
-//   if (mess_id) {
-//     const listImg = await new Promise((resolve, reject) => {
-//       connection.query(
-//         "SELECT * FROM listdata WHERE mess_id = ?",
-//         [mess_id],
-//         (err, results, fields) => {
-//           if (err) {
-//             reject(err);
-//           } else {
-//             const imgPaths = results.map((re) => path.join(uploadDir, re.img));
-//             resolve(imgPaths);
-//           }
-//         }
-//       );
-//     });
-//     if (listImg.length === 0) {
-//       return res.status(200).json({ success: "Bài viết không có hình ảnh" });
-//     }
-//     try {
-//       await Promise.all(
-//         listImg.map((imgdel) => {
-//           return new Promise((resolve, reject) => {
-//             fs.unlink(imgdel, (err) => {
-//               if (err) {
-//                 reject(err);
-//               } else {
-//                 resolve();
-//               }
-//             });
-//           });
-//         })
-//       );
-//       return res.status(200).json({
-//         successWithImgs: "Bạn đã xóa img mess",
-//       });
-//     } catch (err) {
-//       console.log(err);
-//       return res.status(400).json({ error: "Lỗi xóa hình ảnh" });
-//     }
-//   }
-// };
+// update audio
+const storageaudio = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, "./src/public/audio");
+  },
+  filename: (req, file, cb) => {
+    const ext = ".mp3";
+    const mixName =
+      Date.now() +
+      "-" +
+      Math.round(Math.random() * 1e9) +
+      path.extname(file.originalname) +
+      ext;
+    cb(null, file.fieldname + "_" + mixName);
+  },
+});
+const uploadaudio = multer({
+  storage: storageaudio,
+});
 
+// tets = delete img messsage
 const test = async (sender_id, recipient_id) => {
   const uploadDir = path.join(__dirname, "../public/images/");
-  // const sender_id = parseInt(req.params.sender_id);
-  // const recipient_id = parseInt(req.params.recipient_id);
   if (sender_id === recipient_id) {
     return res.status(400).json({ error: "không có tin nhắn với bản thân??" });
   } else {
@@ -89,31 +63,27 @@ const test = async (sender_id, recipient_id) => {
       );
     });
     if (listImg.length === 0) {
-      // return res.status(200).json({ success: "Bài viết không có hình ảnh" });
       console.log("Bài viết không có hình ảnh");
-    }
-    try {
-      await Promise.all(
-        listImg.map((imgdel) => {
-          return new Promise((resolve, reject) => {
-            fs.unlink(imgdel, (err) => {
-              if (err) {
-                reject(err);
-              } else {
-                resolve();
-              }
+    } else {
+      try {
+        await Promise.all(
+          listImg.map((imgdel) => {
+            return new Promise((resolve, reject) => {
+              fs.unlink(imgdel, (err) => {
+                if (err) {
+                  reject(err);
+                } else {
+                  resolve();
+                }
+              });
             });
-          });
-        })
-      );
-      // return res.status(200).json({
-      //   successWithImgs: "Bạn đã xóa img mess",
-      // });
-      console.log("Bạn đã xóa img mess");
-    } catch (err) {
-      console.log(err);
-      // return res.status(400).json({ error: "Lỗi xóa hình ảnh" });
-      console.log("Lỗi xóa hình ảnh");
+          })
+        );
+        console.log("Bạn đã xóa img mess");
+      } catch (err) {
+        console.log(err);
+        console.log("Lỗi xóa hình ảnh");
+      }
     }
   }
 };
@@ -173,9 +143,111 @@ const listMessImg = (req, res) => {
   );
 };
 
+const delRecord = async (sender_id, recipient_id) => {
+  const uploadDir = path.join(__dirname, "../public/audio/");
+  if (sender_id === recipient_id) {
+    return res.status(400).json({ error: "không có tin nhắn với bản thân??" });
+  } else {
+    const listAudio = await new Promise((resolve, reject) => {
+      connection.query(
+        `SELECT recorder FROM messenger WHERE ((messenger.sender_id = ? AND messenger.recipient_id = ?) OR (messenger.sender_id = ? AND messenger.recipient_id = ?)) AND recorder IS NOT NULL`,
+        [sender_id, recipient_id, recipient_id, sender_id],
+        function (err, results, fields) {
+          if (err) {
+            reject(err);
+          } else {
+            const audioPaths = results.map((re) =>
+              path.join(uploadDir, re.recorder)
+            );
+            resolve(audioPaths);
+          }
+        }
+      );
+    });
+    if (listAudio.length === 0) {
+      console.log("Bài viết không có audio");
+    } else {
+      try {
+        await Promise.all(
+          listAudio.map((audiodel) => {
+            return new Promise((resolve, reject) => {
+              fs.unlink(audiodel, (err) => {
+                if (err) {
+                  reject(err);
+                } else {
+                  resolve();
+                }
+              });
+            });
+          })
+        );
+        console.log("Bạn đã xóa audio mess");
+      } catch (err) {
+        console.log(err);
+        console.log("Lỗi xóa audio");
+      }
+    }
+  }
+};
+
+const upRecordMes = (req, res) => {
+  const uploadMiddleware = uploadaudio.any();
+  uploadMiddleware(req, res, function (err) {
+    if (err instanceof multer.MulterError) {
+      console.log(err);
+      return res.status(500).json({ error: "Có lỗi xảy ra khi tải lên file" });
+    } else if (err) {
+      console.log(err);
+      return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau 1" });
+    }
+    if (req.files) {
+      const youID = req.body.youID;
+      const myID = req.body.myID;
+      const files = req.files;
+      connection.query(
+        "INSERT INTO messenger (sender_id , recipient_id , recorder) VALUES (?,?,?)",
+        [myID, youID, files[0].filename],
+        function (err, results, fields) {
+          if (err) {
+            console.log(err);
+            return res
+              .status(500)
+              .json({ error: "Có lỗi xảy ra xin thử lại sau 2" });
+          } else {
+            if (results) {
+              let lastID = results.insertId;
+              connection.query(
+                `SELECT * FROM messenger WHERE id = ${results.insertId}`,
+                function (err, results, fields) {
+                  if (err) {
+                    console.log(err);
+                    return res
+                      .status(500)
+                      .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+                  }
+                  if (results) {
+                    return res.status(200).json({ results, lastID: lastID });
+                  }
+                }
+              );
+            }
+          }
+        }
+      );
+    } else {
+      return res.status(200).json({ success: "Không nhận được audio" });
+    }
+  });
+};
+
 const messengerSend = (req, res) => {
-  const { sender_id, recipient_id, message, listimg } = req.body;
-  if ((!message || message.trim().length === 0) && listimg.length === 0) {
+  const { sender_id, recipient_id, message, listimg, recoder } = req.body;
+  // console.log(recoder);
+  if (
+    (!message || message.trim().length === 0) &&
+    listimg.length === 0 &&
+    !recoder
+  ) {
     return res.status(400).json({ error: "Bạn k có gì để gửi" });
   } else if (sender_id === recipient_id) {
     return res
@@ -376,6 +448,7 @@ const delMess = (req, res) => {
         } else {
           //Xóaimg img trong public tại đây
           test(sender_id, recipient_id);
+          delRecord(sender_id, recipient_id);
           // delete
           connection.query(
             "DELETE FROM messenger WHERE (sender_id = ? AND recipient_id = ?) OR (sender_id = ? AND recipient_id = ?)",
@@ -409,4 +482,6 @@ module.exports = {
   listMessImg,
   // deletePostImgsMess,
   test,
+  upRecordMes,
+  // delRecord,
 };

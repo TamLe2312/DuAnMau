@@ -171,3 +171,6 @@
 .detailMess_Mic:hover * {
   color: rgb(34, 126, 144);
 }
+.detailMess_record {
+  margin-top: 20px;
+}

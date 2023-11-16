@@ -8,6 +8,8 @@ const {
   delMess,
   upImgsMes,
   listMessImg,
+  upRecordMes,
+  // delRecord,
   // deletePostImgsMess,
   // test,
 } = require("../controllers/messenger");
@@ -18,6 +20,8 @@ Router.post("/create", messengerSend);
 Router.post("/upImgMess", upImgsMes);
 Router.post("/viewMes", viewMess);
 Router.post("/delMes", delMess);
+Router.post("/upRecord", upRecordMes);
+// Router.post("/delRecord", delRecord);
 // Router.post("/delImgMes", deletePostImgsMess);
 Router.get("/recipient/:sender_id", recipientList);
 Router.get("/listImgMess/:mesID", listMessImg);
