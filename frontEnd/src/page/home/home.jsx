@@ -1,10 +1,11 @@
-import { Outlet, useLocation } from "react-router-dom";
+import { Await, Outlet, useLocation } from "react-router-dom";
 import "./home.css";
 import Navigation from "../../component/navigation/Navigation";
 import { useCookies } from "react-cookie";
 import { io } from "socket.io-client";
-
+import { HOST_NAME } from "../../utils/config";
 import { createContext, useEffect, useState } from "react";
+import * as request from "../../utils/request";
 export const Context = createContext();
 export const userOnline = createContext();
 function Home() {
@@ -15,19 +16,21 @@ function Home() {
   const click = () => {
     setPlay(!play);
   };
-  // useEffect(() => {
-  //   const socket = io("http://localhost:8080");
-  //   socket.emit("add_new_user", myID);
-  //   socket.on("get_user", (userOl) => {
-  //     setOnline(userOl);
-  //   });
-  //   return () => {
-  //     socket.disconnect();
-  //   };
-  // }, []);
-  // console.log(online);
+  const socket = io(HOST_NAME);
+  useEffect(() => {
+    const fetch = async () => {
+      await socket.emit("add_ols", myID);
+      // socket.on("get_ol", (userOl) => {
+      //   setOnline(userOl);
+      // });
+      // socket.on("recibir", (data) => {
+      //   console.log(data);
+      // });
+    };
+    fetch();
+  }, []);
   return (
-    <userOnline.Provider value={online}>
+    <userOnline.Provider value={{ online, socket }}>
       <Context.Provider value={click}>
         <div className="container-fluit home">
           <div className="home-nav">
