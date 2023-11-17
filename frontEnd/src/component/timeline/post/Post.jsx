@@ -84,17 +84,6 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
     }
   }, [id, groupPostId]);
 
-  // useEffect(() => {
-  //   const postFooterElement = postFooterRef.current;
-  //   if (
-  //     postFooterElement &&
-  //     postFooterElement.scrollWidth > postFooterElement.offsetWidth
-  //   ) {
-  //     setThem(true);
-  //   } else {
-  //     setThem(false);
-  //   }
-  // }, [id]);
   const handleToggleExpand = () => {
     setExpanded(!expanded);
   };
