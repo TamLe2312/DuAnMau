@@ -647,7 +647,7 @@ const FollowedData = (req, res) => {
       const limit = 5;
       const offset = (page - 1) * limit;
       connection.query(
-        `SELECT users.id, users.name, users.username, users.avatar
+        `SELECT users.id, users.name, users.username, users.avatar,follows.follower_id
 FROM follows
 INNER JOIN users ON follows.followed_id = users.id
 WHERE follows.follower_id = ?
@@ -687,6 +687,29 @@ WHERE follows.follower_id = ?`,
     }
   } else {
     return res.status(400).json({ error: "Không có Id User" });
+  }
+};
+const isFollowed = (req, res) => {
+  const idUser = parseInt(req.params.id);
+  if (idUser) {
+    connection.query(
+      `SELECT users.id, users.name, users.username, users.avatar,follows.followed_id
+FROM follows
+INNER JOIN users ON follows.followed_id = users.id
+WHERE follows.follower_id = ?`,
+      [idUser],
+      function (err, results, fields) {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
+        if (results.length > 0) {
+          return res.status(200).json(results);
+        } else {
+          return res.status(200).json([]);
+        }
+      }
+    );
   }
 };
 const suggestFollow = (req, res) => {
@@ -764,7 +787,7 @@ const searchUserFollowed = (req, res) => {
   const idUser = req.body.idUser;
   if (searchFollowed) {
     connection.query(
-      `SELECT u.* 
+      `SELECT u.*,f.follower_id 
     FROM users u
     INNER JOIN follows f ON u.id = f.followed_id
     WHERE (u.name LIKE CONCAT('%', ?, '%') OR u.username LIKE CONCAT('%', ?, '%'))
@@ -829,6 +852,7 @@ module.exports = {
   UnfollowUser,
   FollowerData,
   FollowedData,
+  isFollowed,
   suggestFollow,
   countFollow,
   searchUserFollower,
