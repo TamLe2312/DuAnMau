@@ -23,7 +23,6 @@ import Account from "./component/adminBoss/adminchild/Account";
 import GroupsTable from "./component/adminBoss/adminchild/Groups";
 import Posts from "./component/adminBoss/adminchild/Posts";
 import PostDetail from "./component/postDetail/postDetail";
-
 function App() {
   return (
     <div>

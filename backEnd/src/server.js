@@ -16,6 +16,7 @@ const messenger = require("./routes/messengerApi");
 const adminApi = require("./routes/adminApi");
 const notification = require("./routes/notificationApi");
 const app = express();
+
 // ---------------------------
 // const http = require("http");
 
@@ -70,6 +71,27 @@ io.on("connection", (socket) => {
     ols = ols.filter((user) => user.socketId !== socket.id);
     io.emit("get_user", activeUsers);
     io.emit("get_ol", ols);
+    socket.broadcast.emit("callEnded");
+  });
+
+  // call
+
+  socket.on("findUserCall", (userCallId) => {
+    const userOk = activeUsers.some((user) => user.userId === userCallId);
+    if (userOk) {
+      console.log("my socket id: ", socket.id);
+      io.emit("me", socket.id);
+    }
+  });
+  socket.on("calluser", (data) => {
+    io.to(data.userToCall).emit("calluser", {
+      signal: data.signalData,
+      from: data.from,
+      name: data.name,
+    });
+  });
+  socket.on("answercall", (data) => {
+    io.to(data.to).emit("callaccepted", data.signal);
   });
 });
 

@@ -1,0 +1,51 @@
+.modalvideo_header {
+  background-color: gray;
+  border: 0 !important;
+}
+.modalvideo {
+  background: gray;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  align-items: center;
+}
+.modalvideo_child {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+}
+.modalvideo_me {
+  background-color: rgb(255, 255, 255);
+  height: 70vh;
+  flex: 0.5;
+  position: relative;
+}
+.modalvideo_you {
+  background-image: url("https://i.pinimg.com/originals/ac/e5/2c/ace52ca0271e4322a754db0f2db7b97b.jpg");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  height: 70vh;
+  flex: 0.5;
+  position: relative;
+}
+.modalvideo_me_video {
+  width: 100%; /* Làm cho video rộng bằng phần tử cha */
+  height: 100%; /* Làm cho video cao bằng phần tử cha */
+  position: absolute; /* Định vị tuyệt đối để video lấp đầy phần tử cha */
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+.modalvideo_you_video {
+  width: 100%; /* Làm cho video rộng bằng phần tử cha */
+  height: 100%; /* Làm cho video cao bằng phần tử cha */
+  position: absolute; /* Định vị tuyệt đối để video lấp đầy phần tử cha */
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
