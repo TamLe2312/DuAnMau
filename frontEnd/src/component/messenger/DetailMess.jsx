@@ -16,6 +16,7 @@ import Recoder from "../recoder/recoder";
 import ClearIcon from "@mui/icons-material/Clear";
 import { mirage } from "ldrs";
 import Modalvideo from "../callvideo/Modalvideo";
+
 // Default values shown
 
 function DetailMess(props) {
@@ -247,18 +248,23 @@ function DetailMess(props) {
   const handleCallVideo = (user) => {
     console.log("call video", user);
   };
+
   const [call, setCall] = useState(false);
   const handleCall = (user) => {
-    console.log("call", user);
-    socket.on("get_user", (userOl) => {
-      console.log("online", userOl);
-    });
     setCall((pre) => !pre);
   };
-  // useEffect(() => {}, [call]);
+
   return (
     <>
-      <Modalvideo call={call} setCall={setCall} />
+      {call && (
+        <Modalvideo
+          call={call}
+          setCall={setCall}
+          user={user}
+          socket={socket}
+          myID={myID}
+        />
+      )}
       {yourID ? (
         user ? (
           <>
