@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: row;
   height: 100vh;
+  padding-right: 16px;
 }
 .messenger-users {
   flex: 0.25;
@@ -35,6 +36,7 @@
   padding: 8px;
   text-decoration: none;
   border-radius: 8px;
+  position: relative;
 }
 .messenger-user * {
   text-decoration: none;
@@ -60,10 +62,54 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  align-items: center;
 }
 .messenger-user-information-name {
   font-weight: 500;
 }
 .messenger-user-information-mes {
   font-size: 0.8rem;
+}
+.messenger-user-information-mes.online {
+  color: rgb(33, 166, 33);
+}
+.messenger-user.null {
+  background: aqua;
+}
+.messenger-user-information-dot {
+  position: absolute;
+  top: 2px;
+  left: 4px;
+}
+.messenger-user-information-dot * {
+  font-size: 0.8rem;
+  color: rgb(238, 148, 148);
+}
+.messenger_child {
+  position: relative;
+}
+.messenger_more {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.messenger_more:hover * {
+  transition: 0.5s;
+  cursor: pointer;
+  color: rgba(55, 151, 240, 0.8);
+}
+.list_del_mes {
+  position: absolute;
+  right: 8px;
+  top: 100%;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+.list_del_mes_item:hover {
+  cursor: pointer;
+  color: blue;
+  background-color: gray;
+  color: white;
+  transition: 0.5s;
 }

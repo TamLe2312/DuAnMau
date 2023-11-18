@@ -9,8 +9,8 @@ import { Context } from "../../../page/home/home";
 import axios from "axios";
 
 function MorePost(props) {
-  const conTent = props.title;
-  // console.log(conTent);
+  const conTent = props.title || props.content;
+  console.log(conTent);
   const againPage = useContext(Context);
   const [modalShow, setModalShow] = useState(false);
   const [edit, setEdit] = useState(false);
@@ -23,7 +23,9 @@ function MorePost(props) {
     try {
       const fetchApi = async () => {
         if (groupPostId) {
-          const res2 = await request.deldete("post/deletePostImgs", { groupPostId });
+          const res2 = await request.deldete("post/deletePostImgs", {
+            groupPostId,
+          });
           const res = await request.deldete("post/deldete", { groupPostId });
           if (res || res2) {
             props.show(false);
@@ -48,7 +50,6 @@ function MorePost(props) {
             againPage();
           }
         }
-
       };
       fetchApi();
     } catch (error) {
@@ -64,18 +65,17 @@ function MorePost(props) {
     try {
       const fetchApi = async () => {
         if (groupPostId) {
-          const res = await axios.post("http://localhost:8080/post/editPost", {
+          const res = await request.post("post/editPost", {
             content: contentNew,
             groupPostId: groupPostId,
           });
           if (res.status === 200) {
             props.show(false);
             console.log(res);
-            toast.success(res.data.success)
+            toast.success(res.data.success);
           }
-        }
-        else {
-          const res = await axios.post("http://localhost:8080/post/editPost", {
+        } else {
+          const res = await request.post("post/editPost", {
             content: contentNew,
             postID: postID,
           });
@@ -85,7 +85,6 @@ function MorePost(props) {
             againPage();
           }
         }
-
       };
       fetchApi();
     } catch (err) {

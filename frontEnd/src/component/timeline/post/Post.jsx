@@ -4,10 +4,9 @@ import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import FavoriteIcon from "@mui/icons-material/Favorite";
-
+import * as request from "../../../utils/request";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
-import axios from "axios";
 import "./post.css";
 import { useState, useRef, useEffect } from "react";
 import { Link } from "react-router-dom";
@@ -15,6 +14,7 @@ import MyModal from "../../modal/Modal";
 import MorePost from "./MorePost";
 import { useCookies } from "react-cookie";
 import ListComment from "./ListComment";
+import { APP_WEB } from "../../../utils/config";
 function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
   const focusInput = useRef();
   const [cookies] = useCookies();
@@ -23,7 +23,6 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
   const [modalShowComment, setModalShowComment] = useState(false);
   const [expanded, setExpanded] = useState(false);
   const postFooterRef = useRef(null);
-  const [them, setThem] = useState(false);
   const [run, setRun] = useState(0);
   const [img, setImg] = useState([]);
   const [liked, setliked] = useState(false);
@@ -37,8 +36,10 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:8080/post/${groupPostId ? 'postGroupImgs' : 'postimg'}/${groupPostId ? groupPostId : id}`
+        const response = await request.get(
+          `post/${groupPostId ? "postGroupImgs" : "postimg"}/${
+            groupPostId ? groupPostId : id
+          }`
         );
         if (response.status === 200) {
           setImg(response.data);
@@ -50,9 +51,7 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
       }
     };
     fetchData();
-
   }, [id, groupPostId]);
-
 
   // like-------------------------------------
 
@@ -60,25 +59,18 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
     try {
       const fetchApi = async () => {
         if (groupPostId) {
-          const res = await axios.post(
-            "http://localhost:8080/post/countLikedPost",
-            {
-              groupPostId: groupPostId, // Gửi id trong phần thân của yêu cầu
-            }
-          );
+          const res = await request.post("post/countLikedPost", {
+            groupPostId: groupPostId, // Gửi id trong phần thân của yêu cầu
+          });
           if (res.data[0].countlike > 0) {
             setlike(res.data[0].countlike);
           } else {
             setlike(0);
           }
-        }
-        else {
-          const res = await axios.post(
-            "http://localhost:8080/post/countLikedPost",
-            {
-              postID: id, // Gửi id trong phần thân của yêu cầu
-            }
-          );
+        } else {
+          const res = await request.post("post/countLikedPost", {
+            postID: id, // Gửi id trong phần thân của yêu cầu
+          });
           if (res.data[0].countlike > 0) {
             setlike(res.data[0].countlike);
           } else {
@@ -92,17 +84,6 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
     }
   }, [id, groupPostId]);
 
-  // useEffect(() => {
-  //   const postFooterElement = postFooterRef.current;
-  //   if (
-  //     postFooterElement &&
-  //     postFooterElement.scrollWidth > postFooterElement.offsetWidth
-  //   ) {
-  //     setThem(true);
-  //   } else {
-  //     setThem(false);
-  //   }
-  // }, [id]);
   const handleToggleExpand = () => {
     setExpanded(!expanded);
   };
@@ -131,7 +112,7 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
     try {
       const fetchApi = async () => {
         if (groupPostId) {
-          const res = await axios.get("http://localhost:8080/post/likedPost", {
+          const res = await request.get("post/likedPost", {
             params: {
               groupPostId: groupPostId,
               otherUserID: myID,
@@ -143,9 +124,8 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
           } else {
             setliked(false);
           }
-        }
-        else {
-          const res = await axios.get("http://localhost:8080/post/likedPost", {
+        } else {
+          const res = await request.get("post/likedPost", {
             params: {
               postID: id,
               otherUserID: myID,
@@ -165,27 +145,59 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
     }
   }, [id, groupPostId]);
 
+  const notification = async (postID, userID, notifi, recipient_id) => {
+    try {
+      const res = await request.post(`notification/sendNotification`, {
+        postID: postID,
+        userID: userID,
+        title: notifi,
+        recipient_id: recipient_id,
+      });
+      if (res) {
+        console.log("Bạn đã gửi thông báo tới bài viết: " + postID);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const unNotification = async (postID, sender_id, notifi) => {
+    try {
+      const res = await request.post(`notification/unNotifcation`, {
+        postID: postID,
+        sender_id: sender_id,
+        title: notifi,
+      });
+      if (res) {
+        console.log("Bạn đã hủy thông báo tới bài viết: " + postID);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const handleLikePost = () => {
     setlike((pre) => pre - 1);
     setliked(false);
     try {
       const fetchApi = async () => {
         if (groupPostId) {
-          const res = await axios.post("http://localhost:8080/post/UnLikePost", {
+          const res = await request.post("post/UnLikePost", {
             groupPostId: groupPostId,
             otherUserID: myID,
           });
           if (res) {
-            console.log("bạn đã bỏ thích post: " + groupPostId);
+            console.log("bạn đã bỏ thích Group post: " + groupPostId);
           }
-        }
-        else {
-          const res = await axios.post("http://localhost:8080/post/UnLikePost", {
+        } else {
+          const res = await request.post("post/UnLikePost", {
             postID: id,
             otherUserID: myID,
           });
           if (res) {
-            console.log("bạn đã bỏ thích post: " + id);
+            const thongBao = "Đã thích bài viết của bạn";
+            await unNotification(id, myID, thongBao);
+            // console.log("bạn đã bỏ thích post: " + id);
           }
         }
       };
@@ -201,24 +213,24 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
       const fetchApi = async () => {
         if (groupPostId) {
           console.log(groupPostId);
-          const res = await axios.post("http://localhost:8080/post/likePost", {
+          const res = await request.post("post/likePost", {
             groupPostId: groupPostId,
             otherUserID: myID,
           });
           if (res) {
             console.log("bạn đã thích Group post: " + groupPostId);
           }
-        }
-        else {
-          const res = await axios.post("http://localhost:8080/post/likePost", {
+        } else {
+          const res = await request.post("post/likePost", {
             postID: id,
             otherUserID: myID,
           });
           if (res) {
-            console.log("bạn đã thích post: " + id);
+            // console.log("bạn đã thích post: " + id);
+            let thongBao = "Đã thích bài viết của bạn";
+            await notification(id, myID, thongBao, userid);
           }
         }
-
       };
       fetchApi();
     } catch (error) {
@@ -238,7 +250,7 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
     try {
       const fetchApi = async () => {
         if (groupPostId) {
-          const res = await axios.post("http://localhost:8080/post/commentPost", {
+          const res = await request.post("post/commentPost", {
             groupPostId: groupPostId,
             userID: myID,
             content: comment.trim(),
@@ -250,14 +262,15 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
           } else {
             console.log("Có vấn đề gì đó rồi");
           }
-        }
-        else {
-          const res = await axios.post("http://localhost:8080/post/commentPost", {
+        } else {
+          const res = await request.post("post/commentPost", {
             postID: id,
             userID: myID,
             content: comment.trim(),
           });
           if (res.status == 200) {
+            let thongBao = "Đã bình luận bài viết của bạn";
+            await notification(id, myID, thongBao, userid);
             setdymanicComment(!dymanicComment);
             console.log("bạn đã bình luận: " + id);
             setcomment("");
@@ -265,7 +278,6 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
             console.log("Có vấn đề gì đó rồi");
           }
         }
-
       };
       fetchApi();
     } catch (error) {
@@ -277,16 +289,35 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
     const fetchApi = async () => {
       try {
         if (groupPostId) {
-          const res = await axios.post(
-            "http://localhost:8080/post/onCommentPostLast",
-            {
-              groupPostId: groupPostId,
-            }
-          );
+          const res = await request.post("post/onCommentPostLast", {
+            groupPostId: groupPostId,
+          });
           if (res.data) {
             if (res.data.user_id) {
-              const resUser = await axios.get(
-                `http://localhost:8080/account/getDataUser/${res.data.user_id}`
+              const resUser = await request.get(
+                `account/getDataUser/${res.data.user_id}`
+              );
+              setcommentew({
+                comment: res.data.content,
+                user: resUser.data[0].name || resUser.data[0].username,
+                userID: res.data.user_id,
+              });
+            }
+          } else {
+            setcommentew({
+              comment: "",
+              user: "",
+              userID: "",
+            });
+          }
+        } else {
+          const res = await request.post("post/onCommentPostLast", {
+            postID: id,
+          });
+          if (res.data) {
+            if (res.data.user_id) {
+              const resUser = await request.get(
+                `account/getDataUser/${res.data.user_id}`
               );
               setcommentew({
                 comment: res.data.content,
@@ -302,33 +333,6 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
             });
           }
         }
-        else {
-          const res = await axios.post(
-            "http://localhost:8080/post/onCommentPostLast",
-            {
-              postID: id,
-            }
-          );
-          if (res.data) {
-            if (res.data.user_id) {
-              const resUser = await axios.get(
-                `http://localhost:8080/account/getDataUser/${res.data.user_id}`
-              );
-              setcommentew({
-                comment: res.data.content,
-                user: resUser.data[0].name || resUser.data[0].username,
-                userID: res.data.user_id,
-              });
-            }
-          } else {
-            setcommentew({
-              comment: "",
-              user: "",
-              userID: "",
-            });
-          }
-        }
-
       } catch (e) {
         console.log(e);
       }
@@ -341,26 +345,22 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
       try {
         if (groupPostId) {
           const id = groupPostId;
-          const res = await axios.get(
-            ` http://localhost:8080/post/countCommentPost/${id}&${groupPostId}`
+          const res = await request.get(
+            `post/countCommentPost/${id}&${groupPostId}`
           );
           if (res.data[0].countcomment > 1) {
             sethasComment(true);
           } else {
             sethasComment(false);
           }
-        }
-        else {
-          const res = await axios.get(
-            ` http://localhost:8080/post/countCommentPost/${id}&0`
-          );
+        } else {
+          const res = await request.get(`post/countCommentPost/${id}&0`);
           if (res.data[0].countcomment > 1) {
             sethasComment(true);
           } else {
             sethasComment(false);
           }
         }
-
       } catch (e) {
         console.log(e);
       }
@@ -399,8 +399,8 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
               {minute < 61
                 ? minute + " phút"
                 : minute / 60 > 24
-                  ? Math.floor(minute / 60 / 24) + " Ngày"
-                  : Math.floor(minute / 60) + " Giờ"}
+                ? Math.floor(minute / 60 / 24) + " Ngày"
+                : Math.floor(minute / 60) + " Giờ"}
             </span>
           </div>
           {/* -------------more------------ */}
@@ -420,7 +420,7 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
             <>
               <img
                 src={
-                  "http://localhost:8080/images/" +
+                  `${APP_WEB}images/` +
                   (img.length === 1 ? img[0].img : img[run].img)
                 }
                 alt=""
@@ -448,7 +448,7 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
               )}
             </>
           ) : (
-            title
+            <span style={{ wordBreak: "break-all" }}>{title}</span>
           )}
         </div>
         <div className="post-footer">
@@ -555,9 +555,17 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
               name={name}
               userid={userid}
               handlerun={handlerun}
+              //      await notification(id, userid, thongBao, myID);
+              notification={notification}
+              unNotification={unNotification}
             />
           ) : (
-            <MorePost id={id} groupPostId={groupPostId} title={title} show={handleDataFromChild} />
+            <MorePost
+              id={id}
+              groupPostId={groupPostId}
+              title={title}
+              show={handleDataFromChild}
+            />
           )
         }
       />

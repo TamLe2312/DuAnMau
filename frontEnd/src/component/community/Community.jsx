@@ -1,5 +1,4 @@
-import axios from "axios";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import Validation from "../../component/validation/validation";
 import { Modal, Button, Form } from "react-bootstrap";
 import { toast } from "sonner";
@@ -8,13 +7,15 @@ import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import SearchIcon from "@mui/icons-material/Search";
 import moment from "moment";
 import "./Community.css";
+import * as request from "../../utils/request";
+import SearchGroupValue from "./searchGroupValue";
 
 function Community() {
   const [dataGroup, setDataGroup] = useState([]);
   const [hasJoined, setHasJoined] = useState([]);
   const [error, setError] = useState({});
   const [loading, setLoading] = useState(false);
-  const [cookies] = useCookies(["userId"]);
+  const [cookies] = useCookies(["session"]);
   const [selectedImage, setSelectedImage] = useState(null);
   const [Images, setImages] = useState(null);
   const [showModalCreateGroup, setShowModalCreateGroup] = useState(false);
@@ -22,21 +23,17 @@ function Community() {
     name: "",
     moTa: "",
   });
+  const refSearch = useRef();
   const [searchValue, setSearchValue] = useState("");
   const [searchGroup, setSearchGroup] = useState([]);
   const id = cookies.userId;
   const fetchDataJoined = async () => {
     try {
-      const response = await axios.get(
-        `http://localhost:8080/groups/getDataGroupJoined/${id}`
-      );
+      const response = await request.get(`groups/getDataGroupJoined/${id}`);
       if (response && response.data) {
         setHasJoined(response.data);
-      } else {
-        setHasJoined([]);
       }
     } catch (error) {
-      console.error(error);
       if (error.response && error.response.status === 400) {
         setHasJoined([]);
       }
@@ -48,24 +45,23 @@ function Community() {
       [e.target.name]: e.target.value,
     });
   };
-  const handleSearchChange = (e) => {
+  /*   const handleSearchChange = (e) => {
     setSearchValue((preSearchValue) => ({
       ...preSearchValue,
       [e.target.name]: e.target.value,
     }));
-  };
+  }; */
+  useEffect(() => {
+    refSearch.current.focus();
+  }, []);
   const handleKeyEnter = async (e) => {
     if (e.key === "Enter") {
       e.preventDefault();
       try {
-        const response = await axios.post(
-          "http://localhost:8080/groups/searchGroup",
-          searchValue
-        );
-        console.log(response);
+        const response = await request.post("groups/searchGroup", searchValue);
         if (response && response.data) {
           const formattedData = response.data.map((item) => {
-            const createdAt = item.createdAt;
+            const createdAt = item.created_at;
             const formattedDate = moment(createdAt).format("MMMM Do, YYYY");
             return {
               ...item,
@@ -117,7 +113,6 @@ function Community() {
   };
 
   const handleShowModalCreateGroup = () => {
-    console.log(hasJoined);
     setFormValues({
       name: "",
       moTa: "",
@@ -138,15 +133,11 @@ function Community() {
       formData.append("moTa", formValues.moTa.trim());
       formData.append("idCreatedGroup", id);
 
-      const response = await axios.post(
-        "http://localhost:8080/groups/createGroup",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
+      const response = await request.post("groups/createGroup", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       if (response.data.success) {
         toast.success(response.data.success);
         const formattedData = response.data.results.map((item) => {
@@ -171,13 +162,10 @@ function Community() {
   };
   const handleJoinGroup = async (groupId) => {
     try {
-      const response = await axios.post(
-        "http://localhost:8080/groups/joinGroup",
-        {
-          groupId: groupId,
-          idUser: id,
-        }
-      );
+      const response = await request.post("groups/joinGroup", {
+        groupId: groupId,
+        idUser: id,
+      });
       if (response.data.success) {
         toast.success(response.data.success);
         fetchDataJoined();
@@ -188,13 +176,10 @@ function Community() {
   };
   const handleOutGroup = async (groupId) => {
     try {
-      const response = await axios.post(
-        `http://localhost:8080/groups/outGroup`,
-        {
-          groupId: groupId,
-          idUser: id,
-        }
-      );
+      const response = await request.post(`groups/outGroup`, {
+        groupId: groupId,
+        idUser: id,
+      });
       if (response.data.success) {
         toast.success(response.data.success);
         fetchDataJoined();
@@ -209,12 +194,10 @@ function Community() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(
-          `http://localhost:8080/groups/getDataGroup`
-        );
+        const response = await request.get(`groups/getDataGroup`);
         if (response && response.data) {
           const formattedData = response.data.map((item) => {
-            const createdAt = item.createdAt;
+            const createdAt = item.created_at;
             const formattedDate = moment(createdAt).format("MMMM Do, YYYY");
             return {
               ...item,
@@ -230,7 +213,6 @@ function Community() {
         if (error.response && error.response.status === 400) {
           setDataGroup([]);
         }
-        console.error("Error fetching group data:", error);
         setLoading(false);
       }
     };
@@ -239,16 +221,13 @@ function Community() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:8080/groups/getDataGroupJoined/${id}`
-        );
+        const response = await request.get(`groups/getDataGroupJoined/${id}`);
         if (response && response.data) {
           setHasJoined(response.data);
         } else {
           setHasJoined([]);
         }
       } catch (error) {
-        console.error(error);
         if (error.response && error.response.status === 400) {
           setHasJoined([]);
         }
@@ -269,11 +248,12 @@ function Community() {
                 style={{ position: "relative" }}
               >
                 <Form.Control
+                  ref={refSearch}
                   type="text"
-                  placeholder="Searching Group"
+                  placeholder="Nhập tên group cần tìm..."
                   name="searchGroup"
-                  value={searchValue.searchGroup || ""}
-                  onChange={handleSearchChange}
+                  /*      value={searchValue.searchGroup || ""} */
+                  onChange={(e) => setSearchValue(e.target.value)}
                   onKeyDown={handleKeyEnter}
                 />
                 <SearchIcon
@@ -287,7 +267,6 @@ function Community() {
               </Form.Group>
             </Form>
           </div>
-
           <Modal
             show={showModalCreateGroup}
             onHide={handleCloseModalCreateGroup}
@@ -387,140 +366,85 @@ function Community() {
             </div>
 
             {loading || dataGroup.length < 1 ? (
-              <div className="container">Loading...</div>
+              <div className="container CommunityLoadingTitle">
+                <span>Loading...</span>
+              </div>
             ) : (
               <div></div>
             )}
-            {searchGroup && searchGroup.length > 0 && dataGroup
-              ? searchGroup.map((searchGroup, index) => {
-                  let hasJoinedGroup = false;
+            {searchValue.length !== 0 ? (
+              <SearchGroupValue
+                searchValue={searchValue}
+                hasJoined={hasJoined}
+                idUser={id}
+              />
+            ) : (
+              dataGroup &&
+              dataGroup.map((group, index) => {
+                let hasJoinedGroup = false;
 
-                  if (hasJoined && hasJoined.length > 0) {
-                    for (let i = 0; i < hasJoined.length; i++) {
-                      if (
-                        hasJoined[i].group_id === searchGroup.id &&
-                        id === hasJoined[i].user_id
-                      ) {
-                        hasJoinedGroup = true;
-                        break;
-                      }
+                if (hasJoined && hasJoined.length > 0) {
+                  for (let i = 0; i < hasJoined.length; i++) {
+                    if (
+                      hasJoined[i].group_id === group.id &&
+                      id === hasJoined[i].user_id
+                    ) {
+                      hasJoinedGroup = true;
+                      break;
                     }
                   }
-                  return (
-                    <div className="container CommunityGroupRow" key={index}>
-                      <a href={`/home/community/group/${searchGroup.id}`}>
-                        {loading ? (
-                          <div>Loading....</div>
-                        ) : !searchGroup.avatarGroup ? (
-                          <img
-                            className="ImgGroupAvatar"
-                            src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg"
-                            alt="Avatar"
-                          />
-                        ) : (
-                          <img
-                            className="ImgGroupAvatar"
-                            src={searchGroup.avatarGroup}
-                            alt={searchGroup.name}
-                          />
-                        )}
-                      </a>
-                      <div className="CommunityInformationGroup">
-                        <span>
-                          <a
-                            href={`/home/community/group/${searchGroup.id}`}
-                            className="CommunityInformationTitle"
-                          >
-                            {searchGroup.name}
-                          </a>
-                        </span>
-                        <span>Tạo vào {searchGroup.created_at}</span>
-                      </div>
-                      {hasJoinedGroup ? (
-                        <div className="CommunityInformationButton">
-                          <button
-                            onClick={() => handleOutGroup(searchGroup.id)}
-                          >
-                            Đã tham gia
-                          </button>
-                        </div>
-                      ) : (
-                        <div className="CommunityInformationButton" key={index}>
-                          <button
-                            onClick={() => handleJoinGroup(searchGroup.id)}
-                          >
-                            Tham Gia
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                  );
-                })
-              : dataGroup &&
-                dataGroup.map((group, index) => {
-                  let hasJoinedGroup = false;
-
-                  if (hasJoined && hasJoined.length > 0) {
-                    for (let i = 0; i < hasJoined.length; i++) {
-                      if (
-                        hasJoined[i].group_id === group.id &&
-                        id === hasJoined[i].user_id
-                      ) {
-                        hasJoinedGroup = true;
-                        break;
-                      }
-                    }
-                  }
-                  return (
-                    <div className="container CommunityGroupRow" key={index}>
-                      <a href={`/home/community/group/${group.id}`}>
-                        {loading ? (
-                          <div>Loading....</div>
-                        ) : !group.avatarGroup ? (
-                          <img
-                            className="ImgGroupAvatar"
-                            src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg"
-                            alt="Avatar"
-                          />
-                        ) : (
-                          <img
-                            className="ImgGroupAvatar"
-                            src={group.avatarGroup}
-                            alt={group.name}
-                          />
-                        )}
-                      </a>
-                      <div className="CommunityInformationGroup">
-                        <span>
-                          <a
-                            href={`/home/community/group/${group.id}`}
-                            className="CommunityInformationTitle"
-                          >
-                            {group.name}
-                          </a>
-                        </span>
-                        <span>Tạo vào {group.created_at}</span>
-                      </div>
+                }
+                return (
+                  <div className="container CommunityGroupRow" key={index}>
+                    <a href={`/home/community/group/${group.id}`}>
                       {loading ? (
-                        <div className="CommunityInformationButton">
-                          <button>Loading....</button>
-                        </div>
-                      ) : hasJoinedGroup ? (
-                        <div className="CommunityInformationButton">
-                          <button onClick={() => handleOutGroup(group.id)}>
-                            Đã tham gia
-                          </button>
-                        </div>
+                        <div>Loading....</div>
+                      ) : !group.avatarGroup ? (
+                        <img
+                          className="ImgGroupAvatar"
+                          src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg"
+                          alt="Avatar"
+                        />
                       ) : (
-                        <div className="CommunityInformationButton" key={index}>
-                          <button onClick={() => handleJoinGroup(group.id)}>
-                            Tham Gia
-                          </button>
-                        </div>
+                        <img
+                          className="ImgGroupAvatar"
+                          src={group.avatarGroup}
+                          alt={group.name}
+                        />
                       )}
+                    </a>
+                    <div className="CommunityInformationGroup">
+                      <span>
+                        <a
+                          href={`/home/community/group/${group.id}`}
+                          className="CommunityInformationTitle"
+                        >
+                          {group.name}
+                        </a>
+                      </span>
+                      <span>Tạo vào {group.created_at}</span>
                     </div>
-                  );
-                })}
+                    {loading ? (
+                      <div className="CommunityInformationButton">
+                        <button>Loading....</button>
+                      </div>
+                    ) : hasJoinedGroup ? (
+                      <div className="CommunityInformationButton">
+                        <button onClick={() => handleOutGroup(group.id)}>
+                          Đã tham gia
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="CommunityInformationButton" key={index}>
+                        <button onClick={() => handleJoinGroup(group.id)}>
+                          Tham Gia
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })
+            )}
           </div>
         </div>
       </div>

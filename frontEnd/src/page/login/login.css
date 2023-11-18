@@ -1,3 +1,80 @@
-/* .Heading{
-    color: aqua;
-} */
+.login_big {
+  height: 100vh;
+  overflow: hidden;
+}
+.login_video {
+  z-index: -1;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.TitleLogoContainerForm {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+}
+
+.LogoImgContainerForm {
+  width: 200px;
+  height: 80px;
+}
+
+.LogoImgContainerForm img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.TitleLogoContainerForm h3 {
+  font-weight: 600;
+}
+
+.FormUser {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+}
+
+.FormContainerRoot {
+  background-color: rgba(255, 255, 255, 0.9);
+  padding: 20px;
+  border-radius: 12px;
+  border: 0.5px solid rgb(186, 186, 186);
+}
+
+.form-control {
+  /* padding: 8px 15px !important; */
+  outline: none;
+  border: 1px solid#CACACA !important;
+  font-size: 1rem !important;
+  border-radius: 6px;
+}
+
+.highlightLinkButton {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.highlightLinkButton a {
+  text-decoration: none;
+  color: #0171d3;
+  font-size: 1rem;
+  font-weight: 400;
+}
+
+.buttonFieldFormUser {
+  position: relative;
+  height: 50px;
+  width: 100%;
+  margin-top: 15px;
+  font-weight: 500 !important;
+}
+.floating_val {
+  opacity: 0.6;
+}
