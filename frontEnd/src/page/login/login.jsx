@@ -3,13 +3,13 @@ import { useState, useEffect } from "react";
 import { useCookies } from "react-cookie";
 import { Link, useNavigate } from "react-router-dom";
 import Validation from "../../component/validation/validation";
-import { toast } from 'sonner'
+import { toast } from "sonner";
 import "./login.css";
 function Login() {
   const Navigate = useNavigate();
   const style = {
     margin: "0 auto",
-    width: 600,
+    width: 500,
   };
 
   const [values, setValues] = useState({
@@ -126,12 +126,12 @@ function Login() {
         </button>
 
         <div className="mt-2">
-          <Link className="mt-4" to="/forgotPassword">
-            Quyên mật khẩu
+          <Link className="quenmk" to="/forgotPassword">
+            Quên mật khẩu
           </Link>
         </div>
         <div>
-          <Link className="mt-4" to="/register">
+          <Link className="dangki" to="/register">
             Đăng kí
           </Link>
         </div>
