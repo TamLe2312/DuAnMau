@@ -1,18 +1,29 @@
 import { useEffect, useState } from "react";
 import "./comments.css";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
-import axios from "axios";
 import { useCookies } from "react-cookie";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import { Avatar } from "@mui/material";
 // import { Toaster, toast } from "sonner";
+import * as request from "../../../utils/request";
 
 function Comments(props) {
   const handleRun = props.handlerun;
   const [cookies] = useCookies();
   const myID = cookies.userId;
-  const { img, title, avatar, user, name, id, groupPostId } = props;
+  const {
+    img,
+    title,
+    avatar,
+    user,
+    userid,
+    name,
+    id,
+    groupPostId,
+    notification,
+    unNotification,
+  } = props;
   const [listComment, setListComment] = useState([]);
   const [userComment, setUserComment] = useState([]);
   const [content, setcontent] = useState("");
@@ -26,8 +37,8 @@ function Comments(props) {
     const fetchComments = async () => {
       try {
         if (groupPostId) {
-          const response = await axios.get(
-            `http://localhost:8080/post/listCommentPost/${id}&${groupPostId}`
+          const response = await request.get(
+            `post/listCommentPost/${id}&${groupPostId}`
           );
           console.log(response.data);
           if (response.data.length > 0) {
@@ -40,11 +51,8 @@ function Comments(props) {
             setListComment([]);
             setUserComment([]);
           }
-        }
-        else {
-          const response = await axios.get(
-            `http://localhost:8080/post/listCommentPost/${id}&0`
-          );
+        } else {
+          const response = await request.get(`post/listCommentPost/${id}&0`);
           if (response.data.length > 0) {
             setListComment(response.data);
             const userIds = response.data.map((comment) => comment.user_id);
@@ -63,9 +71,7 @@ function Comments(props) {
     const fetchUserDetails = async (userIds) => {
       try {
         const requests = userIds.map(async (userId) => {
-          const response = await axios.get(
-            `http://localhost:8080/account/getDataUser/${userId}`
-          );
+          const response = await request.get(`account/getDataUser/${userId}`);
           return response.data[0];
         });
         const userDetails = await Promise.all(requests);
@@ -82,7 +88,7 @@ function Comments(props) {
     try {
       const fetchApi = async () => {
         if (groupPostId) {
-          const res = await axios.post("http://localhost:8080/post/commentPost", {
+          const res = await request.post("post/commentPost", {
             content: content,
             userID: myID,
             groupPostId: groupPostId,
@@ -92,14 +98,16 @@ function Comments(props) {
             setdoi((e) => !e);
             handleRun();
           }
-        }
-        else {
-          const res = await axios.post("http://localhost:8080/post/commentPost", {
+        } else {
+          const res = await request.post("post/commentPost", {
             content: content,
             userID: myID,
             postID: id,
           });
           if (res) {
+            // console.log(userid);
+            let thongBao = "Đã bình luận bài viết của bạn";
+            await notification(id, myID, thongBao, userid);
             setcontent("");
             setdoi((e) => !e);
             handleRun();
@@ -117,9 +125,7 @@ function Comments(props) {
     setModalShow(true);
     try {
       const fetchApi = async () => {
-        const res = await axios.get(
-          `http://localhost:8080/post/oneCommentPost/${commentID}`
-        );
+        const res = await request.get(`post/oneCommentPost/${commentID}`);
         if (res.data) {
           // console.log(res.data[0].content);
           setcontentEdit(res.data[0].content);
@@ -144,13 +150,12 @@ function Comments(props) {
       // console.log("Xóa: " + cmtID);
       try {
         const fetchApi = async () => {
-          const res = await axios.post(
-            `http://localhost:8080/post/deleteCommentPost`,
-            {
-              commentID: cmtID,
-            }
-          );
+          const res = await request.post(`post/deleteCommentPost`, {
+            commentID: cmtID,
+          });
           if (res.data) {
+            const thongBao = "Đã bình luận bài viết của bạn";
+            await unNotification(id, myID, thongBao);
             setdoi((e) => !e);
             handleRun();
             // toast.success("Bạn đã xóa bình luận");
@@ -163,14 +168,11 @@ function Comments(props) {
     } else {
       try {
         const fetchApi = async () => {
-          const res = await axios.post(
-            `http://localhost:8080/post/editCommentPost`,
-            {
-              content: contentEdit,
-              commentID: cmtID,
-              userID: myID,
-            }
-          );
+          const res = await request.post(`post/editCommentPost`, {
+            content: contentEdit,
+            commentID: cmtID,
+            userID: myID,
+          });
           if (res.data) {
             setdoi((e) => !e);
             handleRun();
@@ -184,6 +186,7 @@ function Comments(props) {
     }
     setShow(false);
   };
+
   return (
     <>
       {/* <Toaster richColors /> */}
@@ -206,34 +209,34 @@ function Comments(props) {
       >
         {listComment.length > 0
           ? listComment.map((comment, index) => {
-            const user = userComment.find(
-              (user) => user.id === comment.user_id
-            );
-            const username = user ? user.username : null;
+              const user = userComment.find(
+                (user) => user.id === comment.user_id
+              );
+              const username = user ? user.username : null;
 
-            return (
-              <div className="commentschild-once" key={index}>
-                <img
-                  src="https://i.pinimg.com/564x/d7/46/44/d7464475de0dc2550f1ab6d69529ef26.jpg"
-                  alt=""
-                />
-                <span>
-                  <span className="commentschild-usercomment">
-                    {username}
+              return (
+                <div className="commentschild-once" key={index}>
+                  <img
+                    src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg"
+                    alt=""
+                  />
+                  <span>
+                    <span className="commentschild-usercomment">
+                      {username}
+                    </span>
+                    &nbsp; {comment.content}
                   </span>
-                  &nbsp; {comment.content}
-                </span>
-                {myID === comment.user_id && (
-                  <span
-                    className="commentschild-usermore"
-                    onClick={() => commentMore(comment.id)}
-                  >
-                    <MoreHorizIcon />
-                  </span>
-                )}
-              </div>
-            );
-          })
+                  {myID === comment.user_id && (
+                    <span
+                      className="commentschild-usermore"
+                      onClick={() => commentMore(comment.id)}
+                    >
+                      <MoreHorizIcon />
+                    </span>
+                  )}
+                </div>
+              );
+            })
           : "Không có ai bình luận"}
       </div>
 

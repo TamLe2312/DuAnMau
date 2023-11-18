@@ -17,6 +17,7 @@
   flex-direction: row;
   gap: 8px;
   align-items: center;
+  position: relative;
 }
 .detailMess-user-img {
   width: 40px;
@@ -35,6 +36,7 @@
   align-items: center;
 }
 .detailMess-imput-send {
+  margin-top: 3px;
   margin-right: 12px;
 }
 .detailMess-imput-send * {
@@ -43,6 +45,7 @@
 }
 .detailMess-imput-send-success {
   margin-right: 12px;
+  margin-top: 3px;
 }
 .detailMess-imput-send-success:hover {
   cursor: pointer;
@@ -76,11 +79,98 @@
 .detailMessMe {
   display: flex;
   flex-direction: column;
-  background-color: rgba(55, 151, 240, 0.8);
+  /* background-color: rgba(55, 151, 240, 0.8); */
+  background: url("https://i.pinimg.com/564x/6b/12/03/6b1203b579a2afc1301cf252100e5bbf.jpg");
   align-self: flex-end; /* Đặt tin nhắn mình ở bên phải */
   border-radius: 18px 18px 0 18px;
 }
 .detailMessContainer-time {
   text-align: right;
   font-size: 0.8rem;
+}
+
+#imgs_detail {
+  display: none;
+}
+.imgs_detail_for {
+  padding-left: 8px;
+}
+.imgs_detail_for:hover {
+  cursor: pointer;
+}
+.imgs_detail_for * {
+  color: gray;
+}
+
+.detailMess_blob_imgs {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+}
+.detailMess_blob_imgs_list {
+  width: 100px;
+  height: 120px;
+  position: relative;
+  /* border: 1px solid red; */
+  border-radius: 4px;
+  overflow: hidden;
+}
+.detailMess_blob_img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.detailMess_blob_imgs_del {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  z-index: 1;
+}
+.detailMess_blob_imgs_del:hover {
+  cursor: pointer;
+}
+
+.detailMess_call {
+  position: absolute;
+  right: 8px;
+}
+.detailMess_call * {
+  margin-left: 8px;
+  color: gray;
+}
+.detailMess_call:hover * {
+  cursor: pointer;
+}
+.detailMess_imgs {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0 12px;
+}
+.detailMess_img {
+  width: 179px;
+  /* width: 48%; */
+  height: 240px;
+  border-radius: 8px;
+  padding-top: 12px;
+  object-fit: cover;
+}
+
+.detailMess_Mic {
+  padding: 2px 8px 0 0;
+  /* padding-right: 8px; */
+}
+
+.detailMess_Mic * {
+  color: gray;
+}
+.detailMess_Mic:hover {
+  cursor: pointer;
+  color: rgb(34, 126, 144);
+}
+.detailMess_Mic:hover * {
+  color: rgb(34, 126, 144);
+}
+.detailMess_record {
+  margin-top: 20px;
 }

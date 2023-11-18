@@ -56,13 +56,14 @@ const deletePostImgs = async (req, res) => {
           });
         })
       );
-      return res.status(200).json({ successWithImgs: "Bạn đã xóa bài viết.Vui lòng cập nhật lại trang" });
+      return res.status(200).json({
+        successWithImgs: "Bạn đã xóa bài viết.Vui lòng cập nhật lại trang",
+      });
     } catch (err) {
       console.log(err);
       return res.status(400).json({ error: "Lỗi xóa hình ảnh" });
     }
-  }
-  else {
+  } else {
     const listImg = await new Promise((resolve, reject) => {
       connection.query(
         "SELECT * FROM listdata WHERE post_id = ?",
@@ -95,7 +96,10 @@ const deletePostImgs = async (req, res) => {
           });
         })
       );
-      return res.status(200).json({ successWithImgs: "Bạn đã xóa bài viết thành công.Vui lòng cập nhật lại thông tin" });
+      return res.status(200).json({
+        successWithImgs:
+          "Bạn đã xóa bài viết thành công.Vui lòng cập nhật lại thông tin",
+      });
     } catch (err) {
       console.log(err);
       return res.status(400).json({ error: "Lỗi xóa hình ảnh" });
@@ -235,29 +239,37 @@ const deletePost = (req, res) => {
       [groupPostId],
       function (err, results, fields) {
         if (err) {
-          return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+          return res
+            .status(500)
+            .json({ error: "Có lỗi xảy ra xin thử lại sau" });
         }
         if (results) {
-          return res.status(200).json({ successWithoutImgs: "Bạn đã xóa bài viết.Vui lòng cập nhật lại trang" });
+          return res.status(200).json({
+            successWithoutImgs:
+              "Bạn đã xóa bài viết.Vui lòng cập nhật lại trang",
+          });
         }
       }
     );
-  }
-  else {
+  } else {
     connection.query(
       "DELETE FROM posts WHERE id = ?",
       [postID],
       function (err, results, fields) {
         if (err) {
-          return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+          return res
+            .status(500)
+            .json({ error: "Có lỗi xảy ra xin thử lại sau" });
         }
         if (results) {
-          return res.status(200).json({ successWithoutImgs: "Bạn đã xóa bài viết thành công.Vui lòng cập nhật lại thông tin" });
+          return res.status(200).json({
+            successWithoutImgs:
+              "Bạn đã xóa bài viết thành công.Vui lòng cập nhật lại thông tin",
+          });
         }
       }
     );
   }
-
 };
 
 const editPost = (req, res) => {
@@ -268,29 +280,36 @@ const editPost = (req, res) => {
       [content, groupPostId],
       function (err, results, fields) {
         if (err) {
-          return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+          return res
+            .status(500)
+            .json({ error: "Có lỗi xảy ra xin thử lại sau" });
         }
         if (results) {
-          return res.status(200).json({ success: "Bạn đã thay đổi thông tin.Vui lòng cập nhật lại thông tin" });
+          return res.status(200).json({
+            success:
+              "Bạn đã thay đổi thông tin.Vui lòng cập nhật lại thông tin",
+          });
         }
       }
     );
-  }
-  else {
+  } else {
     connection.query(
       "UPDATE posts SET content = ? WHERE id = ?",
       [content, postID],
       function (err, results, fields) {
         if (err) {
-          return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+          return res
+            .status(500)
+            .json({ error: "Có lỗi xảy ra xin thử lại sau" });
         }
         if (results) {
-          return res.status(200).json({ success: "Bạn đã thay đổi thông tin.Vui lòng xem lại thông tin" });
+          return res.status(200).json({
+            success: "Bạn đã thay đổi thông tin.Vui lòng xem lại thông tin",
+          });
         }
       }
     );
   }
-
 };
 
 const likePost = (req, res) => {
@@ -303,21 +322,24 @@ const likePost = (req, res) => {
       function (err, results, fields) {
         if (err) {
           console.error(err);
-          return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+          return res
+            .status(500)
+            .json({ error: "Có lỗi xảy ra xin thử lại sau" });
         }
         if (results) {
           return res.status(200).json({ success: "Bạn đã thích bài viết" });
         }
       }
     );
-  }
-  else {
+  } else {
     connection.query(
       "INSERT INTO likes (post_id,user_id) VALUES (?,?)",
       [postID, otherUserID],
       function (err, results, fields) {
         if (err) {
-          return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+          return res
+            .status(500)
+            .json({ error: "Có lỗi xảy ra xin thử lại sau" });
         }
         if (results) {
           return res.status(200).json({ success: "Bạn đã thích bài viết" });
@@ -335,21 +357,24 @@ const unLikePost = (req, res) => {
       [groupPostId, otherUserID],
       function (err, results, fields) {
         if (err) {
-          return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+          return res
+            .status(500)
+            .json({ error: "Có lỗi xảy ra xin thử lại sau" });
         }
         if (results) {
           return res.status(200).json({ success: "Bạn đã bỏ thích bài viết" });
         }
       }
     );
-  }
-  else {
+  } else {
     connection.query(
       "DELETE FROM likes WHERE post_id = ? AND user_id = ?",
       [postID, otherUserID],
       function (err, results, fields) {
         if (err) {
-          return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+          return res
+            .status(500)
+            .json({ error: "Có lỗi xảy ra xin thử lại sau" });
         }
         if (results) {
           return res.status(200).json({ success: "Bạn đã bỏ thích bài viết" });
@@ -369,7 +394,9 @@ const likedPost = (req, res) => {
       function (err, results, fields) {
         if (err) {
           console.log(err);
-          return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+          return res
+            .status(500)
+            .json({ error: "Có lỗi xảy ra xin thử lại sau" });
         }
         if (results.length > 0) {
           return res.status(200).json({ success: "Bạn đã thích bài viết này" });
@@ -378,15 +405,16 @@ const likedPost = (req, res) => {
         }
       }
     );
-  }
-  else {
+  } else {
     connection.query(
       "SELECT * FROM likes WHERE post_id =? AND user_id=?",
       [postID, otherUserID],
       function (err, results, fields) {
         if (err) {
           console.log(err);
-          return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+          return res
+            .status(500)
+            .json({ error: "Có lỗi xảy ra xin thử lại sau" });
         }
         if (results.length > 0) {
           return res.status(200).json({ success: "Bạn đã thích bài viết này" });
@@ -410,7 +438,9 @@ const CountLikedPost = (req, res) => {
       function (err, results, fields) {
         if (err) {
           console.log(err);
-          return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+          return res
+            .status(500)
+            .json({ error: "Có lỗi xảy ra xin thử lại sau" });
         }
         if (results.length > 0) {
           return res.status(200).json(results);
@@ -419,15 +449,16 @@ const CountLikedPost = (req, res) => {
         }
       }
     );
-  }
-  else {
+  } else {
     connection.query(
       "SELECT COUNT(post_id) as countlike FROM likes WHERE post_id =?",
       [postID],
       function (err, results, fields) {
         if (err) {
           console.log(err);
-          return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+          return res
+            .status(500)
+            .json({ error: "Có lỗi xảy ra xin thử lại sau" });
         }
         if (results.length > 0) {
           return res.status(200).json(results);
@@ -437,9 +468,27 @@ const CountLikedPost = (req, res) => {
       }
     );
   }
-
 };
-
+const dataPostAndUser = (req, res) => {
+  const idPost = parseInt(req.params.idPost);
+  connection.query(
+    `SELECT posts.id,posts.content,posts.created_at,users.id as userid, users.username,users.avatar,users.name
+    FROM posts  
+    JOIN users ON posts.user_id = users.id
+WHERE posts.id = ?
+    `,
+    [idPost],
+    function (err, results, fields) {
+      if (err) {
+        console.error(err);
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+      }
+      if (results) {
+        return res.status(200).json(results);
+      }
+    }
+  );
+};
 const dataPost = (req, res) => {
   const page = parseInt(req.params.page) || 1;
   const limit = 4; // Số lượng người dùng hiển thị trên mỗi trang
@@ -514,7 +563,9 @@ const commentPost = (req, res) => {
       [groupPostId, userID, content],
       function (err, results, fields) {
         if (err) {
-          return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+          return res
+            .status(500)
+            .json({ error: "Có lỗi xảy ra xin thử lại sau" });
         }
         if (results) {
           // console.log(results);
@@ -522,14 +573,15 @@ const commentPost = (req, res) => {
         }
       }
     );
-  }
-  else {
+  } else {
     connection.query(
       "INSERT INTO comments (post_id,user_id,content) VALUE (?,?,?)",
       [postID, userID, content],
       function (err, results, fields) {
         if (err) {
-          return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+          return res
+            .status(500)
+            .json({ error: "Có lỗi xảy ra xin thử lại sau" });
         }
         if (results) {
           // console.log(results);
@@ -538,7 +590,6 @@ const commentPost = (req, res) => {
       }
     );
   }
-
 };
 const onCommentPostLast = (req, res) => {
   const { postID, groupPostId } = req.body;
@@ -548,7 +599,9 @@ const onCommentPostLast = (req, res) => {
       [groupPostId],
       function (err, results, fields) {
         if (err) {
-          return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+          return res
+            .status(500)
+            .json({ error: "Có lỗi xảy ra xin thử lại sau" });
         }
         if (results.length > 0) {
           return res.status(200).json(results[0]);
@@ -557,14 +610,15 @@ const onCommentPostLast = (req, res) => {
         }
       }
     );
-  }
-  else {
+  } else {
     connection.query(
       "SELECT * FROM comments WHERE post_id = ? ORDER BY id DESC LIMIT 1",
       [postID],
       function (err, results, fields) {
         if (err) {
-          return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+          return res
+            .status(500)
+            .json({ error: "Có lỗi xảy ra xin thử lại sau" });
         }
         if (results.length > 0) {
           return res.status(200).json(results[0]);
@@ -586,7 +640,9 @@ const listCommentPost = (req, res) => {
       [postID],
       function (err, results, fields) {
         if (err) {
-          return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+          return res
+            .status(500)
+            .json({ error: "Có lỗi xảy ra xin thử lại sau" });
         }
         if (results.length > 0) {
           return res.status(200).json(results);
@@ -597,15 +653,15 @@ const listCommentPost = (req, res) => {
         }
       }
     );
-  }
-  else {
-
+  } else {
     connection.query(
       "SELECT * FROM comments WHERE postGroup_id = ? ",
       [groupPostId],
       function (err, results, fields) {
         if (err) {
-          return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+          return res
+            .status(500)
+            .json({ error: "Có lỗi xảy ra xin thử lại sau" });
         }
         if (results.length > 0) {
           return res.status(200).json(results);
@@ -617,7 +673,6 @@ const listCommentPost = (req, res) => {
       }
     );
   }
-
 };
 
 const oneCommentPost = (req, res) => {
@@ -691,21 +746,24 @@ const countCommentPost = (req, res) => {
       [postID],
       function (err, results, fields) {
         if (err) {
-          return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+          return res
+            .status(500)
+            .json({ error: "Có lỗi xảy ra xin thử lại sau" });
         }
         if (results) {
           return res.status(200).json(results);
         }
       }
     );
-  }
-  else {
+  } else {
     connection.query(
       "SELECT COUNT(*) as countcomment FROM comments WHERE postGroup_id = ? ",
       [groupPostId],
       function (err, results, fields) {
         if (err) {
-          return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+          return res
+            .status(500)
+            .json({ error: "Có lỗi xảy ra xin thử lại sau" });
         }
         if (results) {
           return res.status(200).json(results);
@@ -737,4 +795,5 @@ module.exports = {
   editCommentPost,
   countCommentPost,
   oneCommentPost,
+  dataPostAndUser,
 };

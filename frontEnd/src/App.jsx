@@ -11,16 +11,18 @@ import Profile from "./component/profile/Profile";
 import Community from "./component/community/Community";
 import Messenger from "./component/messenger/Messenger";
 import Groups from "./component/group/Groups";
-
+import SuggestFollow from "./component/profile/suggestFollow/suggestFollow";
 //React Toastify
 
-import { Toaster } from 'sonner'
+import { Toaster } from "sonner";
 
 import "react-toastify/dist/ReactToastify.css";
-import Admin from "./component/ADMIN/Admin";
-import Account from "./component/ADMIN/adminchild/account";
-import GroupsTable from "./component/ADMIN/adminchild/Groups"
-import Posts from "./component/ADMIN/adminchild/Posts";
+
+import Adminn from "./component/adminBoss/adminchild/Adminc";
+import Account from "./component/adminBoss/adminchild/Account";
+import GroupsTable from "./component/adminBoss/adminchild/Groups";
+import Posts from "./component/adminBoss/adminchild/Posts";
+import PostDetail from "./component/postDetail/postDetail";
 function App() {
   return (
     <div>
@@ -31,13 +33,15 @@ function App() {
 
         <Route path="/home" element={<Home />}>
           <Route path="/home" element={<Timeline />} />
+          <Route path="/home/post/:post_id/detail" element={<PostDetail />} />
+          <Route path="/home/suggestFollow" element={<SuggestFollow />} />
           <Route path="/home/profile/user/:userID" element={<Profile />} />
           <Route path="/home/community/group/:groupID" element={<Groups />} />
           <Route path="/home/profile" element={<Profile />} />
           <Route path="/home/community" element={<Community />} />
           <Route path="/home/messenger" element={<Messenger />} />
           <Route path="/home/messenger/:id" element={<Messenger />} />
-          <Route path="/home/admin" element={<Admin />}>
+          <Route path="/home/admin" element={<Adminn />}>
             <Route path="/home/admin/account" element={<Account />} />
             <Route path="/home/admin/groups" element={<GroupsTable />} />
             <Route path="/home/admin/posts" element={<Posts />} />
@@ -48,8 +52,6 @@ function App() {
       </Routes>
 
       <Toaster position="top-right" expand={false} richColors />
-
-
     </div>
   );
 }

@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
 import SuggestionFriend from "./suggestionFriend/SuggestionFriend";
 import "./suggestions.css";
-import axios from "axios";
 import { Avatar } from "@mui/material";
 import { useCookies } from "react-cookie";
 import { Link } from "react-router-dom";
+import * as request from "../../utils/request";
 function Suggestions() {
   const [cookies] = useCookies(["session"]);
   const [userData, setUserData] = useState("");
@@ -14,9 +14,7 @@ function Suggestions() {
     if (id) {
       const fetchData = async () => {
         try {
-          const response = await axios.get(
-            `http://localhost:8080/account/getDataUser/${id}`
-          ); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
+          const response = await request.get(`account/getDataUser/${id}`);
           setUserData(response.data[0]);
           setIsLoading(false);
         } catch (error) {
@@ -56,14 +54,21 @@ function Suggestions() {
               </span>
             )}
           </Link>
-          {userData.moTa ? <span>{userData.moTa}</span> : <span></span>}
+          <span>
+            {userData.moTa && userData.moTa.length > 20
+              ? userData.moTa.slice(0, 20) + "..."
+              : userData.moTa}
+          </span>
+          {/*    {userData.moTa ? <span>{userData.moTa}</span> : <span></span>} */}
         </div>
       </div>
 
       <div className="suggestions-friend">
         <div className="suggestions-friend-title">
           <p> Gợi ý cho bạn</p>
-          <p>All</p>
+          <Link to={`/home/suggestFollow`} id="suggestFollowLink">
+            All
+          </Link>
         </div>
         <SuggestionFriend />
       </div>

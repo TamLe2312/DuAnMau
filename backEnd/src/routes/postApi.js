@@ -21,6 +21,7 @@ const {
   editCommentPost,
   countCommentPost,
   oneCommentPost,
+  dataPostAndUser,
 } = require("../controllers/post");
 const Router = express.Router();
 
@@ -29,6 +30,7 @@ Router.post("/create", createPost);
 Router.post("/createGroupPost", createGroupPost);
 Router.post("/upimgs", upImgs);
 Router.post("/groupUpImgs", groupUpImgs);
+Router.get("/dataPostAndUser/:idPost", dataPostAndUser);
 Router.get("/datapost/:page", dataPost);
 Router.get("/postimg/:postID", postimgs);
 Router.get("/postGroupImgs/:postGroupId", postGroupImgs);
