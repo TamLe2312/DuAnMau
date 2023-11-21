@@ -174,3 +174,24 @@
 .detailMess_record {
   margin-top: 20px;
 }
+.receiveCall {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: rgb(111, 171, 231);
+  padding: 4px 12px;
+  z-index: 100;
+  border-radius: 8px;
+  transition: 1s;
+}
+.receive_call_end {
+  position: fixed;
+  bottom: 20px;
+  right: -200px;
+  background-color: rgb(111, 171, 231);
+  padding: 4px 12px;
+  z-index: 100;
+  border-radius: 8px;
+  transition: 1s;
+}
+/* HTML: <div class="loader"></div> */

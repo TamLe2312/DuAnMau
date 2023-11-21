@@ -4,11 +4,16 @@ import Navigation from "../../component/navigation/Navigation";
 import { useCookies } from "react-cookie";
 import { io } from "socket.io-client";
 import { HOST_NAME } from "../../utils/config";
-import { createContext, useEffect, useState } from "react";
-import * as request from "../../utils/request";
+import { createContext, useEffect, useState, useContext } from "react";
+import { SocketCon } from "../../component/socketio/Socketcontext";
+// import * as request from "../../utils/request";
 export const Context = createContext();
 export const userOnline = createContext();
 function Home() {
+  // import { useContext } from "react";
+  // import { SocketCon } from "../socketio/Socketcontext";
+  const value = useContext(SocketCon);
+  const socket = value.socket;
   const [cookies] = useCookies();
   const myID = cookies.userId;
   const [online, setOnline] = useState([]);
@@ -16,7 +21,6 @@ function Home() {
   const click = () => {
     setPlay(!play);
   };
-  const socket = io(HOST_NAME);
   useEffect(() => {
     const fetch = async () => {
       await socket.emit("add_ols", myID);
@@ -30,7 +34,7 @@ function Home() {
     fetch();
   }, []);
   return (
-    <userOnline.Provider value={{ online, socket }}>
+    <userOnline.Provider value={{ online }}>
       <Context.Provider value={click}>
         <div className="container-fluit home">
           <div className="home-nav">

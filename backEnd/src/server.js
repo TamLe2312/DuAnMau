@@ -77,17 +77,19 @@ io.on("connection", (socket) => {
   // call
 
   socket.on("findUserCall", (userCallId) => {
-    const userOk = activeUsers.some((user) => user.userId === userCallId);
+    const userOk = activeUsers.find((user) => user.userId === userCallId);
     if (userOk) {
-      console.log("my socket id: ", socket.id);
-      io.emit("me", socket.id);
+      io.emit("isyou", activeUsers);
+      socket.broadcast.emit("me", { idcall: userOk.socketId });
+      socket.broadcast.emit("calling", userOk);
     }
   });
   socket.on("calluser", (data) => {
+    // console.log(data);
     io.to(data.userToCall).emit("calluser", {
       signal: data.signalData,
       from: data.from,
-      name: data.name,
+      // name: data.name,
     });
   });
   socket.on("answercall", (data) => {
