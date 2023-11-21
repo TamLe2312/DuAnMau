@@ -1,8 +1,9 @@
 import axios from "axios";
-import { APP_WEB } from "./config";
+import { APP_URL, APP_WEB } from "./config";
 
 const request = axios.create({
   baseURL: APP_WEB,
+  appURL: APP_URL,
 });
 
 export const deldete = async (path, option) => {
