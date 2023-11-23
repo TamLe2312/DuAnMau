@@ -7,17 +7,18 @@ import { useContext, useEffect, useState } from "react";
 // import { io } from "socket.io-client";
 import * as request from "../../utils/request";
 // import { APP_WEB, HOST_NAME } from "../../utils/config";
-import { userOnline } from "../../page/home/home";
+// import { userOnline } from "../../page/home/home";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { SocketCon } from "../socketio/Socketcontext";
 function Messenger() {
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
-  const value = useContext(userOnline);
+  const value = useContext(SocketCon);
   const socket = value.socket;
   const [online, setonline] = useState([]);
   const [cookies] = useCookies();
@@ -45,7 +46,6 @@ function Messenger() {
     };
     fetchApi();
   }, [chay]);
-
 
   useEffect(() => {
     socket.on("get_ol", (userOl) => {

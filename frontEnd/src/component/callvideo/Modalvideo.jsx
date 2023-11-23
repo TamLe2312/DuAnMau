@@ -1,10 +1,7 @@
-// import Peer from "simple-peer";
 import { useEffect, useRef, useState } from "react";
 import Modal from "react-bootstrap/Modal";
 import "./modalvideo.css";
-import SimpleBottomNavigation from "./Editvideo";
-import "ldrs/dotPulse";
-import video from "../../../public/video/bg1.mp4";
+
 import Peer from "simple-peer";
 function Modalvideo(props) {
   const { call, setCall, user, socket, myID } = props;
@@ -19,7 +16,7 @@ function Modalvideo(props) {
   const [callAccepted, setCallAccepted] = useState(false);
   const [idToCall, setIdToCall] = useState("");
   const [callEnded, setCallEnded] = useState(false);
-  const [name, setName] = useState("");
+  const [name, setName] = useState("vip");
   const myVideo = useRef();
   const userVideo = useRef();
   const connectionRef = useRef();
@@ -29,14 +26,13 @@ function Modalvideo(props) {
       .getUserMedia({ video: true, audio: true })
       .then((stream) => {
         setStream(stream);
-        myVideo.current.srcObject = stream;
+        if (myVideo.current) {
+          myVideo.current.srcObject = stream;
+        }
+      })
+      .catch((e) => {
+        console.log(e);
       });
-
-    socket.emit("findUserCall", myID);
-    socket.on("me", (id) => {
-      setMe(id);
-    });
-
     socket.on("callUser", (data) => {
       setReceivingCall(true);
       setCaller(data.from);
@@ -44,6 +40,18 @@ function Modalvideo(props) {
       setCallerSignal(data.signal);
     });
   }, []);
+  useEffect(() => {
+    setShow(true);
+    // check ở đây :v
+    socket.on("isyou", (data) => {
+      // console.log("you", data.idyou);
+      let a = data.activeUsers.find((id) => id.userId == myID);
+      // console.log("me", a.socketId);
+      // setIdToCall(data.idyou);
+      setMe(a.socketId);
+      callUser(data.idyou);
+    });
+  }, [call]);
   const callUser = (id) => {
     const peer = new Peer({
       initiator: true,
@@ -65,7 +73,6 @@ function Modalvideo(props) {
       setCallAccepted(true);
       peer.signal(signal);
     });
-
     connectionRef.current = peer;
   };
 
@@ -82,27 +89,31 @@ function Modalvideo(props) {
     peer.on("stream", (stream) => {
       userVideo.current.srcObject = stream;
     });
-
     peer.signal(callerSignal);
     connectionRef.current = peer;
   };
 
-  const leaveCall = () => {
-    setCallEnded(true);
-    connectionRef.current.destroy();
-  };
-
-  useEffect(() => {
-    setShow(call);
-  }, [call]);
   const handleClose = async () => {
     window.location.reload();
     setShow(false);
     setCall(false);
   };
+
+  const leaveCall = () => {
+    if (stream) {
+      const tracks = stream.getTracks();
+      tracks.forEach((track) => track.stop());
+    }
+    setCallEnded(true);
+  };
+
   const nameCall = () => {
     return user.name !== null ? user.name : user.username;
   };
+  if (idToCall && me) {
+    console.log(idToCall);
+    console.log(me);
+  }
   return (
     <>
       <Modal show={show} fullscreen={true} onHide={handleClose}>
@@ -112,37 +123,47 @@ function Modalvideo(props) {
         <Modal.Body className="modalvideo">
           <div className="modalvideo_child">
             <div className="modalvideo_me">
-              <video
-                ref={myVideo}
-                className="modalvideo_me_video"
-                src={myVideo}
-                autoPlay
-                loop
-                muted
-              />
+              {stream && (
+                <video
+                  className="modalvideo_me_video"
+                  muted
+                  ref={myVideo}
+                  autoPlay
+                />
+              )}
             </div>
             <div className="modalvideo_you">
-              {video ? (
+              {callAccepted && !callEnded ? (
                 <video
                   className="modalvideo_you_video"
-                  src={userVideo}
+                  ref={userVideo}
                   autoPlay
-                  loop
-                  muted
                 />
               ) : (
-                <span>
-                  Calling{" "}
-                  <l-dot-pulse size="43" speed="1.3" color="gray"></l-dot-pulse>
-                </span>
+                <div className="loader"></div>
               )}
             </div>
           </div>
           <div className="modalvideo_setting">
-            <SimpleBottomNavigation
-              leaveCall={leaveCall}
-              answerCall={answerCall}
-            />
+            {callAccepted && !callEnded ? (
+              <button className="btn btn-danger" onClick={leaveCall}>
+                Tắt
+              </button>
+            ) : // <button
+            //   className="btn btn-success"
+            //   onClick={() => callUser(idToCall)}
+            // >
+            //   Gọi
+            // </button>
+            null}
+            {receivingCall && !callAccepted ? (
+              <div className="caller">
+                <h1>{name} is calling...</h1>
+                <button className="btn btn-success" onClick={answerCall}>
+                  Answer
+                </button>
+              </div>
+            ) : null}
           </div>
         </Modal.Body>
       </Modal>

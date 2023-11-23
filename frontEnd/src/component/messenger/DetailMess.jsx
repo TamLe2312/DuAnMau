@@ -3,26 +3,26 @@ import InputEmoji from "react-input-emoji";
 import SendIcon from "@mui/icons-material/Send";
 import { useEffect, useRef, useState, useContext } from "react";
 import { format } from "timeago.js";
-// import { io } from "socket.io-client";
 import * as request from "../../utils/request";
 import { HOST_NAME } from "../../utils/config";
-import { userOnline } from "../../page/home/home";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import PhoneIcon from "@mui/icons-material/Phone";
-import VideocamIcon from "@mui/icons-material/Videocam";
 import MicNoneIcon from "@mui/icons-material/MicNone";
 import Recoder from "../recoder/recoder";
 import ClearIcon from "@mui/icons-material/Clear";
 import { mirage } from "ldrs";
-import Modalvideo from "../callvideo/Modalvideo";
-
+// import Modalvideo from "../callvideo/Modalvideo";
+import Linkify from "linkify-react";
 // Default values shown
-
+import { useNavigate } from "react-router-dom";
+import { SocketCon } from "../socketio/Socketcontext";
+import { toast } from "react-toastify";
+import audio from "../../../../backEnd/src/public/audio/iphone.mp3";
 function DetailMess(props) {
+  const Navigate = useNavigate();
   mirage.register();
-
-  let value = useContext(userOnline);
+  let value = useContext(SocketCon);
   const socket = value.socket;
   const scroll = useRef();
   const input = useRef();
@@ -245,26 +245,47 @@ function DetailMess(props) {
     setImgsMes([]);
     setBanghi(null);
   }, [youID]);
-  const handleCallVideo = (user) => {
-    console.log("call video", user);
-  };
+  // call
 
-  const [call, setCall] = useState(false);
   const handleCall = (user) => {
-    setCall((pre) => !pre);
+    let id = user.id;
+    Navigate(`/home/messenger/${id}/call`, {
+      replace: true,
+      state: { user },
+    });
+  };
+  const [nhan, setNhan] = useState(null);
+  useEffect(() => {
+    socket.on("calling", (userCall) => {
+      setNhan(userCall);
+    });
+  }, []);
+  const traloi = () => {
+    setNhan(null);
+    let id = user.id;
+    Navigate(`/home/messenger/${id}/call`, {
+      replace: true,
+      state: { user },
+    });
+  };
+  const tuChoi = () => {
+    setNhan(null);
   };
 
   return (
     <>
-      {call && (
-        <Modalvideo
-          call={call}
-          setCall={setCall}
-          user={user}
-          socket={socket}
-          myID={myID}
-        />
-      )}
+      <div className={nhan ? "receiveCall" : "receive_call_end"}>
+        {user && <span>{user.username}</span>} đang gọi
+        <div className="receiveCall_btn">
+          <button className="btn btn-danger" onClick={tuChoi}>
+            Từ chối
+          </button>
+          &nbsp; &nbsp;
+          <button onClick={traloi} className="btn btn-success">
+            trả lời
+          </button>
+        </div>
+      </div>
       {yourID ? (
         user ? (
           <>
@@ -284,9 +305,6 @@ function DetailMess(props) {
               <div className="detailMess_call">
                 <span onClick={() => handleCall(user)}>
                   <PhoneIcon sx={{ fontSize: 22 }} />
-                </span>
-                <span onClick={() => handleCallVideo(user)}>
-                  <VideocamIcon sx={{ fontSize: 28 }} />
                 </span>
               </div>
             </div>
@@ -318,7 +336,9 @@ function DetailMess(props) {
                           }
                           key={index}
                         >
-                          <span>{mes.message}</span>
+                          <span>
+                            <Linkify> {mes.message}</Linkify>
+                          </span>
 
                           <span className="detailMess_imgs">
                             {test(mes.id)}
@@ -380,6 +400,7 @@ function DetailMess(props) {
               </div>
 
               {/* -------------------------------------------- */}
+
               <InputEmoji
                 ref={input}
                 value={text}

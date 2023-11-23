@@ -19,6 +19,8 @@
     "dotenv": "^16.3.1",
     "express-session": "^1.17.3",
     "ldrs": "^1.0.1",
+    "linkify-react": "^4.1.2",
+    "linkifyjs": "^4.1.2",
     "moment": "^2.29.4",
     "react": "^18.2.0",
     "react-bootstrap": "^2.9.0",
@@ -34,6 +36,7 @@
     "socket.io-client": "^4.7.2",
     "sonner": "^1.0.3",
     "timeago.js": "^4.0.2",
+    "vite-plugin-node-polyfills": "^0.16.0",
     "vmsg": "^0.4.0"
   },
   "devDependencies": {
