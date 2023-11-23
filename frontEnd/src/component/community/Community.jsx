@@ -21,6 +21,7 @@ function Community() {
   const [showModalCreateGroup, setShowModalCreateGroup] = useState(false);
   const [formValues, setFormValues] = useState({
     name: "",
+    privacy: "", // Giá trị mặc định
     moTa: "",
   });
   const refSearch = useRef();
@@ -116,6 +117,7 @@ function Community() {
     setFormValues({
       name: "",
       moTa: "",
+      privacy: "",
     });
     setSelectedImage(null);
     setShowModalCreateGroup(true);
@@ -131,6 +133,7 @@ function Community() {
       formData.append("avatarGroup", Images);
       formData.append("name", formValues.name.trim());
       formData.append("moTa", formValues.moTa.trim());
+      formData.append("privacy", formValues.privacy.trim());
       formData.append("idCreatedGroup", id);
 
       const response = await request.post("groups/createGroup", formData, {
@@ -194,7 +197,7 @@ function Community() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const response = await request.get(`groups/getDataGroup`);
+        const response = await request.get(`groups/getDataGroup/${id}`);
         if (response && response.data) {
           const formattedData = response.data.map((item) => {
             const createdAt = item.created_at;
@@ -325,6 +328,32 @@ function Community() {
                     onChange={handleInputChange}
                     required
                   />
+                </Form.Group>
+                <Form.Group controlId="formPrivacy">
+                  <Form.Label>Quyền riêng tư</Form.Label>
+                  <Form.Control
+                    as="select"
+                    name="privacy"
+                    value={formValues.privacy}
+                    onChange={handleChange}
+                    className={
+                      error.privacy ? "form-control is-invalid" : "form-control"
+                    }
+                  >
+                    <option value=""></option>
+                    <option value="public" selected>
+                      Công khai
+                    </option>
+                    <option value="private">Riêng tư</option>
+                  </Form.Control>
+                  {error.privacy && (
+                    <div
+                      id="validationServerUsernameFeedback"
+                      className="invalid-feedback"
+                    >
+                      {error.privacy}
+                    </div>
+                  )}
                 </Form.Group>
               </Form>
               <div className="ProfileShowImageContainer">
