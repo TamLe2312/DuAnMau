@@ -4,7 +4,6 @@ import Peer from "simple-peer";
 import { useCookies } from "react-cookie";
 import { SocketCon } from "../socketio/Socketcontext";
 import "./modalvideo.css";
-// import Peer from "simple-peer";
 
 const Callvideo = () => {
   const [cookies] = useCookies();
@@ -15,7 +14,6 @@ const Callvideo = () => {
   const myID = cookies.userId;
   const receptor = location.state.user;
   const Navigate = useNavigate();
-
   // call
 
   const [me, setMe] = useState("");
@@ -29,6 +27,7 @@ const Callvideo = () => {
   const myVideo = useRef();
   const userVideo = useRef();
   const connectionRef = useRef();
+  const [datavip, setdatavip] = useState("");
 
   useEffect(() => {
     navigator.mediaDevices
@@ -50,10 +49,10 @@ const Callvideo = () => {
     socket.on("isyou", (data) => {
       let my = data.find((data) => data.userId == myID);
       setMe(my.socketId);
+      setdatavip(data);
     });
 
     socket.on("calluser", (data) => {
-      console.log(data);
       setReceivingCall(true);
       setCaller(data.from);
       setCallerSignal(data.signal);
@@ -67,9 +66,7 @@ const Callvideo = () => {
         trickle: false,
         stream: stream,
       });
-      console.log(peer);
       peer.on("signal", (data) => {
-        // console.log(data);
         socket.emit("calluser", {
           userToCall: id,
           signalData: data,
@@ -89,7 +86,8 @@ const Callvideo = () => {
       console.log(e);
     }
   };
-
+  const [runTime, setrunTime] = useState(false);
+  const [chaychay, setchaychay] = useState(false);
   const answerCall = () => {
     setCallAccepted(true);
     let peer = new Peer({
@@ -101,6 +99,8 @@ const Callvideo = () => {
       socket.emit("answercall", { signal: data, to: caller });
     });
     peer.on("stream", (stream) => {
+      setrunTime(true);
+      console.log("Nhận cuộc gọi");
       userVideo.current.srcObject = stream;
     });
     peer.signal(callerSignal);
@@ -108,19 +108,59 @@ const Callvideo = () => {
   };
 
   const handleHome = () => {
-    // if (stream) {
-    //   const tracks = stream.getTracks();
-    //   tracks.forEach((track) => track.stop());
-    // }
-    // setCallEnded(true);
-    Navigate(`/home/messenger/${receptor.id}`, { replace: true });
-    window.location.reload();
+    socket.emit("endcall", myID);
+    if (stream) {
+      const tracks = stream.getTracks();
+      tracks.forEach((track) => track.stop());
+      setrunTime(false);
+      setchaychay(true);
+    }
+    setReceivingCall(false);
+    setCallEnded(true);
+    setTimeout(() => {
+      Navigate(`/home/messenger/${receptor.id}`, { replace: true });
+      window.location.reload();
+    }, 1000);
   };
+  useEffect(() => {
+    if (receivingCall) {
+      answerCall();
+    }
+  }, [receivingCall]);
+  useEffect(() => {
+    socket.on("end", () => {
+      setrunTime(false);
+      setchaychay(true);
+    });
+  }, [callEnded]);
   useEffect(() => {
     if (idToCall) {
       callUser(idToCall);
     }
   }, [idToCall]);
+  const [dem, setDem] = useState(0);
+  useEffect(() => {
+    if (runTime) {
+      let timee = setInterval(() => {
+        setDem((pre) => pre + 1);
+      }, 1000);
+      return () => clearInterval(timee);
+    }
+  }, [runTime]);
+
+  // save time
+  useEffect(() => {
+    const endCall = async () => {
+      if (chaychay && dem !== 0) {
+        let b = datavip.find((item) => item.socketId == caller);
+        console.log("thời gian gọi", dem);
+        console.log("ID người gọi", b.userId);
+        console.log("ID người nhận:", myID);
+      }
+    };
+    endCall();
+  }, [chaychay]);
+
   return (
     <div className="modalvideo_header">
       <h3 className="modalvideo_name">{receptor.username}</h3>
@@ -146,24 +186,9 @@ const Callvideo = () => {
           </div>
         </div>
         <div className="modalvideo_setting">
-          {/* {callAccepted && !callEnded ? ( */}
           <button className="btn btn-danger m-2" onClick={handleHome}>
             Tắt
           </button>
-          {/* ) : ( */}
-          {/* <button
-            onClick={() => callUser(idToCall)}
-            className="btn btn-success m-2"
-          >
-            Gọi
-          </button> */}
-          {/* )} */}
-
-          {receivingCall && !callAccepted ? (
-            <button className="btn btn-success m-2" onClick={answerCall}>
-              Answer
-            </button>
-          ) : null}
         </div>
       </div>
     </div>

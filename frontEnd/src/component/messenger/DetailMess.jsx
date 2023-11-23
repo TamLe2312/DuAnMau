@@ -18,6 +18,7 @@ import Linkify from "linkify-react";
 import { useNavigate } from "react-router-dom";
 import { SocketCon } from "../socketio/Socketcontext";
 import { toast } from "react-toastify";
+import audio from "../../../../backEnd/src/public/audio/iphone.mp3";
 function DetailMess(props) {
   const Navigate = useNavigate();
   mirage.register();
@@ -246,16 +247,12 @@ function DetailMess(props) {
   }, [youID]);
   // call
 
-  // const [call, setCall] = useState(false);
   const handleCall = (user) => {
     let id = user.id;
     Navigate(`/home/messenger/${id}/call`, {
       replace: true,
       state: { user },
     });
-    // console.log(user);
-    // setCall(true);
-    // socket.emit("findUserCall", user.id);
   };
   const [nhan, setNhan] = useState(null);
   useEffect(() => {
@@ -271,22 +268,24 @@ function DetailMess(props) {
       state: { user },
     });
   };
+  const tuChoi = () => {
+    setNhan(null);
+  };
+
   return (
     <>
-      {nhan ? (
-        <button onClick={traloi} className="btn btn-success">
-          trả lời
-        </button>
-      ) : null}
-      {/* {call && (
-        <Modalvideo
-          call={call}
-          setCall={setCall}
-          user={user}
-          socket={socket}
-          myID={myID}
-        />
-      )} */}
+      <div className={nhan ? "receiveCall" : "receive_call_end"}>
+        {user && <span>{user.username}</span>} đang gọi
+        <div className="receiveCall_btn">
+          <button className="btn btn-danger" onClick={tuChoi}>
+            Từ chối
+          </button>
+          &nbsp; &nbsp;
+          <button onClick={traloi} className="btn btn-success">
+            trả lời
+          </button>
+        </div>
+      </div>
       {yourID ? (
         user ? (
           <>

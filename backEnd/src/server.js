@@ -85,7 +85,6 @@ io.on("connection", (socket) => {
     }
   });
   socket.on("calluser", (data) => {
-    // console.log(data);
     io.to(data.userToCall).emit("calluser", {
       signal: data.signalData,
       from: data.from,
@@ -95,12 +94,18 @@ io.on("connection", (socket) => {
   socket.on("answercall", (data) => {
     io.to(data.to).emit("callaccepted", data.signal);
   });
+  socket.on("endcall", (userCallId) => {
+    const userOk = activeUsers.find((user) => user.userId === userCallId);
+    if (userOk) {
+      // console.log("tim thay", userOk);
+      socket.broadcast.emit("end", "callend");
+    }
+  });
 });
 
 // });
 // -----------------------
 app.use(cors());
-
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.static("public"));
