@@ -23,7 +23,8 @@ const Validation = (value) => {
     error.email = "không được để trống email";
   }
   if (value.email) {
-    let regex = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    let regex =
+      /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
     if (!regex.test(value.email)) {
       error.email = "Email không hợp lệ";
     }
@@ -33,6 +34,9 @@ const Validation = (value) => {
   }
   if (!value.moTa) {
     error.moTa = "Không bỏ trống mô tả";
+  }
+  if (value.privacy === "") {
+    error.privacy = "Không bỏ trống quyền riêng tư";
   }
   if (!value.birthday) {
     error.birthday = "Không bỏ trống ngày sinh nhật";

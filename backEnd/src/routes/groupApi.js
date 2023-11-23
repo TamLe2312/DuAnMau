@@ -14,6 +14,9 @@ const {
   outGroup,
   postGroupData,
   CountPostGroup,
+  invitationCode,
+  getInviteDataGroup,
+  joinInvitationGroup,
 } = require("../controllers/groups");
 const Router = express.Router();
 const multer = require("multer");
@@ -42,11 +45,15 @@ Router.post(
   upload.single("avatarGroup"),
   changeAvatarGroup
 );
-Router.get("/getDataGroup", getDataGroup);
+Router.post("/joinInvitationGroup/:inviteCode&:userId", joinInvitationGroup);
+
+Router.get("/getDataGroup/:idUser", getDataGroup);
 Router.get("/group/:groupId", getDataGroupProfile);
 Router.get("/CountPostGroup/:groupId", CountPostGroup);
 Router.get("/TotalMembers/:groupId&:userId", TotalMembers);
 Router.get("/getDataGroupJoined/:idUser", getDataGroupJoined);
 Router.get("/postGroupData/:groupId&:page", postGroupData);
+Router.get("/invitationCode/:groupId", invitationCode);
+Router.get("/invite/:inviteCode&:userId", getInviteDataGroup);
 
 module.exports = Router;

@@ -145,3 +145,80 @@
     margin: 50px;
     justify-content: center;
 }
+
+.ProfileButtonInvite {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 4px 10px;
+    background-color: #007ACC;
+    outline: 3px #007ACC solid !important;
+    margin-left: 20px;
+    outline-offset: -3px;
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+    transition: 400ms;
+}
+
+.ProfileButtonInvite .ProfileButtonInviteText {
+    color: white;
+    font-weight: 700;
+    font-size: 1em;
+    transition: 400ms;
+    margin: 0;
+}
+
+.ProfileButtonInvite:hover {
+    background-color: transparent;
+}
+
+.ProfileButtonInvite:hover .ProfileButtonInviteText {
+    color: #007ACC;
+}
+
+.InviteGroupContainer {
+    flex: 1 1 0%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    gap: 15px;
+    margin: 8px auto;
+}
+
+.InviteGroupText {
+    font-size: 1.2rem;
+}
+
+.InviteGroupBox {
+    justify-content: space-between;
+    border: 1px solid black;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+    width: 400px;
+}
+
+.InviteGroupBox input {
+    outline: none;
+    border: none;
+    margin-left: 8px;
+    width: 350px;
+}
+
+.InviteGroupBox button {
+    padding: 4px 12px;
+    border-radius: 12px;
+    margin-right: 8px;
+    border: none;
+    outline: none;
+    background-color: #3ea6ff;
+    color: #fff;
+    font-weight: 500;
+}
+
+.InviteGroupBox button:hover {
+    background-color: #00C4FF;
+}

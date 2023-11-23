@@ -2,6 +2,7 @@ import Login from "./page/login/login";
 import { Routes, Route } from "react-router-dom";
 import NoMath from "./page/noMath/noMath";
 import Register from "./page/register/register";
+import InvitePage from "./page/invitePage/invitePage";
 import ForgotPassword from "./page/forgotPassword/forgotPassword";
 import Home from "./page/home/home";
 import VerifyToken from "./page/VerifyToken/VerifyToken";
@@ -53,9 +54,10 @@ function App() {
           <Route path="/home/messenger/:id/call" element={<Callvideo />} />
           <Route path="/verifyToken" element={<VerifyToken />} />
           <Route path="*" element={<NoMath />} />
-        </Routes>
-        <Toaster position="top-right" expand={false} richColors />
-      </SocketContext>
+        <Route path="/invite/:inviteCode" element={<InvitePage />} />
+      </Routes>
+      <Toaster position="top-right" expand={false} richColors />
+     </SocketContext>
     </div>
   );
 }

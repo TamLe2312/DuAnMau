@@ -113,9 +113,28 @@ function Profile() {
         if (response.data.length === 0) {
           setSearchUserFollower([]);
         } else {
-          const updatedData = response.data.map((item) => {
+          /*   const updatedData = response.data.map((item) => {
             return { ...item, isFollow: true };
-          });
+          }); */
+          const updatedData = [];
+          const response1 = await request.get(
+            `account/isFollowed/${cookies.userId}`
+          );
+          for (let i = 0; i < response.data.length; i++) {
+            const item = response.data[i];
+            if (item.follower_id === cookies.userId) {
+              updatedData.push({ ...item, isFollow: true });
+            } else {
+              if (response1.data.find((itemData) => itemData.id === item.id)) {
+                updatedData.push({ ...item, isFollow: true });
+              } else if (item.id === cookies.userId) {
+                console.log("OK");
+                updatedData.push({ ...item, isFollowme: true });
+              } else {
+                updatedData.push({ ...item, isFollow: false });
+              }
+            }
+          }
           setSearchUserFollowed(updatedData);
         }
       } catch (err) {
@@ -129,45 +148,6 @@ function Profile() {
       setSearchUserFollowed([]);
     }
   }, [searchValueFollowed, id]);
-  /*  const handleKeyEnterSearchFollower = async (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      try {
-        const response = await request.post("account/searchUserFollower", {
-          searchUser: searchValue,
-          idUser: id,
-        });
-        setSearchUserFollower(response.data);
-      } catch (err) {
-        console.error(err);
-        toast.error(err.response.data.error);
-      }
-    }
-    if (e.key === "Backspace" || e.key === "Delete") {
-      setSearchUserFollower([]);
-    }
-  }; */
-  /* const handleKeyEnterSearchFollowed = async (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
-      try {
-        const response = await request.post("account/searchUserFollowed", {
-          searchFollowed: searchValueFollowed,
-          idUser: id,
-        });
-        const updatedData = response.data.map((item) => {
-          return { ...item, isFollow: true };
-        });
-        setSearchUserFollowed(updatedData);
-      } catch (err) {
-        console.error(err);
-        toast.error(err.response.data.error);
-      }
-    }
-    if (e.key === "Backspace" || e.key === "Delete") {
-      setSearchUserFollowed([]);
-    }
-  }; */
   const handleShowModalInformationProfile = () => {
     setFormValues({
       name: "",
@@ -321,6 +301,7 @@ function Profile() {
     }
   }, [userData]);
   useEffect(() => {
+    setIsMoreDetailFollower(false);
     const fetchData = async () => {
       try {
         const response = await request.get(`account/followerData/${id}&1`);
@@ -332,32 +313,31 @@ function Profile() {
     fetchData();
   }, [id]);
   useEffect(() => {
+    setIsMoreDetailFollowed(false);
     const fetchData = async () => {
-      if (id === cookies.userId) {
-        try {
-          const response = await request.get(`account/followedData/${id}&1`);
-          const updatedData = response.data.map((item) => {
-            return { ...item, isFollow: true };
-          });
-          setFollowedData(updatedData);
-        } catch (error) {
-          setFollowedData([]);
-        }
-      } else {
-        try {
-          const response = await request.get(`account/followedData/${id}&1`);
-          const updatedData = response.data.map((item) => {
-            if (item.id === cookies.userId) {
-              return { ...item, isFollowme: true };
+      try {
+        const response = await request.get(`account/followedData/${id}&1`);
+        const response1 = await request.get(
+          `account/isFollowed/${cookies.userId}`
+        );
+        const updatedData = [];
+        for (let i = 0; i < response.data.length; i++) {
+          const item = response.data[i];
+          if (item.follower_id === cookies.userId) {
+            updatedData.push({ ...item, isFollow: true });
+          } else {
+            if (response1.data.find((itemData) => itemData.id === item.id)) {
+              updatedData.push({ ...item, isFollow: true });
+            } else if (item.id === cookies.userId) {
+              updatedData.push({ ...item, isFollowme: true });
             } else {
-              return { ...item, isFollow: true };
+              updatedData.push({ ...item, isFollow: false });
             }
-          });
-
-          setFollowedData(updatedData);
-        } catch (error) {
-          setFollowedData([]);
+          }
         }
+        setFollowedData(updatedData);
+      } catch (error) {
+        setFollowedData([]);
       }
     };
     fetchData();
@@ -389,13 +369,28 @@ function Profile() {
   const handleMoreDetailFollowed = async () => {
     try {
       const response = await request.get(`account/followedData/${id}&0`);
-      const updatedData = response.data.map((item) => {
-        return { ...item, isFollow: true };
-      });
+      const response1 = await request.get(
+        `account/isFollowed/${cookies.userId}`
+      );
+      const updatedData = [];
+      for (let i = 0; i < response.data.length; i++) {
+        const item = response.data[i];
+        if (item.follower_id === cookies.userId) {
+          updatedData.push({ ...item, isFollow: true });
+        } else {
+          if (response1.data.find((itemData) => itemData.id === item.id)) {
+            updatedData.push({ ...item, isFollow: true });
+          } else if (item.id === cookies.userId) {
+            updatedData.push({ ...item, isFollowme: true });
+          } else {
+            updatedData.push({ ...item, isFollow: false });
+          }
+        }
+      }
       setFollowedData(updatedData);
       setIsMoreDetailFollowed(true);
     } catch (error) {
-      console.error("Error fetching user data:", error);
+      setFollowedData([]);
     }
   };
   const handleAdd = async (idFollowed) => {
@@ -403,6 +398,30 @@ function Profile() {
       try {
         let res = await request.post("account/followUser", {
           follower_id: id,
+          followed_id: idFollowed,
+        });
+        if (res.data.success) {
+          toast.success(res.data.success);
+          if (searchUserFollowed && searchUserFollowed.length > 0) {
+            setSearchUserFollowed((prevData) =>
+              prevData.map((data) =>
+                data.id === idFollowed ? { ...data, isFollow: true } : data
+              )
+            );
+          }
+          setFollowedData((prevData) =>
+            prevData.map((data) =>
+              data.id === idFollowed ? { ...data, isFollow: true } : data
+            )
+          );
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      try {
+        let res = await request.post("account/followUser", {
+          follower_id: cookies.userId,
           followed_id: idFollowed,
         });
         if (res.data.success) {
@@ -1007,7 +1026,7 @@ function Profile() {
                                                   : searchUserFollowed.username}
                                               </Link>
                                             </span>
-                                            {searchUserFollowed.isFollow ? (
+                                            {searchUserFollowed.isFollowme ? null : searchUserFollowed.isFollow ? (
                                               <button
                                                 onClick={() =>
                                                   handleRemove(
