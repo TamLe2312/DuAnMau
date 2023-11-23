@@ -17,6 +17,8 @@ const {
   invitationCode,
   getInviteDataGroup,
   joinInvitationGroup,
+  getDataTotalMember,
+  KickMember,
 } = require("../controllers/groups");
 const Router = express.Router();
 const multer = require("multer");
@@ -40,6 +42,7 @@ Router.post("/createGroup", upload.single("avatarGroup"), createGroup);
 Router.post("/removeAvatarGroup", removeAvatarGroup);
 Router.post("/joinGroup", joinGroup);
 Router.post("/outGroup", outGroup);
+Router.post("/kickMember", KickMember);
 Router.post(
   "/changeAvatarGroup",
   upload.single("avatarGroup"),
@@ -48,6 +51,7 @@ Router.post(
 Router.post("/joinInvitationGroup/:inviteCode&:userId", joinInvitationGroup);
 
 Router.get("/getDataGroup/:idUser", getDataGroup);
+Router.get("/getDataTotalMember/:groupId", getDataTotalMember);
 Router.get("/group/:groupId", getDataGroupProfile);
 Router.get("/CountPostGroup/:groupId", CountPostGroup);
 Router.get("/TotalMembers/:groupId&:userId", TotalMembers);
