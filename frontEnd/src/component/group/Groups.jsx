@@ -16,6 +16,7 @@ import Post from "../timeline/post/Post";
 import * as request from "../../utils/request";
 import "./Groups.css";
 import InviteGroup from "./inviteGroup";
+import TotalMemberModal from "./totalMembersModal";
 
 function Groups() {
   const Navigate = useNavigate();
@@ -23,11 +24,12 @@ function Groups() {
   const [loading, setLoading] = useState(false);
   const [showModalAvatar, setShowModalAvatar] = useState(false);
   const [showModalPostGroup, setShowModalPostGroup] = useState(false);
-  const [cookies] = useCookies(["userId"]);
+  const [cookies] = useCookies();
   const [showModalInformationProfile, setShowModalInformationProfile] =
     useState(false);
   const [showModalConfirmDelete, setShowModalConfirmDelete] = useState(false);
   const [showModalInviteGroup, setShowModalInviteGroup] = useState(false);
+  const [showModalTotalMembers, setShowModalTotalMembers] = useState(false);
   const [hasAvatarGroup, setHasAvatarGroup] = useState(null);
   const [groupDataProfile, setGroupDataProfile] = useState("");
   const [formValues, setFormValues] = useState({
@@ -253,6 +255,9 @@ function Groups() {
   };
   const handleModalButtonInviteGroup = () => {
     setShowModalInviteGroup(!showModalInviteGroup);
+  };
+  const handleModalTotalMembers = () => {
+    setShowModalTotalMembers(!showModalTotalMembers);
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -633,14 +638,16 @@ function Groups() {
                       </Modal.Body>
                     </Modal>
                   </div>
-                  <div className="ProfileButtonContainer">
-                    <button
-                      className="ProfileButtonInvite"
-                      onClick={handleModalButtonInviteGroup}
-                    >
-                      <p className="ProfileButtonInviteText">Mời</p>
-                    </button>
-                  </div>
+                  {hasJoined && (
+                    <div className="ProfileButtonContainer">
+                      <button
+                        className="ProfileButtonInvite"
+                        onClick={handleModalButtonInviteGroup}
+                      >
+                        <p className="ProfileButtonInviteText">Mời</p>
+                      </button>
+                    </div>
+                  )}
                   <MyModal
                     text={"Mời bạn bè tham gia nhóm"}
                     show={showModalInviteGroup}
@@ -649,14 +656,21 @@ function Groups() {
                   />
                 </div>
                 <div className="ProfileRow">
-                  <div>
+                  <div className="ProfileInformationContainer">
                     <span style={{ marginRight: 10 }}>
                       <b>{CountPostGroup}</b> bài viết
                     </span>
                     <span>
-                      <a href="#">
+                      <a onClick={handleModalTotalMembers}>
                         Có <b>{TotalMembers}</b> thành viên
                       </a>
+                      <MyModal
+                        text={"Thành viên nhóm"}
+                        show={showModalTotalMembers}
+                        onHide={handleModalTotalMembers}
+                        childrens={<TotalMemberModal />}
+                        display={"block"}
+                      />
                     </span>
                   </div>
                 </div>

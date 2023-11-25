@@ -76,9 +76,9 @@ function Timeline() {
   return (
     <div className=" timeline">
       <div className="timeline-post">
-        {/*   <div className="timeline-tin">
+        <div className="timeline-tin">
           <Tin />
-        </div> */}
+        </div>
         <br />
         <div className="timeline-post">
           {postsData

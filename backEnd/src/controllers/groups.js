@@ -72,7 +72,7 @@ const createGroup = (req, res) => {
 const getDataGroup = (req, res) => {
   const id = req.params.idUser;
   connection.query(
-    "SELECT groupsTable.* FROM groupsTable " +
+    "SELECT DISTINCT groupsTable.* FROM groupsTable " +
       "LEFT JOIN membergroup ON groupsTable.id = membergroup.group_id " +
       "WHERE groupsTable.privacy = 'public' OR (groupsTable.privacy = 'private' AND membergroup.user_id = ?) " +
       "ORDER BY RAND() LIMIT 10",
@@ -88,6 +88,30 @@ const getDataGroup = (req, res) => {
       }
     }
   );
+};
+const getDataTotalMember = (req, res) => {
+  const groupId = req.params.groupId;
+  if (groupId) {
+    connection.query(
+      `SELECT membergroup.group_id, users.username, users.id, users.avatar, users.name, groupsTable.idUserCreatedGroup
+   FROM membergroup 
+   INNER JOIN users ON users.id = membergroup.user_id 
+   INNER JOIN groupsTable ON groupsTable.id = membergroup.group_id
+   WHERE membergroup.group_id = ? 
+   LIMIT 20 OFFSET 0`,
+      [groupId],
+      async function (err, results, fields) {
+        if (err) {
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
+        if (results.length > 0) {
+          return res.status(200).json(results);
+        } else {
+          return res.status(200).json([]);
+        }
+      }
+    );
+  }
 };
 
 const searchGroup = (req, res) => {
@@ -419,6 +443,21 @@ const outGroup = (req, res) => {
     }
   );
 };
+const KickMember = (req, res) => {
+  const { groupId, idUser } = req.body;
+  if (groupId && idUser) {
+    connection.query(
+      "DELETE FROM membergroup WHERE group_id = ? AND user_id = ?",
+      [groupId, idUser],
+      async function (err, results, fields) {
+        if (err) {
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
+        return res.status(200).json({ success: "Xóa thành công" });
+      }
+    );
+  }
+};
 const TotalMembers = (req, res) => {
   const groupId = parseInt(req.params.groupId);
   const userId = parseInt(req.params.userId || null);
@@ -441,16 +480,16 @@ const TotalMembers = (req, res) => {
               if (results1.length > 0) {
                 return res.status(200).json({ hasJoined: true, results });
               } else {
-                return res.status(400).json({
+                return res.status(200).json({
                   hasJoined: false,
-                  error: "Không có dữ liệu Member Group",
+                  results,
                 });
               }
             }
           );
         }
       } else {
-        return res.status(400).json({ error: "Nhóm không tồn tại" });
+        return res.status(200).json({ error: "Nhóm không tồn tại" });
       }
     }
   );
@@ -584,7 +623,7 @@ const getInviteDataGroup = (req, res) => {
             .json({ error: "Có lỗi xảy ra xin thử lại sau" });
         }
         if (results.length > 0) {
-          return res.status(200).json(results[0]);
+          return res.status(200).json(results);
         } else {
           return res.status(200).json([]);
         }
@@ -610,8 +649,8 @@ const joinInvitationGroup = (req, res) => {
         if (results.length > 0) {
           const groupId = results[0].id;
           connection.query(
-            `SELECT * FROM memberGroup WHERE user_id = ?`,
-            [userId],
+            `SELECT * FROM memberGroup WHERE user_id = ? AND group_id = ?`,
+            [userId, groupId],
             async function (err, results, fields) {
               if (err) {
                 return res.status(500).json({ error: "Lỗi máy chủ" });
@@ -646,6 +685,7 @@ const joinInvitationGroup = (req, res) => {
 module.exports = {
   createGroup,
   getDataGroup,
+  getDataTotalMember,
   searchGroup,
   getDataGroupProfile,
   changeAvatarGroup,
@@ -661,4 +701,5 @@ module.exports = {
   invitationCode,
   getInviteDataGroup,
   joinInvitationGroup,
+  KickMember,
 };

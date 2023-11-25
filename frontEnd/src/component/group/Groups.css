@@ -222,3 +222,45 @@
 .InviteGroupBox button:hover {
     background-color: #00C4FF;
 }
+
+.ProfileInformationContainer span a {
+    cursor: pointer;
+}
+
+.TotalMemberContainer {
+    border-radius: 12px;
+    display: block;
+    flex-grow: 1;
+    flex-shrink: 1;
+    max-height: 300px;
+    overflow-y: scroll;
+    position: relative;
+}
+
+.TotalMemberRowContent {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    padding: 8px 16px;
+    font-size: 1.1rem;
+}
+
+.TotalMemberRowContent button {
+    margin-left: auto;
+    background-color: #07bbff;
+    color: white;
+    border: none;
+    outline: none;
+    font-size: 1rem;
+    font-weight: 500;
+    padding: 5px 16px;
+    border-radius: 12px;
+}
+
+.TotalMemberRowContent button:hover {
+    background-color: #0095f6;
+}
+
+.TotalMemberRole {
+    margin-left: auto;
+}
