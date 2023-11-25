@@ -1,0 +1,19 @@
+.StoriesContainer {
+    width: 100%;
+    height: 100svh;
+    padding: 0;
+    margin: 0;
+    box-sizing: border-box;
+    display: flex;
+
+}
+
+.StoriesNavBar {
+    width: 20%;
+    border: 1px solid red;
+}
+
+.StoriesDisplay {
+    width: 80%;
+    border: 1px solid blue;
+}

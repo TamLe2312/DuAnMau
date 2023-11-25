@@ -24,6 +24,7 @@ import Account from "./component/adminBoss/adminchild/Account";
 import GroupsTable from "./component/adminBoss/adminchild/Groups";
 import Posts from "./component/adminBoss/adminchild/Posts";
 import PostDetail from "./component/postDetail/postDetail";
+import Stories from "./page/stories/stories";
 import Callvideo from "./component/callvideo/Callvideo";
 
 import SocketContext from "./component/socketio/Socketcontext";
@@ -51,8 +52,10 @@ function App() {
               <Route path="/home/admin/posts" element={<Posts />} />
             </Route>
           </Route>
+        </Route>
+        <Route path="/stories/:idStory" element={<Stories />} />
+        <Route path="/verifyToken" element={<VerifyToken />} />
           <Route path="/home/messenger/:id/call" element={<Callvideo />} />
-          <Route path="/verifyToken" element={<VerifyToken />} />
           <Route path="*" element={<NoMath />} />
         <Route path="/invite/:inviteCode" element={<InvitePage />} />
       </Routes>
