@@ -24,6 +24,7 @@ import Account from "./component/adminBoss/adminchild/Account";
 import GroupsTable from "./component/adminBoss/adminchild/Groups";
 import Posts from "./component/adminBoss/adminchild/Posts";
 import PostDetail from "./component/postDetail/postDetail";
+import Stories from "./page/stories/stories";
 
 function App() {
   return (
@@ -49,6 +50,7 @@ function App() {
             <Route path="/home/admin/posts" element={<Posts />} />
           </Route>
         </Route>
+        <Route path="/stories/:idStory" element={<Stories />} />
         <Route path="/verifyToken" element={<VerifyToken />} />
         <Route path="/invite/:inviteCode" element={<InvitePage />} />
         <Route path="*" element={<NoMath />} />
