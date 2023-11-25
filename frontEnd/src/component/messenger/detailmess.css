@@ -92,10 +92,10 @@
   color: rgb(0, 76, 255);
 }
 
-.detailMessContainer-time {
+/* .detailMessContainer-time {
   text-align: right;
   font-size: 0.8rem;
-}
+} */
 
 #imgs_detail {
   display: none;
@@ -160,7 +160,7 @@
   /* width: 48%; */
   height: 240px;
   border-radius: 8px;
-  padding-top: 12px;
+  padding: 12px 0;
   object-fit: cover;
 }
 
@@ -180,7 +180,7 @@
   color: rgb(34, 126, 144);
 }
 .detailMess_record {
-  margin-top: 20px;
+  margin-top: 4px;
 }
 .receiveCall {
   position: fixed;
@@ -206,3 +206,13 @@
   margin-top: 8px;
 }
 /* HTML: <div class="loader"></div> */
+.detailMess_timecalltitle {
+  font-weight: 500;
+}
+.detailMess_timecall {
+  font-size: 0.9rem;
+}
+.detailMess_missedCall {
+  color: rgb(244, 25, 25);
+  font-weight: 500;
+}

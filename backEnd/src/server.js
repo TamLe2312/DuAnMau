@@ -16,7 +16,7 @@ const messenger = require("./routes/messengerApi");
 const adminApi = require("./routes/adminApi");
 const notification = require("./routes/notificationApi");
 const app = express();
-
+const callEnd = require("./routes/callvideoApi");
 // ---------------------------
 // const http = require("http");
 
@@ -58,11 +58,12 @@ io.on("connection", (socket) => {
     const user = activeUsers.find((user) => user.userId == youID);
     if (user) {
       io.to(user.socketId).emit("get_message", data);
+      io.to(user.socketId).emit("typing", "Đang nhập");
       io.to(user.socketId).emit("recibir", [
         "Bạn có một tin nhắn mới : ",
         youID,
       ]);
-      console.log("Đã gửi :", user);
+      // console.log("Đã gửi :", user);
     }
   });
 
@@ -97,8 +98,15 @@ io.on("connection", (socket) => {
   socket.on("endcall", (userCallId) => {
     const userOk = activeUsers.find((user) => user.userId === userCallId);
     if (userOk) {
-      // console.log("tim thay", userOk);
       socket.broadcast.emit("end", "callend");
+    }
+  });
+  // typing
+  socket.on("typingadd", (data) => {
+    const { youID, myID } = data;
+    const user = activeUsers.find((user) => user.userId == youID);
+    if (user) {
+      io.to(user.socketId).emit("typing", data);
     }
   });
 });
@@ -141,6 +149,8 @@ app.use("/messenger", messenger);
 app.use("/admin", adminApi);
 
 app.use("/notification", notification);
+
+app.use("/call", callEnd);
 
 server.listen(port, () => {
   console.log(`Sever app listening on port ${port}`);
