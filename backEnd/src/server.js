@@ -16,6 +16,7 @@ const messenger = require("./routes/messengerApi");
 const adminApi = require("./routes/adminApi");
 const notification = require("./routes/notificationApi");
 const app = express();
+const callEnd = require("./routes/callvideoApi");
 // ---------------------------
 // const http = require("http");
 
@@ -57,11 +58,12 @@ io.on("connection", (socket) => {
     const user = activeUsers.find((user) => user.userId == youID);
     if (user) {
       io.to(user.socketId).emit("get_message", data);
+      io.to(user.socketId).emit("typing", "Đang nhập");
       io.to(user.socketId).emit("recibir", [
         "Bạn có một tin nhắn mới : ",
         youID,
       ]);
-      console.log("Đã gửi :", user);
+      // console.log("Đã gửi :", user);
     }
   });
 
@@ -70,13 +72,48 @@ io.on("connection", (socket) => {
     ols = ols.filter((user) => user.socketId !== socket.id);
     io.emit("get_user", activeUsers);
     io.emit("get_ol", ols);
+    socket.broadcast.emit("callEnded");
+  });
+
+  // call
+
+  socket.on("findUserCall", (userCallId) => {
+    const userOk = activeUsers.find((user) => user.userId === userCallId);
+    if (userOk) {
+      io.emit("isyou", activeUsers);
+      socket.broadcast.emit("me", { idcall: userOk.socketId });
+      socket.broadcast.emit("calling", userOk);
+    }
+  });
+  socket.on("calluser", (data) => {
+    io.to(data.userToCall).emit("calluser", {
+      signal: data.signalData,
+      from: data.from,
+      // name: data.name,
+    });
+  });
+  socket.on("answercall", (data) => {
+    io.to(data.to).emit("callaccepted", data.signal);
+  });
+  socket.on("endcall", (userCallId) => {
+    const userOk = activeUsers.find((user) => user.userId === userCallId);
+    if (userOk) {
+      socket.broadcast.emit("end", "callend");
+    }
+  });
+  // typing
+  socket.on("typingadd", (data) => {
+    const { youID, myID } = data;
+    const user = activeUsers.find((user) => user.userId == youID);
+    if (user) {
+      io.to(user.socketId).emit("typing", data);
+    }
   });
 });
 
 // });
 // -----------------------
 app.use(cors());
-
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.static("public"));
@@ -112,6 +149,8 @@ app.use("/messenger", messenger);
 app.use("/admin", adminApi);
 
 app.use("/notification", notification);
+
+app.use("/call", callEnd);
 
 server.listen(port, () => {
   console.log(`Sever app listening on port ${port}`);

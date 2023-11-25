@@ -3,25 +3,32 @@ import InputEmoji from "react-input-emoji";
 import SendIcon from "@mui/icons-material/Send";
 import { useEffect, useRef, useState, useContext } from "react";
 import { format } from "timeago.js";
-// import { io } from "socket.io-client";
 import * as request from "../../utils/request";
 import { HOST_NAME } from "../../utils/config";
-import { userOnline } from "../../page/home/home";
 import AddPhotoAlternateIcon from "@mui/icons-material/AddPhotoAlternate";
 import HighlightOffIcon from "@mui/icons-material/HighlightOff";
 import PhoneIcon from "@mui/icons-material/Phone";
-import VideocamIcon from "@mui/icons-material/Videocam";
 import MicNoneIcon from "@mui/icons-material/MicNone";
 import Recoder from "../recoder/recoder";
 import ClearIcon from "@mui/icons-material/Clear";
 import { mirage } from "ldrs";
-import Modalvideo from "../callvideo/Modalvideo";
+// import Modalvideo from "../callvideo/Modalvideo";
+import Linkify from "linkify-react";
+// Default values shown
+import { useNavigate } from "react-router-dom";
+import { SocketCon } from "../socketio/Socketcontext";
+// import { toast } from "react-toastify";
+import audio from "../../../../backEnd/src/public/audio/iphone.mp3";
+import { dotPulse } from "ldrs";
+
 // Default values shown
 
 function DetailMess(props) {
-  mirage.register();
+  dotPulse.register();
 
-  let value = useContext(userOnline);
+  const Navigate = useNavigate();
+  mirage.register();
+  let value = useContext(SocketCon);
   const socket = value.socket;
   const scroll = useRef();
   const input = useRef();
@@ -37,6 +44,8 @@ function DetailMess(props) {
   const [imgBlob, setImgBlob] = useState([]);
   const [imgsMes, setImgsMes] = useState([]);
   const [banghi, setBanghi] = useState(null);
+  const [nhan, setNhan] = useState(null);
+  const [typing, settyping] = useState(false);
   // data user
   const FetchDataUser = async (yID) => {
     try {
@@ -68,9 +77,6 @@ function DetailMess(props) {
       const res = await request.get(`messenger/listMes/${me}/${you}`);
       if (res) {
         setListmess(res.data);
-        // res.data.map((id) => {
-        //   fetchListImgMess(id.id);
-        // });
       }
     } catch (e) {
       console.log(e);
@@ -84,16 +90,16 @@ function DetailMess(props) {
       }
     };
     fetchApi();
-  }, [youID, chay]);
+  }, [youID, chay, nhan]);
   // --------------------------
   function handleOnEnter() {
     handleSendMess();
   }
   // ------------------------------------------
   const handleSendMess = async () => {
+    settyping(false);
     const textMes = text.trim();
     const formData = new FormData();
-
     try {
       setLoading(true);
       const formDataRecord = new FormData();
@@ -153,6 +159,7 @@ function DetailMess(props) {
     setImgsMes([]);
     setBanghi(null);
     setMic(false);
+    settyping(false);
   };
 
   useEffect(() => {
@@ -212,7 +219,6 @@ function DetailMess(props) {
     listmess.map((mes) => {
       a.push(fetchListImgMess(mes.id));
     });
-
     Promise.all(a)
       .then((results) => {
         setlistImgMess(results);
@@ -243,22 +249,100 @@ function DetailMess(props) {
     setMic(false);
     setImgsMes([]);
     setBanghi(null);
+    settyping(false);
   }, [youID]);
-  const handleCallVideo = (user) => {
-    console.log("call video", user);
-  };
-  const [call, setCall] = useState(false);
+  // call
+
   const handleCall = (user) => {
-    console.log("call", user);
-    socket.on("get_user", (userOl) => {
-      console.log("online", userOl);
+    let id = user.id;
+    Navigate(`/home/messenger/${id}/call`, {
+      replace: true,
+      state: { user },
     });
-    setCall((pre) => !pre);
   };
-  // useEffect(() => {}, [call]);
+  useEffect(() => {
+    socket.on("calling", (userCall) => {
+      setNhan(userCall);
+    });
+  }, []);
+
+  const traloi = () => {
+    setNhan(null);
+    setusercall(null);
+    let id = user.id;
+    Navigate(`/home/messenger/${id}/call`, {
+      replace: true,
+      state: { user },
+    });
+  };
+  const tuChoi = () => {
+    setNhan(null);
+    setusercall(null);
+  };
+  //call time
+  const timed = (time) => {
+    if (time < 60) {
+      return time + " Giây";
+    } else if (time < 3601) {
+      let minute = Math.floor(time / 60);
+      let second = time % 60;
+      return time < 60
+        ? minute + " Phút "
+        : minute + " Phút " + second + " Giây ";
+    } else {
+      let hour = Math.floor(time / 60);
+      let minute = Math.floor(time % 60);
+      return hour + " Giờ " + minute + " phút ";
+    }
+  };
+  const [usercall, setusercall] = useState(null);
+  useEffect(() => {
+    const id = async () => {
+      if (nhan) {
+        // console.log(nhan);
+        const res = await request.get(`account/detail/${nhan.userId}`);
+        if (res) {
+          setusercall(res.data[0]);
+        }
+        let a = setTimeout(() => {
+          setNhan(null);
+          setusercall(null);
+        }, 10000);
+        return () => clearTimeout(a);
+      }
+    };
+    id();
+  }, [nhan]);
+  // typing
+  // useEffect(() => {
+  //   if (text.length == 0) {
+  //     settyping(false);
+  //   }
+  //   if (text) {
+  //     socket.emit("typingadd", { youID, myID });
+  //     socket.on("typing", (data) => {
+  //       settyping(data);
+  //       // console.log(data);
+  //     });
+  //   }
+  //   return () => settyping(false);
+  // }, [text]);
+  const handleText = () => {};
   return (
     <>
-      <Modalvideo call={call} setCall={setCall} />
+      {/* {typing && text.length} */}
+      <div className={nhan ? "receiveCall" : "receive_call_end"}>
+        {usercall && <span>{usercall.username}</span>} đang gọi
+        <div className="receiveCall_btn">
+          <button className="btn btn-danger" onClick={tuChoi}>
+            Từ chối
+          </button>
+          &nbsp; &nbsp;
+          <button onClick={traloi} className="btn btn-success">
+            trả lời
+          </button>
+        </div>
+      </div>
       {yourID ? (
         user ? (
           <>
@@ -278,9 +362,6 @@ function DetailMess(props) {
               <div className="detailMess_call">
                 <span onClick={() => handleCall(user)}>
                   <PhoneIcon sx={{ fontSize: 22 }} />
-                </span>
-                <span onClick={() => handleCallVideo(user)}>
-                  <VideocamIcon sx={{ fontSize: 28 }} />
                 </span>
               </div>
             </div>
@@ -304,6 +385,7 @@ function DetailMess(props) {
                     (mes, index) =>
                       mes.softdelete !== myID && (
                         <div
+                          title={format(mes.created_at)}
                           ref={scroll}
                           className={
                             mes.sender_id === myID
@@ -312,11 +394,15 @@ function DetailMess(props) {
                           }
                           key={index}
                         >
-                          <span>{mes.message}</span>
-
+                          {/* list message text*/}
+                          <span>
+                            <Linkify> {mes.message}</Linkify>
+                          </span>
+                          {/* list message img*/}
                           <span className="detailMess_imgs">
                             {test(mes.id)}
                           </span>
+                          {/* list message recorder*/}
                           <span>
                             {mes.recorder && (
                               <audio
@@ -325,13 +411,41 @@ function DetailMess(props) {
                                 controls
                               ></audio>
                             )}
+                            {/* list call time*/}
                           </span>
-                          <span className="detailMessContainer-time">
-                            {format(mes.created_at)}
-                          </span>
+                          {mes.timecall && (
+                            <>
+                              <span className="detailMess_timecalltitle">
+                                Cuộc gọi -&nbsp;
+                                <span className="detailMess_timecall">
+                                  {timed(mes.timecall)}
+                                </span>
+                              </span>
+                            </>
+                          )}
+                          {/* list Missed call */}
+                          {mes.missedcall && (
+                            <span className="detailMess_missedCall">
+                              {mes.sender_id == myID
+                                ? "Cuộc gọi đi"
+                                : "Cuộc gọi nhỡ"}
+                            </span>
+                          )}
+
+                          {/* ----------------------------------------------- */}
                         </div>
                       )
                   )}
+                {/* typing */}
+                {typing && (
+                  <span className="detailMess_typing">
+                    <l-dot-pulse
+                      size="32"
+                      speed="1.7"
+                      color="gray"
+                    ></l-dot-pulse>
+                  </span>
+                )}
               </div>
 
               {/* ------------------------------------------ */}
@@ -374,6 +488,7 @@ function DetailMess(props) {
               </div>
 
               {/* -------------------------------------------- */}
+
               <InputEmoji
                 ref={input}
                 value={text}
