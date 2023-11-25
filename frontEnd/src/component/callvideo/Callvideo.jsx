@@ -4,10 +4,12 @@ import Peer from "simple-peer";
 import { useCookies } from "react-cookie";
 import { SocketCon } from "../socketio/Socketcontext";
 import "./modalvideo.css";
+import * as request from "../../utils/request";
 
 const Callvideo = () => {
   const [cookies] = useCookies();
   const location = useLocation();
+  const youID = location.state.user.id;
   const value = useContext(SocketCon);
   //   ----------------------------------
   const socket = value.socket;
@@ -109,24 +111,53 @@ const Callvideo = () => {
 
   const handleHome = () => {
     socket.emit("endcall", myID);
-    if (stream) {
-      const tracks = stream.getTracks();
-      tracks.forEach((track) => track.stop());
-      setrunTime(false);
-      setchaychay(true);
-    }
-    setReceivingCall(false);
-    setCallEnded(true);
-    setTimeout(() => {
-      Navigate(`/home/messenger/${receptor.id}`, { replace: true });
-      window.location.reload();
-    }, 1000);
+    const home = async () => {
+      if (stream) {
+        const tracks = stream.getTracks();
+        await tracks.forEach((track) => track.stop());
+        setrunTime(false);
+        setchaychay(true);
+      }
+      setReceivingCall(false);
+      setCallEnded(true);
+      setTimeout(() => {
+        Navigate(`/home/messenger/${receptor.id}`, { replace: true });
+      }, 1000);
+    };
+    home();
+    // window.location.reload();
   };
+
+  const [noAnswer, setnoAnswer] = useState(false);
+
   useEffect(() => {
     if (receivingCall) {
       answerCall();
     }
   }, [receivingCall]);
+
+  useEffect(() => {
+    if (callAccepted) {
+      setnoAnswer(false);
+    } else {
+      let a = setTimeout(async () => {
+        try {
+          const res = await request.post(`call/missedCall`, {
+            sender_id: myID,
+            recipient_id: youID,
+          });
+          if (res) {
+            console.log("người dùng bận");
+          }
+          setnoAnswer(true);
+        } catch (e) {
+          console.log(e);
+        }
+      }, 10000);
+      return () => clearTimeout(a);
+    }
+  }, [callAccepted]);
+
   useEffect(() => {
     socket.on("end", () => {
       setrunTime(false);
@@ -147,15 +178,23 @@ const Callvideo = () => {
       return () => clearInterval(timee);
     }
   }, [runTime]);
-
   // save time
   useEffect(() => {
     const endCall = async () => {
       if (chaychay && dem !== 0) {
         let b = datavip.find((item) => item.socketId == caller);
-        console.log("thời gian gọi", dem);
-        console.log("ID người gọi", b.userId);
-        console.log("ID người nhận:", myID);
+        try {
+          const res = await request.post(`call/callEnd`, {
+            sender_id: b.userId,
+            recipient_id: myID,
+            time: dem,
+          });
+          if (res) {
+            console.log("Callended");
+          }
+        } catch (e) {
+          console.log(e);
+        }
       }
     };
     endCall();
@@ -187,7 +226,7 @@ const Callvideo = () => {
         </div>
         <div className="modalvideo_setting">
           <button className="btn btn-danger m-2" onClick={handleHome}>
-            Tắt
+            {!noAnswer ? "Tắt" : "Không trả lời"}
           </button>
         </div>
       </div>
