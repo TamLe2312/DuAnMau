@@ -52,15 +52,14 @@ function App() {
               <Route path="/home/admin/posts" element={<Posts />} />
             </Route>
           </Route>
-        </Route>
-        <Route path="/stories/:idStory" element={<Stories />} />
-        <Route path="/verifyToken" element={<VerifyToken />} />
+          <Route path="/stories/:idStory" element={<Stories />} />
           <Route path="/home/messenger/:id/call" element={<Callvideo />} />
+          <Route path="/verifyToken" element={<VerifyToken />} />
           <Route path="*" element={<NoMath />} />
-        <Route path="/invite/:inviteCode" element={<InvitePage />} />
-      </Routes>
-      <Toaster position="top-right" expand={false} richColors />
-     </SocketContext>
+          <Route path="/invite/:inviteCode" element={<InvitePage />} />
+        </Routes>
+        <Toaster position="top-right" expand={false} richColors />
+      </SocketContext>
     </div>
   );
 }

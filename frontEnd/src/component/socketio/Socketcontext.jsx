@@ -6,6 +6,7 @@ export const SocketCon = createContext();
 
 function SocketContext({ children }) {
   const [socket, setSocket] = useState(null);
+  const [usersop, setusers] = useState([]);
   useEffect(() => {
     const newSocket = io(HOST_NAME);
     setSocket(newSocket);
@@ -13,9 +14,15 @@ function SocketContext({ children }) {
       newSocket.disconnect();
     };
   }, []);
+  const addUsers = async (id) => {
+    await socket.emit("add_new_user", id);
+    socket.on("get_user", (users) => {
+      setusers(users);
+    });
+  };
 
   return (
-    <SocketCon.Provider value={{ socket }}>
+    <SocketCon.Provider value={{ socket, usersop, addUsers }}>
       {socket && children}
     </SocketCon.Provider>
   );

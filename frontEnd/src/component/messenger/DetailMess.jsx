@@ -12,24 +12,20 @@ import MicNoneIcon from "@mui/icons-material/MicNone";
 import Recoder from "../recoder/recoder";
 import ClearIcon from "@mui/icons-material/Clear";
 import { mirage } from "ldrs";
-// import Modalvideo from "../callvideo/Modalvideo";
 import Linkify from "linkify-react";
 // Default values shown
 import { useNavigate } from "react-router-dom";
 import { SocketCon } from "../socketio/Socketcontext";
-// import { toast } from "react-toastify";
-import audio from "../../../../backEnd/src/public/audio/iphone.mp3";
 import { dotPulse } from "ldrs";
-
-// Default values shown
 
 function DetailMess(props) {
   dotPulse.register();
-
   const Navigate = useNavigate();
   mirage.register();
   let value = useContext(SocketCon);
   const socket = value.socket;
+  const usersss = value.usersop;
+  console.log(usersss);
   const scroll = useRef();
   const input = useRef();
   const { myID, yourID, handleChay, listUserMess, chay } = props;
@@ -46,6 +42,7 @@ function DetailMess(props) {
   const [banghi, setBanghi] = useState(null);
   const [nhan, setNhan] = useState(null);
   const [typing, settyping] = useState(false);
+
   // data user
   const FetchDataUser = async (yID) => {
     try {
@@ -93,11 +90,11 @@ function DetailMess(props) {
   }, [youID, chay, nhan]);
   // --------------------------
   function handleOnEnter() {
+    // setOpenTyping(false);
     handleSendMess();
   }
   // ------------------------------------------
   const handleSendMess = async () => {
-    settyping(false);
     const textMes = text.trim();
     const formData = new FormData();
     try {
@@ -159,7 +156,7 @@ function DetailMess(props) {
     setImgsMes([]);
     setBanghi(null);
     setMic(false);
-    settyping(false);
+    setOpenTyping(false);
   };
 
   useEffect(() => {
@@ -167,11 +164,6 @@ function DetailMess(props) {
     input.current?.focus();
   }, [listmess]);
   useEffect(() => {
-    socket.emit("add_new_user", myID);
-    // socket.on("get_user", (userOl) => {
-    //   console.log("online", userOl);
-    //   setonline(userOl);
-    // });
     if (listmess.length > 0) {
       socket.emit("add_message", { mes: listmess, youID, myID });
     }
@@ -180,8 +172,8 @@ function DetailMess(props) {
       setDataMessID(myID);
       setnewMess(mes);
     });
-  }, [loading, socket]);
-
+  }, [loading]);
+  // socket
   useEffect(() => {
     if (dataMessID !== null && !isNaN(youID) && dataMessID === youID) {
       setListmess(newMess);
@@ -299,7 +291,6 @@ function DetailMess(props) {
   useEffect(() => {
     const id = async () => {
       if (nhan) {
-        // console.log(nhan);
         const res = await request.get(`account/detail/${nhan.userId}`);
         if (res) {
           setusercall(res.data[0]);
@@ -313,21 +304,34 @@ function DetailMess(props) {
     };
     id();
   }, [nhan]);
+
   // typing
-  // useEffect(() => {
-  //   if (text.length == 0) {
-  //     settyping(false);
-  //   }
-  //   if (text) {
-  //     socket.emit("typingadd", { youID, myID });
-  //     socket.on("typing", (data) => {
-  //       settyping(data);
-  //       // console.log(data);
-  //     });
-  //   }
-  //   return () => settyping(false);
-  // }, [text]);
-  const handleText = () => {};
+  const [openTyping, setOpenTyping] = useState(false);
+  const handleText = (e) => {
+    setText(e);
+    setOpenTyping(e.length > 0);
+  };
+  useEffect(() => {
+    if (openTyping) {
+      // console.log("đang nhập");
+      socket.emit("typingadd", { youID: youID });
+    } else {
+      // console.log("Hủy nhập rồi");
+      socket.emit("typingstop", { youID: youID });
+    }
+  }, [openTyping, youID]);
+  useEffect(() => {
+    socket.on("typingok", () => {
+      settyping(true);
+    });
+    socket.on("typingstop", () => {
+      settyping(false);
+    });
+    return () => {
+      socket.off("typingok");
+      socket.off("typingstop");
+    };
+  }, []);
   return (
     <>
       {/* {typing && text.length} */}
@@ -437,15 +441,17 @@ function DetailMess(props) {
                       )
                   )}
                 {/* typing */}
+                {/* {typing && ( */}
                 {typing && (
                   <span className="detailMess_typing">
                     <l-dot-pulse
-                      size="32"
-                      speed="1.7"
+                      size="28"
+                      speed="1.8"
                       color="gray"
                     ></l-dot-pulse>
                   </span>
                 )}
+                {/* )} */}
               </div>
 
               {/* ------------------------------------------ */}
@@ -472,6 +478,7 @@ function DetailMess(props) {
               </div>
             )}
             {/* ----------------------------------- */}
+
             <div className="detailMess-imput">
               <div className="detailMess_imgs">
                 <input
@@ -492,10 +499,10 @@ function DetailMess(props) {
               <InputEmoji
                 ref={input}
                 value={text}
-                onChange={setText}
+                onChange={handleText}
                 cleanOnEnter
                 onEnter={handleOnEnter}
-                placeholder="Type a message"
+                placeholder="Nhập tin nhắn"
               />
               <span className="detailMess_Mic" onClick={handleMic}>
                 {!mic ? (

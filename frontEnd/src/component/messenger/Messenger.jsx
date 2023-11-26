@@ -4,10 +4,7 @@ import "./messenger.css";
 import React, { useRef } from "react";
 import { useCookies } from "react-cookie";
 import { useContext, useEffect, useState } from "react";
-// import { io } from "socket.io-client";
 import * as request from "../../utils/request";
-// import { APP_WEB, HOST_NAME } from "../../utils/config";
-// import { userOnline } from "../../page/home/home";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
@@ -17,13 +14,14 @@ import { SocketCon } from "../socketio/Socketcontext";
 function Messenger() {
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
+  // const handleShow = () => setShow(true);
   const value = useContext(SocketCon);
-  const socket = value.socket;
+  // const socket = value.socket;
   const [online, setonline] = useState([]);
   const [cookies] = useCookies();
   const [listUserMess, setlistUserMess] = useState([]);
   const [chay, setChay] = useState(false);
+  const usersop = value.usersop;
 
   const myID = cookies.userId;
   const yourID = useParams().id;
@@ -46,31 +44,19 @@ function Messenger() {
     };
     fetchApi();
   }, [chay]);
-
-  useEffect(() => {
-    socket.on("get_ol", (userOl) => {
-      setonline(userOl);
-    });
-  }, [online, socket]);
-
   const isOnline = (data, yourID) => {
-    // if (data.length > 0) {
     const isOl = data.some((user) => user.userId == yourID);
     if (isOl) {
       return (
         <span className="messenger-user-information-mes online">Online</span>
       );
     } else {
-      return <span className="messenger-user-information-mes">Offline</span>;
+      // return <span className="messenger-user-information-mes">Offline</span>;
     }
-    // } else {
-    //   return <span className="messenger-user-information-mes">Offline</span>;
-    // }
   };
   const [hien, setHien] = useState(false);
   const [hienUser, setHienUser] = useState(null);
   const handleDel = (e) => {
-    // console.log(e.id);
     setHienUser(e.id);
     setHien((pre) => !pre);
   };
@@ -140,7 +126,7 @@ function Messenger() {
                         <span className="messenger-user-information-name">
                           {user.name ? user.name : user.username}
                         </span>
-                        {isOnline(online, user.id)}
+                        {isOnline(usersop, user.id)}
                       </div>
                     </NavLink>
 

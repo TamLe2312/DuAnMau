@@ -28,7 +28,6 @@ const io = new Server(server, {
   },
 });
 let activeUsers = [];
-let ols = [];
 io.on("connection", (socket) => {
   socket.on("add_new_user", (newUserID) => {
     const userExists = activeUsers.some((user) => user.userId === newUserID);
@@ -42,23 +41,12 @@ io.on("connection", (socket) => {
     }
   });
   // --------------------
-  socket.on("add_ols", (newUserID) => {
-    const userExists = ols.some((user) => user.userId === newUserID);
-    if (!userExists) {
-      ols.push({
-        userId: newUserID,
-        socketId: socket.id,
-      });
-      io.emit("get_ol", ols);
-    }
-  });
   // ------------------
   socket.on("add_message", (data) => {
     const { youID, myID } = data;
     const user = activeUsers.find((user) => user.userId == youID);
     if (user) {
       io.to(user.socketId).emit("get_message", data);
-      io.to(user.socketId).emit("typing", "Đang nhập");
       io.to(user.socketId).emit("recibir", [
         "Bạn có một tin nhắn mới : ",
         youID,
@@ -69,12 +57,9 @@ io.on("connection", (socket) => {
 
   socket.on("disconnect", () => {
     activeUsers = activeUsers.filter((user) => user.socketId !== socket.id);
-    ols = ols.filter((user) => user.socketId !== socket.id);
     io.emit("get_user", activeUsers);
-    io.emit("get_ol", ols);
     socket.broadcast.emit("callEnded");
   });
-
   // call
 
   socket.on("findUserCall", (userCallId) => {
@@ -89,7 +74,6 @@ io.on("connection", (socket) => {
     io.to(data.userToCall).emit("calluser", {
       signal: data.signalData,
       from: data.from,
-      // name: data.name,
     });
   });
   socket.on("answercall", (data) => {
@@ -103,10 +87,17 @@ io.on("connection", (socket) => {
   });
   // typing
   socket.on("typingadd", (data) => {
-    const { youID, myID } = data;
+    const { youID } = data;
     const user = activeUsers.find((user) => user.userId == youID);
     if (user) {
-      io.to(user.socketId).emit("typing", data);
+      io.to(user.socketId).emit("typingok", data);
+    }
+  });
+  socket.on("typingstop", (data) => {
+    const { youID } = data;
+    const user = activeUsers.find((user) => user.userId == youID);
+    if (user) {
+      io.to(user.socketId).emit("typingstop", data);
     }
   });
 });
