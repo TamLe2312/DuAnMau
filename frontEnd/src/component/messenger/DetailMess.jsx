@@ -25,7 +25,12 @@ function DetailMess(props) {
   let value = useContext(SocketCon);
   const socket = value.socket;
   const usersss = value.usersop;
-  console.log(usersss);
+  useEffect(() => {
+    if (usersss) {
+      console.log(usersss);
+    }
+  }, [usersss]);
+
   const scroll = useRef();
   const input = useRef();
   const { myID, yourID, handleChay, listUserMess, chay } = props;
@@ -336,7 +341,7 @@ function DetailMess(props) {
     <>
       {/* {typing && text.length} */}
       <div className={nhan ? "receiveCall" : "receive_call_end"}>
-        {usercall && <span>{usercall.username}</span>} đang gọi
+        {usercall && <span>{usercall.name ?? usercall.username}</span>} đang gọi
         <div className="receiveCall_btn">
           <button className="btn btn-danger" onClick={tuChoi}>
             Từ chối

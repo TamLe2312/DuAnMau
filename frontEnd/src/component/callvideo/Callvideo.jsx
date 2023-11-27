@@ -17,7 +17,6 @@ const Callvideo = () => {
   const receptor = location.state.user;
   const Navigate = useNavigate();
   // call
-
   const [me, setMe] = useState("");
   const [stream, setStream] = useState();
   const [receivingCall, setReceivingCall] = useState(false);

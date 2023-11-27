@@ -61,7 +61,6 @@ io.on("connection", (socket) => {
     socket.broadcast.emit("callEnded");
   });
   // call
-
   socket.on("findUserCall", (userCallId) => {
     const userOk = activeUsers.find((user) => user.userId === userCallId);
     if (userOk) {
