@@ -60,13 +60,16 @@ io.on("connection", (socket) => {
     io.emit("get_user", activeUsers);
     socket.broadcast.emit("callEnded");
   });
+
   // call
   socket.on("findUserCall", (userCallId) => {
-    const userOk = activeUsers.find((user) => user.userId === userCallId);
-    if (userOk) {
+    const { myID, youID } = userCallId;
+    const userOk = activeUsers.find((user) => user.userId === myID);
+    const conlai = activeUsers.find((user) => user.userId === youID);
+    if (userOk && conlai) {
       io.emit("isyou", activeUsers);
-      socket.broadcast.emit("me", { idcall: userOk.socketId });
-      socket.broadcast.emit("calling", userOk);
+      io.to(conlai.socketId).emit("me", { idcall: userOk.socketId });
+      io.to(conlai.socketId).emit("calling", userOk);
     }
   });
   socket.on("calluser", (data) => {

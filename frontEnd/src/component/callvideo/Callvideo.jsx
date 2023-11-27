@@ -43,7 +43,7 @@ const Callvideo = () => {
         console.log(e);
       });
 
-    socket.emit("findUserCall", myID);
+    socket.emit("findUserCall", { myID: myID, youID: youID });
     socket.on("me", (data) => {
       setIdToCall(data.idcall);
     });
