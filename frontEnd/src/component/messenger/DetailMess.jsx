@@ -17,20 +17,15 @@ import Linkify from "linkify-react";
 import { useNavigate } from "react-router-dom";
 import { SocketCon } from "../socketio/Socketcontext";
 import { dotPulse } from "ldrs";
-
+import hieuthuhai from "../../../public/audio/khongthesay.mp3";
 function DetailMess(props) {
+  const ringtone = new Audio(null);
   dotPulse.register();
   const Navigate = useNavigate();
   mirage.register();
   let value = useContext(SocketCon);
   const socket = value.socket;
-  const usersss = value.usersop;
-  useEffect(() => {
-    if (usersss) {
-      console.log(usersss);
-    }
-  }, [usersss]);
-
+  // const usersss = value.usersop;
   const scroll = useRef();
   const input = useRef();
   const { myID, yourID, handleChay, listUserMess, chay } = props;
@@ -99,11 +94,28 @@ function DetailMess(props) {
     handleSendMess();
   }
   // ------------------------------------------
+  // read
+  const fetchRead = async (sendID) => {
+    try {
+      const res = await request.post(`messenger/read`, {
+        sender_id: sendID,
+        recipient_id: myID,
+      });
+      if (res) {
+        // console.log("đã đọc tin nhắn của", user.id);
+      }
+    } catch (e) {
+      console.log(e);
+    }
+  };
+  // ------------------------------------------
   const handleSendMess = async () => {
     const textMes = text.trim();
     const formData = new FormData();
     try {
       setLoading(true);
+      // đọc luôn khi gửi
+      await fetchRead(youID);
       const formDataRecord = new FormData();
       let res = "";
       if (banghi !== null) {
@@ -247,6 +259,7 @@ function DetailMess(props) {
     setImgsMes([]);
     setBanghi(null);
     settyping(false);
+    setText("");
   }, [youID]);
   // call
 
@@ -257,6 +270,15 @@ function DetailMess(props) {
       state: { user },
     });
   };
+  const playRingtone = () => {
+    ringtone.loop = true; // Lặp lại âm thanh chuông
+    ringtone.play();
+  };
+  const stopRingtone = () => {
+    ringtone.pause();
+    ringtone.currentTime = 0;
+  };
+
   useEffect(() => {
     socket.on("calling", (userCall) => {
       setNhan(userCall);
@@ -264,6 +286,7 @@ function DetailMess(props) {
   }, []);
 
   const traloi = () => {
+    stopRingtone();
     setNhan(null);
     setusercall(null);
     let id = user.id;
@@ -274,9 +297,48 @@ function DetailMess(props) {
   };
   const tuChoi = () => {
     setNhan(null);
+    stopRingtone();
     setusercall(null);
   };
   //call time
+
+  const [usercall, setusercall] = useState(null);
+  useEffect(() => {
+    const id = async () => {
+      if (nhan) {
+        playRingtone();
+        const res = await request.get(`account/detail/${nhan.userId}`);
+        if (res) {
+          setusercall(res.data[0]);
+        }
+        return () => {
+          setusercall(null);
+          setNhan(null);
+        };
+      }
+    };
+    id();
+  }, [nhan]);
+
+  useEffect(() => {
+    if (nhan) {
+      socket.on("end", async () => {
+        await new Promise((resolve) => {
+          request.post(`call/missedCall`, {
+            sender_id: nhan.userId,
+            recipient_id: myID,
+          });
+          resolve();
+        });
+        setNhan(false);
+      });
+      return () => {
+        socket.off("end");
+        stopRingtone();
+      };
+    }
+  }, [nhan]);
+  // ---------------------------------
   const timed = (time) => {
     if (time < 60) {
       return time + " Giây";
@@ -292,24 +354,6 @@ function DetailMess(props) {
       return hour + " Giờ " + minute + " phút ";
     }
   };
-  const [usercall, setusercall] = useState(null);
-  useEffect(() => {
-    const id = async () => {
-      if (nhan) {
-        const res = await request.get(`account/detail/${nhan.userId}`);
-        if (res) {
-          setusercall(res.data[0]);
-        }
-        let a = setTimeout(() => {
-          setNhan(null);
-          setusercall(null);
-        }, 10000);
-        return () => clearTimeout(a);
-      }
-    };
-    id();
-  }, [nhan]);
-
   // typing
   const [openTyping, setOpenTyping] = useState(false);
   const handleText = (e) => {
@@ -318,10 +362,8 @@ function DetailMess(props) {
   };
   useEffect(() => {
     if (openTyping) {
-      // console.log("đang nhập");
       socket.emit("typingadd", { youID: youID });
     } else {
-      // console.log("Hủy nhập rồi");
       socket.emit("typingstop", { youID: youID });
     }
   }, [openTyping, youID]);

@@ -11,6 +11,7 @@ import Modal from "react-bootstrap/Modal";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { SocketCon } from "../socketio/Socketcontext";
+import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 function Messenger() {
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
@@ -50,12 +51,11 @@ function Messenger() {
       return (
         <span className="messenger-user-information-mes online">Online</span>
       );
-    } else {
-      // return <span className="messenger-user-information-mes">Offline</span>;
     }
   };
   const [hien, setHien] = useState(false);
   const [hienUser, setHienUser] = useState(null);
+
   const handleDel = (e) => {
     setHienUser(e.id);
     setHien((pre) => !pre);
@@ -95,6 +95,76 @@ function Messenger() {
     };
   }, []);
 
+  const [isread, setisread] = useState([]);
+  const [read, setread] = useState(null);
+  const handleRead = (user) => {
+    setread(true);
+    const fetchRead = async () => {
+      try {
+        const res = await request.post(`messenger/read`, {
+          sender_id: user.id,
+          recipient_id: myID,
+        });
+        if (res) {
+          // console.log("đã đọc tin nhắn của", user.id);
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    };
+    fetchRead();
+  };
+  // người nhận là myid
+  useEffect(() => {
+    if (listUserMess.length > 0) {
+      listUserMess.map(async (item) => {
+        try {
+          const res = await request.get(`messenger/isread/${item.id}/${myID}`);
+          if (res) {
+            setisread((pre) => [...pre, res.data]);
+          }
+        } catch (e) {
+          console.log(e);
+          return false;
+        }
+      });
+    }
+    return () => {
+      setisread([]);
+    };
+  }, [listUserMess]);
+  const fetchRead = async (id) => {
+    try {
+      if (isread && isread.length > 0) {
+        const hasUnread = isread.some(
+          (item) => item.sender === id && item.success === "Chưa đọc"
+        );
+        return hasUnread;
+      }
+      return false;
+    } catch (error) {
+      console.error(error);
+      return null;
+    }
+  };
+  const [userReadStatus, setUserReadStatus] = useState({});
+  useEffect(() => {
+    listUserMess.forEach((user) => {
+      fetchRead(user.id)
+        .then((result) => {
+          // console.log(result);
+          setUserReadStatus((prevStatus) => ({
+            ...prevStatus,
+            [user.id]: result,
+          }));
+        })
+        .catch((error) => {
+          console.error(error);
+          // Xử lý lỗi nếu có
+        });
+    });
+  }, [listUserMess]);
+
   return (
     <div className="messenger">
       <div className="messenger-users">
@@ -107,11 +177,14 @@ function Messenger() {
                 <React.Fragment key={index}>
                   <div className="messenger_child">
                     <NavLink
-                      // onClick={() => handleView(user)}
+                      onClick={() => handleRead(user)}
                       to={`/home/messenger/${user.id}`}
                       className="messenger-user"
-                      // key={index}
                     >
+                      {/* read */}
+                      {userReadStatus[user.id] && !read && (
+                        <span className="messenger_user_dot"></span>
+                      )}
                       <img
                         src={
                           user.avatar
@@ -121,7 +194,6 @@ function Messenger() {
                         alt=""
                         className="messenger-user-img"
                       />
-
                       <div className="messenger-user-information">
                         <span className="messenger-user-information-name">
                           {user.name ? user.name : user.username}
@@ -129,7 +201,6 @@ function Messenger() {
                         {isOnline(usersop, user.id)}
                       </div>
                     </NavLink>
-
                     <span
                       className="messenger_more"
                       onClick={() => handleDel(user)}
@@ -148,15 +219,14 @@ function Messenger() {
                       )}
                     </ul>
                   </div>
+                  {/* =================================== */}
                   <Modal
                     show={show}
                     onHide={() => setShow(false)}
                     aria-labelledby="contained-modal-title-vcenter"
                     centered
                   >
-                    <Modal.Header closeButton>
-                      {/* <Modal.Title id="contained-modal-title-vcenter"></Modal.Title> */}
-                    </Modal.Header>
+                    <Modal.Header closeButton></Modal.Header>
                     <Modal.Body>
                       <p>Bạn muốn xóa tin nhắn</p>
                     </Modal.Body>
@@ -171,7 +241,6 @@ function Messenger() {
               );
             })
           : "Chưa có cuộc trò truyện nào..."}
-
         {/* ---------------------------------- */}
       </div>
       <div className="messenger-detail">

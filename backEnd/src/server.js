@@ -47,13 +47,22 @@ io.on("connection", (socket) => {
     const user = activeUsers.find((user) => user.userId == youID);
     if (user) {
       io.to(user.socketId).emit("get_message", data);
-      io.to(user.socketId).emit("recibir", [
-        "Bạn có một tin nhắn mới : ",
-        youID,
-      ]);
+      io.to(user.socketId).emit("recibir", { newMessage: myID });
       // console.log("Đã gửi :", user);
     }
   });
+  // notification
+
+  socket.on("add_notification", (data) => {
+    const { userid, myID } = data;
+    const user = activeUsers.find((user) => user.userId == userid);
+    if (user) {
+      // console.log("Chính nó");
+      io.to(user.socketId).emit("notification", { newNoti: myID });
+    }
+  });
+
+  // ------------------------
 
   socket.on("disconnect", () => {
     activeUsers = activeUsers.filter((user) => user.socketId !== socket.id);
@@ -68,7 +77,7 @@ io.on("connection", (socket) => {
     const conlai = activeUsers.find((user) => user.userId === youID);
     if (userOk && conlai) {
       io.emit("isyou", activeUsers);
-      io.to(conlai.socketId).emit("me", { idcall: userOk.socketId });
+      io.to(conlai.socketId).emit("callID", { idcall: userOk.socketId });
       io.to(conlai.socketId).emit("calling", userOk);
     }
   });

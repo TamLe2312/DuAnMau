@@ -5,8 +5,24 @@ import { useCookies } from "react-cookie";
 import { SocketCon } from "../socketio/Socketcontext";
 import "./modalvideo.css";
 import * as request from "../../utils/request";
-
+import VideocamIcon from "@mui/icons-material/Videocam";
+import VideocamOffIcon from "@mui/icons-material/VideocamOff";
+import MicIcon from "@mui/icons-material/Mic";
+import MicOffIcon from "@mui/icons-material/MicOff";
+import tuchohieu from "../../../public/audio/tuchoihieu.mp3";
 const Callvideo = () => {
+  const ringtone = new Audio(tuchohieu);
+
+  // Phát âm thanh chuông khi có cuộc gọi đến
+  const playRingtone = () => {
+    ringtone.loop = true; // Lặp lại âm thanh chuông
+    ringtone.play();
+  };
+  const stopRingtone = () => {
+    ringtone.pause();
+    ringtone.currentTime = 0;
+  };
+
   const [cookies] = useCookies();
   const location = useLocation();
   const youID = location.state.user.id;
@@ -42,9 +58,8 @@ const Callvideo = () => {
       .catch((e) => {
         console.log(e);
       });
-
     socket.emit("findUserCall", { myID: myID, youID: youID });
-    socket.on("me", (data) => {
+    socket.on("callID", (data) => {
       setIdToCall(data.idcall);
     });
     socket.on("isyou", (data) => {
@@ -59,7 +74,7 @@ const Callvideo = () => {
       setCallerSignal(data.signal);
     });
   }, []);
-
+  const [callerBlur, setCallerBlur] = useState(false);
   const callUser = (id) => {
     try {
       let peer = new Peer({
@@ -100,6 +115,7 @@ const Callvideo = () => {
       socket.emit("answercall", { signal: data, to: caller });
     });
     peer.on("stream", (stream) => {
+      // stopRingtone();
       setrunTime(true);
       console.log("Nhận cuộc gọi");
       userVideo.current.srcObject = stream;
@@ -109,7 +125,7 @@ const Callvideo = () => {
   };
 
   const handleHome = () => {
-    socket.emit("endcall", myID);
+    socket.emit("endcall", youID);
     const home = async () => {
       if (stream) {
         const tracks = stream.getTracks();
@@ -126,9 +142,7 @@ const Callvideo = () => {
     home();
     // window.location.reload();
   };
-
   const [noAnswer, setnoAnswer] = useState(false);
-
   useEffect(() => {
     if (receivingCall) {
       answerCall();
@@ -140,29 +154,12 @@ const Callvideo = () => {
       setnoAnswer(false);
     } else {
       let a = setTimeout(async () => {
-        try {
-          const res = await request.post(`call/missedCall`, {
-            sender_id: myID,
-            recipient_id: youID,
-          });
-          if (res) {
-            console.log("người dùng bận");
-          }
-          setnoAnswer(true);
-        } catch (e) {
-          console.log(e);
-        }
+        setnoAnswer(true);
       }, 10000);
       return () => clearTimeout(a);
     }
   }, [callAccepted]);
 
-  useEffect(() => {
-    socket.on("end", () => {
-      setrunTime(false);
-      setchaychay(true);
-    });
-  }, [callEnded]);
   useEffect(() => {
     if (idToCall) {
       callUser(idToCall);
@@ -195,9 +192,47 @@ const Callvideo = () => {
           console.log(e);
         }
       }
+      if (chaychay && dem == 0) {
+        // console.log("bắn data để lưu");
+      }
     };
     endCall();
   }, [chaychay]);
+  // -----------close cam
+  const [mic, setmic] = useState(false);
+  const [cam, setcam] = useState(false);
+  const handleCloseCam = () => {
+    setcam((pre) => !pre);
+  };
+  const handleCloseMic = () => {
+    setmic((pre) => !pre);
+  };
+  useEffect(() => {
+    if (stream) {
+      const tracks = stream.getTracks();
+      const audio = tracks.find((item) => item.kind == "audio");
+      if (mic) {
+        audio.enabled = false;
+        // console.log(audio);
+      } else {
+        audio.enabled = true;
+        // console.log(audio);
+      }
+    }
+  }, [mic]);
+  useEffect(() => {
+    if (stream) {
+      const tracks = stream.getTracks();
+      const camera = tracks.find((item) => item.kind == "video");
+      if (cam) {
+        camera.enabled = false;
+        // console.log(camera);
+      } else {
+        camera.enabled = true;
+        // console.log(camera);
+      }
+    }
+  }, [cam]);
 
   return (
     <div className="modalvideo_header">
@@ -224,6 +259,13 @@ const Callvideo = () => {
           </div>
         </div>
         <div className="modalvideo_setting">
+          <button className="btn btn-success m-2" onClick={handleCloseMic}>
+            {!mic ? <MicIcon /> : <MicOffIcon />}
+          </button>
+          <button className="btn btn-success m-2" onClick={handleCloseCam}>
+            {!cam ? <VideocamIcon /> : <VideocamOffIcon />}
+          </button>
+          &nbsp;
           <button className="btn btn-danger m-2" onClick={handleHome}>
             {!noAnswer ? "Tắt" : "Không trả lời"}
           </button>

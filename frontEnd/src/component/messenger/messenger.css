@@ -113,3 +113,12 @@
   color: white;
   transition: 0.5s;
 }
+.messenger_user_dot {
+  width: 12px;
+  height: 12px;
+  background-color: rgb(211, 58, 58);
+  border-radius: 50%;
+  position: absolute;
+  top: 6px;
+  left: 6px;
+}
