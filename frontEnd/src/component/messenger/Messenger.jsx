@@ -11,13 +11,12 @@ import Modal from "react-bootstrap/Modal";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { SocketCon } from "../socketio/Socketcontext";
-import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 function Messenger() {
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   // const handleShow = () => setShow(true);
   const value = useContext(SocketCon);
-  // const socket = value.socket;
+  const socket = value.socket;
   const [online, setonline] = useState([]);
   const [cookies] = useCookies();
   const [listUserMess, setlistUserMess] = useState([]);
@@ -121,6 +120,7 @@ function Messenger() {
         try {
           const res = await request.get(`messenger/isread/${item.id}/${myID}`);
           if (res) {
+            // false = đã đọc
             setisread((pre) => [...pre, res.data]);
           }
         } catch (e) {
@@ -133,38 +133,17 @@ function Messenger() {
       setisread([]);
     };
   }, [listUserMess]);
-  const fetchRead = async (id) => {
-    try {
-      if (isread && isread.length > 0) {
-        const hasUnread = isread.some(
-          (item) => item.sender === id && item.success === "Chưa đọc"
-        );
-        return hasUnread;
+  // un read
+  const unreadMessagesMap = {};
+  isread.forEach((item) => {
+    if (item.success === false) {
+      if (!unreadMessagesMap[item.sender]) {
+        unreadMessagesMap[item.sender] = false;
       }
-      return false;
-    } catch (error) {
-      console.error(error);
-      return null;
+    } else {
+      unreadMessagesMap[item.sender] = true;
     }
-  };
-  const [userReadStatus, setUserReadStatus] = useState({});
-  useEffect(() => {
-    listUserMess.forEach((user) => {
-      fetchRead(user.id)
-        .then((result) => {
-          // console.log(result);
-          setUserReadStatus((prevStatus) => ({
-            ...prevStatus,
-            [user.id]: result,
-          }));
-        })
-        .catch((error) => {
-          console.error(error);
-          // Xử lý lỗi nếu có
-        });
-    });
-  }, [listUserMess]);
-
+  });
   return (
     <div className="messenger">
       <div className="messenger-users">
@@ -181,8 +160,8 @@ function Messenger() {
                       to={`/home/messenger/${user.id}`}
                       className="messenger-user"
                     >
-                      {/* read */}
-                      {userReadStatus[user.id] && !read && (
+                      {/* Chưa đọc */}
+                      {unreadMessagesMap[user.id] && !read && (
                         <span className="messenger_user_dot"></span>
                       )}
                       <img

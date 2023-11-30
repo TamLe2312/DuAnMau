@@ -48,7 +48,6 @@ io.on("connection", (socket) => {
     if (user) {
       io.to(user.socketId).emit("get_message", data);
       io.to(user.socketId).emit("recibir", { newMessage: myID });
-      // console.log("Đã gửi :", user);
     }
   });
   // notification
@@ -57,7 +56,6 @@ io.on("connection", (socket) => {
     const { userid, myID } = data;
     const user = activeUsers.find((user) => user.userId == userid);
     if (user) {
-      // console.log("Chính nó");
       io.to(user.socketId).emit("notification", { newNoti: myID });
     }
   });
@@ -67,7 +65,6 @@ io.on("connection", (socket) => {
   socket.on("disconnect", () => {
     activeUsers = activeUsers.filter((user) => user.socketId !== socket.id);
     io.emit("get_user", activeUsers);
-    socket.broadcast.emit("callEnded");
   });
 
   // call
@@ -78,6 +75,7 @@ io.on("connection", (socket) => {
     if (userOk && conlai) {
       io.emit("isyou", activeUsers);
       io.to(conlai.socketId).emit("callID", { idcall: userOk.socketId });
+      // socket.broadcast.emit("callID", { idcall: userOk.socketId });
       io.to(conlai.socketId).emit("calling", userOk);
     }
   });
@@ -93,7 +91,7 @@ io.on("connection", (socket) => {
   socket.on("endcall", (userCallId) => {
     const userOk = activeUsers.find((user) => user.userId === userCallId);
     if (userOk) {
-      socket.broadcast.emit("end", "callend");
+      io.to(userOk.socketId).emit("end", "callend");
     }
   });
   // typing

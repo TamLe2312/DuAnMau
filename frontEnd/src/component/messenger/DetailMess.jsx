@@ -18,6 +18,7 @@ import { useNavigate } from "react-router-dom";
 import { SocketCon } from "../socketio/Socketcontext";
 import { dotPulse } from "ldrs";
 import hieuthuhai from "../../../public/audio/khongthesay.mp3";
+import iphone from "../../../public/audio/phone.mp3";
 function DetailMess(props) {
   const ringtone = new Audio(null);
   dotPulse.register();
@@ -54,6 +55,7 @@ function DetailMess(props) {
       console.log(e);
     }
   };
+
   const [listImgMess, setlistImgMess] = useState([]);
   const fetchListImgMess = async (mesID) => {
     try {
@@ -270,14 +272,14 @@ function DetailMess(props) {
       state: { user },
     });
   };
-  const playRingtone = () => {
-    ringtone.loop = true; // Lặp lại âm thanh chuông
-    ringtone.play();
-  };
-  const stopRingtone = () => {
-    ringtone.pause();
-    ringtone.currentTime = 0;
-  };
+  // const playRingtone = () => {
+  //   ringtone.loop = true; // Lặp lại âm thanh chuông
+  //   ringtone.play();
+  // };
+  // const stopRingtone = () => {
+  //   ringtone.pause();
+  //   ringtone.currentTime = 0;
+  // };
 
   useEffect(() => {
     socket.on("calling", (userCall) => {
@@ -286,7 +288,7 @@ function DetailMess(props) {
   }, []);
 
   const traloi = () => {
-    stopRingtone();
+    // stopRingtone();
     setNhan(null);
     setusercall(null);
     let id = user.id;
@@ -297,7 +299,7 @@ function DetailMess(props) {
   };
   const tuChoi = () => {
     setNhan(null);
-    stopRingtone();
+    // stopRingtone();
     setusercall(null);
   };
   //call time
@@ -306,7 +308,7 @@ function DetailMess(props) {
   useEffect(() => {
     const id = async () => {
       if (nhan) {
-        playRingtone();
+        // playRingtone();
         const res = await request.get(`account/detail/${nhan.userId}`);
         if (res) {
           setusercall(res.data[0]);
@@ -323,6 +325,7 @@ function DetailMess(props) {
   useEffect(() => {
     if (nhan) {
       socket.on("end", async () => {
+        console.log("đã tắt");
         await new Promise((resolve) => {
           request.post(`call/missedCall`, {
             sender_id: nhan.userId,
@@ -334,7 +337,6 @@ function DetailMess(props) {
       });
       return () => {
         socket.off("end");
-        stopRingtone();
       };
     }
   }, [nhan]);

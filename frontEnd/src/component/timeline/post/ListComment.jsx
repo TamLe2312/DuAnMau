@@ -7,12 +7,6 @@ import Comments from "./Comments";
 
 import { useState } from "react";
 function ListComment(props) {
-  //  user(tk), , avatar, , name, id, userid
-  // const img = props.img;
-  // const title = props.title;
-  // const avatar = props.avatar;
-  // const user = props.user;
-  // const name = props.name;
   const {
     name,
     user,
@@ -23,8 +17,6 @@ function ListComment(props) {
     notification,
     unNotification,
   } = props;
-  // console.log(props.handlerun);
-
   const [indexImg, setindexImg] = useState(0);
   const handleLeft = () => {
     if (indexImg === 0) {

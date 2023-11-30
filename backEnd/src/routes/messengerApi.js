@@ -31,6 +31,6 @@ Router.get("/listImgMess/:mesID", listMessImg);
 Router.get("/listMes/:sender_id/:recipient_id", listMess);
 Router.get("/lastedMess/:sender_id/:recipient_id", lastedMess);
 Router.get("/isread/:sender_id/:recipient_id", isread);
-Router.get("/notimes/:recipient_id", notimes);
+Router.get("/notimess/:recipient_id", notimes);
 
 module.exports = Router;

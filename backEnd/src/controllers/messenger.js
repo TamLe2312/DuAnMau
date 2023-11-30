@@ -342,7 +342,7 @@ const isread = (req, res) => {
   } else {
     connection.query(
       `SELECT DISTINCT sender_id,isread FROM messenger 
-       WHERE (sender_id = ? AND recipient_id = ?)`,
+       WHERE (sender_id = ? AND recipient_id = ?) AND isread IS NULL`,
       [sender_id, recipient_id],
       function (err, results, fields) {
         if (err) {
@@ -353,15 +353,10 @@ const isread = (req, res) => {
         }
         // return res.status(200).json(results);
         if (results.length === 0) {
-          return res.status(200).json({ success: "Đã đọc", sender: sender_id });
+          // Đã đọc
+          return res.status(200).json({ success: false, sender: sender_id });
         }
-        if (results.length === 1 && results[0].isread !== null) {
-          return res.status(200).json({ success: "Đã đọc", sender: sender_id });
-        } else {
-          return res
-            .status(200)
-            .json({ success: "Chưa đọc", sender: sender_id });
-        }
+        return res.status(200).json({ success: true, sender: sender_id });
       }
     );
   }
@@ -373,24 +368,22 @@ const notimes = (req, res) => {
   const recipient_id = parseInt(req.params.recipient_id);
   connection.query(
     `SELECT DISTINCT sender_id,isread FROM messenger 
-       WHERE (recipient_id = ?)`,
+       WHERE (recipient_id = ?) AND isread IS NULL`,
     [recipient_id],
     function (err, results, fields) {
       if (err) {
         console.log(err);
         return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
       }
+      // return res.status(200).json(results);
+      // đã đọc
       if (results.length === 0) {
-        return res.status(200).json({ success: true });
+        return res.status(200).json({ success: false });
       }
-      if (results.length === 1 && results[0].isread == 1) {
-        // return res.status(200).json(results);
-        return res.status(200).json({ success: true });
-      }
-      return res.status(200).json({ success: false });
+      // chưa đọc
+      return res.status(200).json({ success: true });
     }
   );
-  // }
 };
 // view
 const viewMess = (req, res) => {
@@ -565,7 +558,6 @@ module.exports = {
   // deletePostImgsMess,
   test,
   upRecordMes,
-  // delRecord,
   read,
   isread,
   notimes,

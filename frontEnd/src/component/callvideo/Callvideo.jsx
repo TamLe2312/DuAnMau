@@ -9,26 +9,13 @@ import VideocamIcon from "@mui/icons-material/Videocam";
 import VideocamOffIcon from "@mui/icons-material/VideocamOff";
 import MicIcon from "@mui/icons-material/Mic";
 import MicOffIcon from "@mui/icons-material/MicOff";
-import tuchohieu from "../../../public/audio/tuchoihieu.mp3";
 const Callvideo = () => {
-  const ringtone = new Audio(tuchohieu);
-
-  // Phát âm thanh chuông khi có cuộc gọi đến
-  const playRingtone = () => {
-    ringtone.loop = true; // Lặp lại âm thanh chuông
-    ringtone.play();
-  };
-  const stopRingtone = () => {
-    ringtone.pause();
-    ringtone.currentTime = 0;
-  };
-
   const [cookies] = useCookies();
   const location = useLocation();
   const youID = location.state.user.id;
   const value = useContext(SocketCon);
-  //   ----------------------------------
   const socket = value.socket;
+  //   ----------------------------------
   const myID = cookies.userId;
   const receptor = location.state.user;
   const Navigate = useNavigate();
@@ -40,7 +27,7 @@ const Callvideo = () => {
   const [callerSignal, setCallerSignal] = useState();
   const [callAccepted, setCallAccepted] = useState(false);
   const [idToCall, setIdToCall] = useState("");
-  const [callEnded, setCallEnded] = useState(false);
+  // const [callEnded, setCallEnded] = useState(false);
   const myVideo = useRef();
   const userVideo = useRef();
   const connectionRef = useRef();
@@ -53,6 +40,7 @@ const Callvideo = () => {
         setStream(stream);
         if (myVideo.current) {
           myVideo.current.srcObject = stream;
+          // console.log("kết nối1");
         }
       })
       .catch((e) => {
@@ -74,7 +62,7 @@ const Callvideo = () => {
       setCallerSignal(data.signal);
     });
   }, []);
-  const [callerBlur, setCallerBlur] = useState(false);
+
   const callUser = (id) => {
     try {
       let peer = new Peer({
@@ -87,11 +75,11 @@ const Callvideo = () => {
           userToCall: id,
           signalData: data,
           from: me,
-          // name: name,
         });
       });
       peer.on("stream", (stream) => {
         userVideo.current.srcObject = stream;
+        // console.log("kết nối2");
       });
       socket.on("callaccepted", (signal) => {
         setCallAccepted(true);
@@ -103,7 +91,7 @@ const Callvideo = () => {
     }
   };
   const [runTime, setrunTime] = useState(false);
-  const [chaychay, setchaychay] = useState(false);
+  const [stopCall, setStop] = useState(false);
   const answerCall = () => {
     setCallAccepted(true);
     let peer = new Peer({
@@ -115,10 +103,8 @@ const Callvideo = () => {
       socket.emit("answercall", { signal: data, to: caller });
     });
     peer.on("stream", (stream) => {
-      // stopRingtone();
-      setrunTime(true);
-      console.log("Nhận cuộc gọi");
       userVideo.current.srcObject = stream;
+      setrunTime(true);
     });
     peer.signal(callerSignal);
     connectionRef.current = peer;
@@ -126,26 +112,29 @@ const Callvideo = () => {
 
   const handleHome = () => {
     socket.emit("endcall", youID);
+    socket.on("end", (data) => {
+      console.log(data);
+    });
     const home = async () => {
       if (stream) {
         const tracks = stream.getTracks();
-        await tracks.forEach((track) => track.stop());
+        await Promise.all(tracks.map((track) => track.stop()));
         setrunTime(false);
-        setchaychay(true);
+        setStop(true);
       }
       setReceivingCall(false);
-      setCallEnded(true);
       setTimeout(() => {
         Navigate(`/home/messenger/${receptor.id}`, { replace: true });
       }, 1000);
     };
     home();
-    // window.location.reload();
   };
+
   const [noAnswer, setnoAnswer] = useState(false);
   useEffect(() => {
     if (receivingCall) {
       answerCall();
+      console.log("Đã trả lời");
     }
   }, [receivingCall]);
 
@@ -163,6 +152,7 @@ const Callvideo = () => {
   useEffect(() => {
     if (idToCall) {
       callUser(idToCall);
+      console.log("đang gọi");
     }
   }, [idToCall]);
   const [dem, setDem] = useState(0);
@@ -177,7 +167,7 @@ const Callvideo = () => {
   // save time
   useEffect(() => {
     const endCall = async () => {
-      if (chaychay && dem !== 0) {
+      if (stopCall && dem !== 0) {
         let b = datavip.find((item) => item.socketId == caller);
         try {
           const res = await request.post(`call/callEnd`, {
@@ -186,18 +176,17 @@ const Callvideo = () => {
             time: dem,
           });
           if (res) {
-            console.log("Callended");
+            // console.log("cuộc gọi đã kết thúc");
           }
         } catch (e) {
           console.log(e);
         }
       }
-      if (chaychay && dem == 0) {
-        // console.log("bắn data để lưu");
-      }
     };
     endCall();
-  }, [chaychay]);
+  }, [stopCall]);
+
+  // -------------------------------------------------------------------
   // -----------close cam
   const [mic, setmic] = useState(false);
   const [cam, setcam] = useState(false);
@@ -213,10 +202,8 @@ const Callvideo = () => {
       const audio = tracks.find((item) => item.kind == "audio");
       if (mic) {
         audio.enabled = false;
-        // console.log(audio);
       } else {
         audio.enabled = true;
-        // console.log(audio);
       }
     }
   }, [mic]);
@@ -226,10 +213,8 @@ const Callvideo = () => {
       const camera = tracks.find((item) => item.kind == "video");
       if (cam) {
         camera.enabled = false;
-        // console.log(camera);
       } else {
         camera.enabled = true;
-        // console.log(camera);
       }
     }
   }, [cam]);

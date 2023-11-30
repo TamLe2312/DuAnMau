@@ -103,19 +103,19 @@ function Navigation() {
     fetchData();
 
     // const interval = setInterval(fetchData, 2000); // Chạy hàm fetchData() mỗi 2 giây
-    // return () => {
-    //   clearInterval(interval); // Xóa bỏ interval khi component bị unmount
-    // };
+    return () => {
+      // clearInterval(interval); // Xóa bỏ interval khi component bị unmount
+    };
   }, [id]);
   // time
   const [mesNoti, setmesNoti] = useState(false);
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // const response = await request.get(`account/getDataUser/${id}`);
-        const response = await request.get(`messenger/notimes/${id}`);
+        const response = await request.get(`messenger/notimess/${id}`);
         if (response) {
-          // console.log(response.data.success);
+          // console.log(response.data);
+          // false = Đọc r
           setmesNoti(response.data.success);
         }
       } catch (error) {
@@ -124,9 +124,10 @@ function Navigation() {
     };
     fetchData();
   }, []);
+  // đọc tin nhắn NAV
   const handReadMess = async () => {
-    console.log("Đọc nào ");
-    setmesNoti(true);
+    // console.log("Đọc nào ");
+    setmesNoti(false);
   };
   useEffect(() => {
     const fetchData = async () => {
@@ -145,7 +146,7 @@ function Navigation() {
     // console.log(location.pathname);
     socket.on("recibir", (data) => {
       if (location.pathname === "/home") {
-        setmesNoti(false);
+        setmesNoti(true);
       }
     });
     return () => {
@@ -192,7 +193,7 @@ function Navigation() {
       >
         <ChatBubbleIcon />
         <span>Tin nhắn</span>
-        {!mesNoti && <div className="navigation-button-number"> </div>}
+        {mesNoti && <div className="navigation-button-number"> </div>}
       </NavLink>
       <button
         className="navigation-button"
