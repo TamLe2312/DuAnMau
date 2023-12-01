@@ -540,8 +540,7 @@ const invitationCode = (req, res) => {
 
   if (groupId) {
     connection.query(
-      `SELECT invitationCode FROM groupsTable WHERE id = ?
-      `,
+      `SELECT invitationCode, createdCode FROM groupsTable WHERE id = ?`,
       [groupId],
       function (err, results, fields) {
         if (err) {
@@ -551,17 +550,23 @@ const invitationCode = (req, res) => {
         }
         if (results.length > 0) {
           const invitationCode = results[0].invitationCode;
-          if (invitationCode !== null) {
+          const createdCode = results[0].createdCode;
+
+          // Calculate 24 hours ago
+          const twentyFourHoursAgo = new Date();
+          twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
+
+          if (invitationCode !== null && createdCode > twentyFourHoursAgo) {
             return res.status(200).json(invitationCode);
           } else {
             bcrypt.hash(groupId, saltRounds, function (err, hash) {
               if (!err) {
                 const alphanumericHash = hash.replace(/[^a-zA-Z0-9]/g, "");
                 let shortCode = alphanumericHash.slice(0, 10);
-
+                const currentTime = new Date();
                 connection.query(
-                  "UPDATE groupsTable SET invitationCode = ? WHERE id = ?",
-                  [shortCode, groupId],
+                  "UPDATE groupsTable SET invitationCode = ?, createdCode = ? WHERE id = ?",
+                  [shortCode, currentTime, groupId],
                   function (err, results, fields) {
                     if (err) {
                       console.log(err);
@@ -569,31 +574,6 @@ const invitationCode = (req, res) => {
                         .status(500)
                         .json({ error: "Có lỗi xảy ra xin thử lại sau" });
                     }
-
-                    // Schedule a one-time execution after 1 day
-                    const delayInDays = 1;
-                    const job = schedule.scheduleJob(
-                      {
-                        start: new Date(Date.now() + 86400000 * delayInDays),
-                        rule: "*/1 * * * *",
-                      },
-                      function () {
-                        const oneDayAgo = new Date();
-                        oneDayAgo.setDate(oneDayAgo.getDate() - delayInDays);
-
-                        const updateQuery =
-                          "UPDATE groupsTable SET invitationCode = null WHERE createdCode < ? AND id = ?";
-                        connection.query(
-                          updateQuery,
-                          [oneDayAgo, groupId],
-                          (err, results) => {
-                            if (err) {
-                              console.error("Error updating old data:", err);
-                            }
-                          }
-                        );
-                      }
-                    );
                     return res.status(200).json(shortCode);
                   }
                 );
@@ -605,6 +585,7 @@ const invitationCode = (req, res) => {
     );
   }
 };
+
 const getInviteDataGroup = (req, res) => {
   const { inviteCode, userId } = req.params;
   if (inviteCode && userId) {

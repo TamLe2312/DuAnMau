@@ -10,10 +10,189 @@
 
 .StoriesNavBar {
     width: 20%;
-    border: 1px solid red;
+    border-right: 1px solid black;
 }
 
 .StoriesDisplay {
     width: 80%;
-    border: 1px solid blue;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.StoriesNavBarHeader {
+    display: flex;
+    align-items: center;
+    margin: 8px 12px;
+    gap: 12px;
+}
+
+.StoriesNavBarHeader .fa-xmark {
+    width: 50px;
+    height: 50px;
+    color: #fff;
+    background-color: #3e4042;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+}
+
+.StoriesNavBarHeader .fa-xmark:hover {
+    transition: 0.5s;
+    cursor: pointer;
+    background-color: rgba(128, 128, 128, 0.8);
+}
+
+.StoriesNavBarHeader a {
+    text-decoration: none;
+}
+
+.StoriesNavBarHeader a .navigation-logo {
+    width: 160px;
+}
+
+.StoriesNavBarContainer {
+    padding: 8px 12px;
+}
+
+.StoriesNavBarContainer h3 {
+    font-weight: 700;
+}
+
+.StoriesNavBarInform {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin-top: 12px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #3e4042;
+}
+
+.StoriesName {
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.StoriesRowContainer {
+    overflow-y: auto;
+    height: 620px;
+    margin: 8px auto;
+}
+
+.StoriesNavBarRow {
+    margin: 12px auto;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.StoriesInformGroup {
+    display: flex;
+    flex-direction: column;
+}
+
+.StoriesAvatarImg {
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.StoriesDisplayContainer {
+    display: flex;
+    gap: 20px;
+}
+
+.StoriesNewsImg,
+.StoriesNewsContent {
+    width: 220px;
+    height: 330px;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.StoriesNewsImg {
+    background: linear-gradient(97deg, rgba(34, 193, 195, 1) 0%, rgba(253, 187, 45, 1) 100%);
+
+}
+
+.StoriesNewsContent {
+    background: radial-gradient(circle, rgba(238, 174, 202, 1) 0%, rgba(148, 187, 233, 1) 100%);
+}
+
+.StoriesCreateNewsContainer {
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+    padding: 16px;
+    border-radius: 12px;
+}
+
+.StoriesCreateNewsContainer span {
+    font-weight: 600;
+}
+
+.StoriesCreateNewsBackground {
+    width: 800px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #18191a;
+    border-radius: 12px;
+    margin: 12px;
+}
+
+.StoriesCreateImgContent {
+    height: 500px;
+    width: 500px;
+    object-fit: cover;
+    margin: 16px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
+}
+
+.StoriesCreateImgContent span {
+    color: #fff;
+    word-break: break-all;
+}
+
+.StoriesCreateImgContent img {
+    width: 100%;
+    height: 100%;
+    border-radius: 12px;
+}
+
+.StoriesHandleButton {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+}
+
+.StoriesHandleButton .StoriesCancelButton,
+.StoriesUpNews {
+    height: 40px;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: none;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+.StoriesHandleButton .StoriesCancelButton {
+    background-color: #e4e6eb;
+    color: #000;
+}
+
+.StoriesHandleButton .StoriesUpNews {
+    background-color: #0866ff;
+    color: #fff;
+}
+
+#StoriesNewsImgInput {
+    display: none;
 }
