@@ -233,11 +233,11 @@ function Account() {
           </tr>
         </thead>
         <tbody>
-          {AllDataUser &&
+          {/* {AllDataUser &&
             AllDataUser.map((dataUser, index) => {
               return (
-                <>
-                  <tr key={index}>
+                <React.Fragment key={index}>
+                  <tr>
                     <th scope="row">{index + 1}</th>
                     <td>
                       {dataUser && dataUser.name
@@ -268,7 +268,46 @@ function Account() {
                       </button>
                     </td>
                   </tr>
-                </>
+                </React.Fragment>
+              );
+            })} */}
+
+          {AllDataUser &&
+            AllDataUser.map((dataUser, index) => {
+              return (
+                <React.Fragment key={index}>
+                  <tr>
+                    <th scope="row">{index + 1}</th>
+                    <td>
+                      {dataUser && dataUser.name
+                        ? dataUser.name
+                        : "Không có name"}
+                    </td>
+                    <td>{dataUser.username}</td>
+                    <td>{dataUser.role}</td>
+                    <td>
+                      <button
+                        type="button"
+                        className="btn btn-primary btn-featureHandle"
+                        onClick={() =>
+                          handleShowModalAdjustInformatione(dataUser.id)
+                        }
+                      >
+                        <i className="fa-solid fa-wrench"></i>
+                      </button>
+                      &nbsp;
+                      <button
+                        type="button"
+                        className="btn btn-danger btn-featureHandle"
+                        onClick={() =>
+                          handleShowModalConfirmDelete(dataUser.id)
+                        }
+                      >
+                        <i className="fa-solid fa-trash"></i>
+                      </button>
+                    </td>
+                  </tr>
+                </React.Fragment>
               );
             })}
           <Modal

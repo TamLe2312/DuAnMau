@@ -185,8 +185,8 @@ function Posts() {
           {AllDataPost && AllDataPost.length > 0 ? (
             AllDataPost.map((dataPost, index) => {
               return (
-                <>
-                  <tr key={index}>
+                <React.Fragment key={index}>
+                  <tr>
                     <th scope="row">{index + 1}</th>
                     <td className="AdminDescription">
                       {/* <span>{dataPost.content}</span> */}
@@ -343,7 +343,7 @@ function Posts() {
                       </Modal>
                     </td>
                   </tr>
-                </>
+                </React.Fragment>
               );
             })
           ) : (

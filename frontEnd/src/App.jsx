@@ -28,6 +28,7 @@ import Stories from "./page/stories/stories";
 import Callvideo from "./component/callvideo/Callvideo";
 
 import SocketContext from "./component/socketio/Socketcontext";
+import Test from "./component/adminBoss/adminchild/Test";
 function App() {
   return (
     <div>
@@ -46,12 +47,15 @@ function App() {
             <Route path="/home/community" element={<Community />} />
             <Route path="/home/messenger" element={<Messenger />} />
             <Route path="/home/messenger/:id" element={<Messenger />} />
-            <Route path="/home/admin" element={<Adminn />}>
-              <Route path="/home/admin/account" element={<Account />} />
-              <Route path="/home/admin/groups" element={<GroupsTable />} />
-              <Route path="/home/admin/posts" element={<Posts />} />
-            </Route>
           </Route>
+          {/* admin */}
+          <Route path="/home/admin" element={<Adminn />}>
+            <Route path="/home/admin/account" element={<Account />} />
+            <Route path="/home/admin/groups" element={<GroupsTable />} />
+            <Route path="/home/admin/posts" element={<Posts />} />
+            <Route path="/home/admin/test" element={<Test />} />
+          </Route>
+          {/* ---- */}
           <Route path="/stories/:idStory" element={<Stories />} />
           <Route path="/home/messenger/:id/call" element={<Callvideo />} />
           <Route path="/verifyToken" element={<VerifyToken />} />
