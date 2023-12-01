@@ -772,6 +772,79 @@ const countCommentPost = (req, res) => {
     );
   }
 };
+const storiesImg = (req, res) => {
+  const { id } = req.body;
+  if (req.file) {
+    const fileName = req.file.filename;
+    const filePath = "/uploads/" + fileName;
+    const baseURL = process.env.APP_URL;
+    const imageURL = `${baseURL.slice(0, -1)}${filePath}`;
+    connection.query(
+      "INSERT INTO stories (user_id) VALUES (?)",
+      [id],
+      function (err, results, fields) {
+        if (err) {
+          console.log(err);
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
+        const insertedId = results.insertId;
+        connection.query(
+          "INSERT INTO listdata (stories_id,img) VALUES (?,?)",
+          [insertedId, imageURL],
+          function (err, results, fields) {
+            if (err) {
+              console.log(err);
+              return res.status(500).json({ error: "Lỗi máy chủ" });
+            }
+            return res.status(200).json({ success: "Đăng tin thành công" });
+          }
+        );
+      }
+    );
+  }
+};
+const storiesContent = (req, res) => {
+  const { id, searchValue } = req.body;
+  if (id && searchValue) {
+    connection.query(
+      "INSERT INTO stories (user_id,content) VALUES (?,?)",
+      [id, searchValue],
+      function (err, results, fields) {
+        if (err) {
+          console.log(err);
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
+        return res.status(200).json({ success: "Đăng tin thành công" });
+      }
+    );
+  }
+};
+const getDataNews = (req, res) => {
+  //Max lấy giá trị mới nhất của người dùng
+  connection.query(
+    `SELECT
+  users.id AS user_id,
+  users.avatar,
+  users.username,
+  users.name,
+  MAX(stories.id) AS story_id,
+  MAX(stories.content) AS content,
+  MAX(stories.created_at) AS created_at
+FROM
+  users
+  INNER JOIN stories ON users.id = stories.user_id
+GROUP BY
+  users.id, users.avatar, users.username, users.name;
+`,
+    function (err, results, fields) {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Lỗi máy chủ" });
+      }
+      return res.status(200).json(results);
+    }
+  );
+};
 
 module.exports = {
   createPost,
@@ -796,4 +869,7 @@ module.exports = {
   countCommentPost,
   oneCommentPost,
   dataPostAndUser,
+  storiesImg,
+  storiesContent,
+  getDataNews,
 };

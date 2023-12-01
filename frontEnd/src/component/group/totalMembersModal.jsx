@@ -33,7 +33,6 @@ function TotalMemberModal() {
           });
         }
       }
-      console.log(updateDataTotalMember);
       setDataTotalMember(updateDataTotalMember);
     } catch (error) {
       console.error("Error fetching user data:", error);
@@ -129,7 +128,7 @@ function TotalMemberModal() {
                         <span className="TotalMemberRole">Trưởng nhóm</span>
                       ) : (
                         <>
-                          {dataMember.handleDeteleMember && (
+                          {userId === dataMember.idUserCreatedGroup && (
                             <button
                               onClick={() => handleDeteleMember(dataMember.id)}
                             >
