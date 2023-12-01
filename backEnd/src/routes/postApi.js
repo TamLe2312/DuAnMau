@@ -22,6 +22,9 @@ const {
   countCommentPost,
   oneCommentPost,
   dataPostAndUser,
+  // list comment post
+  listCommenOnetPost,
+  banComment,
 } = require("../controllers/post");
 const Router = express.Router();
 
@@ -49,4 +52,8 @@ Router.post("/onCommentPostLast", onCommentPostLast);
 Router.get("/listCommentPost/:postID&:groupPostId", listCommentPost);
 Router.get("/oneCommentPost/:commentID", oneCommentPost);
 Router.get("/countCommentPost/:postID&:groupPostId", countCommentPost);
+// listCommenOnetPost;
+Router.get("/lisComents/:postID/:page", listCommenOnetPost);
+Router.post("/banComment", banComment);
+
 module.exports = Router;

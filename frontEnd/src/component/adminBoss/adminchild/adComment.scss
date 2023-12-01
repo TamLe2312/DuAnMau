@@ -1,0 +1,12 @@
+.comment_ad {
+  padding: 20px;
+  position: relative;
+
+  .comment_ad_listmenu li:hover {
+    cursor: pointer;
+    color: red;
+  }
+  .comment_aitem {
+    color: red;
+  }
+}

@@ -210,7 +210,6 @@ function Comments(props) {
           </span>
         </div>
       )}
-
       <div
         className={img.length > 0 ? "commentschild" : "commentschild-notimg"}
       >
@@ -247,7 +246,6 @@ function Comments(props) {
             })
           : "Không có ai bình luận"}
       </div>
-
       <div className="commentschild-input">
         <div className="input-group">
           <input
@@ -296,7 +294,6 @@ function Comments(props) {
           </ul>
         </Modal.Body>
       </Modal>
-
       <Modal
         show={show}
         onHide={() => setShow(false)}
