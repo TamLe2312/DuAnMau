@@ -3,20 +3,16 @@ import { useState, useEffect } from "react";
 import { useCookies } from "react-cookie";
 import { Link, useNavigate } from "react-router-dom";
 import Validation from "../../component/validation/validation";
-<<<<<<< HEAD
-import { toast } from "sonner";
-=======
 import Logo from "../../../uploads/Logo1.png";
 import * as request from "../../utils/request";
 import { toast } from "sonner";
 import video from "../../../public/video/bg2.mp4";
->>>>>>> 0b4224f49791b852e3c9bf0179dd1779e251e33c
 import "./login.css";
 function Login() {
   const Navigate = useNavigate();
   const style = {
     margin: "0 auto",
-    width: 500,
+    width: 600,
   };
 
   const [values, setValues] = useState({
@@ -129,20 +125,6 @@ function Login() {
               )}
             </div>
 
-<<<<<<< HEAD
-        <div className="mt-2">
-          <Link className="quenmk" to="/forgotPassword">
-            Quên mật khẩu
-          </Link>
-        </div>
-        <div>
-          <Link className="dangki" to="/register">
-            Đăng kí
-          </Link>
-        </div>
-      </form>
-    </>
-=======
             <button
               onClick={handleClick}
               type="submit"
@@ -174,7 +156,6 @@ function Login() {
         </div>
       </div>
     </div>
->>>>>>> 0b4224f49791b852e3c9bf0179dd1779e251e33c
   );
 }
 
