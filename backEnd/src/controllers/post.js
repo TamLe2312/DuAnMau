@@ -837,6 +837,9 @@ const banComment = (req, res) => {
           }
         );
       }
+    }
+  );
+};
 
 const storiesImg = (req, res) => {
   const { id } = req.body;
@@ -908,7 +911,6 @@ GROUP BY
         return res.status(500).json({ error: "Lỗi máy chủ" });
       }
       return res.status(200).json(results);
-
     }
   );
 };
@@ -940,9 +942,7 @@ module.exports = {
   // list comment one
   listCommenOnetPost,
   banComment,
-
   storiesImg,
   storiesContent,
   getDataNews,
-
 };
