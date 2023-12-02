@@ -611,7 +611,7 @@ LIMIT ? OFFSET ?`,
           if (results.length > 0) {
             return res.status(200).json(results);
           } else {
-            return res.status(400).json({ error: "Không có người dùng" });
+            return res.status(200).json([]);
           }
         }
       );
@@ -661,7 +661,7 @@ LIMIT ? OFFSET ?`,
           if (results.length > 0) {
             return res.status(200).json(results);
           } else {
-            return res.status(400).json({ error: "Không có người dùng" });
+            return res.status(200).json([]);
           }
         }
       );
