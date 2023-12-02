@@ -10,7 +10,7 @@ const callEnd = (req, res) => {
       .json({ error: "Bạn tự gửi tin nhắn cho bản thân??" });
   } else {
     connection.query(
-      "INSERT INTO messenger (sender_id, recipient_id,timecall) VALUES (?, ?,?)",
+      "INSERT INTO messenger (sender_id, recipient_id,timecall,isread) VALUES (?, ?,?,true)",
       [sender_id, recipient_id, time],
       function (err, results, fields) {
         if (err) {

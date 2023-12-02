@@ -3,11 +3,13 @@ import moment from "moment";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { Modal, Button, Form } from "react-bootstrap";
-import Validation from "../../validation/validation";
+// import Validation from "../../validation/validation";
 import { toast } from "sonner";
 import * as request from "../../../utils/request";
+import { useNavigate } from "react-router-dom";
 
 function Posts() {
+  const Navigate = useNavigate();
   const [AllDataPost, setAllDataPost] = useState([]);
   const [IdPostDelete, setIdPostDelete] = useState(null);
   const [IdPostDetail, setIdPostDetail] = useState(null);
@@ -29,19 +31,9 @@ function Posts() {
     name: "",
     content: "",
   });
-  const handleShowModalMoreDetailPost = async (id, name, content) => {
-    setFormMoreDetail({
-      name: name,
-      content: content,
-    });
-    try {
-      setIdPostDetail(id); // Cập nhật id trước khi gọi yêu cầu request
-      const response = await request.get(`admin/postImgs/${id}`);
-      setImgs(response.data);
-    } catch (err) {
-      /*       console.error(err); */
-    }
-    setShowModalMoreDetailPost(true);
+  // chi tiết bài viết
+  const handleShowModalMoreDetailPost = (data) => {
+    Navigate(`/home/admin/posts/${data.id}`, { replace: true, state: data });
   };
   const handleCloseModalMoreDetailPost = () => {
     setShowModalMoreDetailPost(false);
@@ -185,8 +177,8 @@ function Posts() {
           {AllDataPost && AllDataPost.length > 0 ? (
             AllDataPost.map((dataPost, index) => {
               return (
-                <>
-                  <tr key={index}>
+                <React.Fragment key={index}>
+                  <tr>
                     <th scope="row">{index + 1}</th>
                     <td className="AdminDescription">
                       {/* <span>{dataPost.content}</span> */}
@@ -223,13 +215,7 @@ function Posts() {
                       <button
                         type="button"
                         className="btn btn-primary btn-featureHandle"
-                        onClick={() =>
-                          handleShowModalMoreDetailPost(
-                            dataPost.id,
-                            dataPost.name ? dataPost.name : dataPost.username,
-                            dataPost.content
-                          )
-                        }
+                        onClick={() => handleShowModalMoreDetailPost(dataPost)}
                       >
                         <i className="fa-solid fa-info"></i>
                       </button>
@@ -343,7 +329,7 @@ function Posts() {
                       </Modal>
                     </td>
                   </tr>
-                </>
+                </React.Fragment>
               );
             })
           ) : (

@@ -7,12 +7,6 @@ import Comments from "./Comments";
 
 import { useState } from "react";
 function ListComment(props) {
-  //  user(tk), , avatar, , name, id, userid
-  // const img = props.img;
-  // const title = props.title;
-  // const avatar = props.avatar;
-  // const user = props.user;
-  // const name = props.name;
   const {
     name,
     user,
@@ -23,8 +17,6 @@ function ListComment(props) {
     notification,
     unNotification,
   } = props;
-  // console.log(props.handlerun);
-
   const [indexImg, setindexImg] = useState(0);
   const handleLeft = () => {
     if (indexImg === 0) {
@@ -42,18 +34,23 @@ function ListComment(props) {
   };
   return (
     <div className={img.length > 0 ? "listComments" : "listComments-notimg"}>
+      {/* {console.log(img.length)} */}
       {img.length > 0 ? (
         <>
           <div className="listComment-img">
             <span className="listComment-img-length">
               {indexImg + 1}/{img.length}
             </span>
-            <span className="listComment-icon-left" onClick={handleLeft}>
-              <ChevronLeftIcon sx={{ fontSize: 26 }} />
-            </span>
-            <span className="listComment-icon-right" onClick={handleRight}>
-              <ChevronRightIcon sx={{ fontSize: 26 }} />
-            </span>
+            {img.length > 1 && (
+              <>
+                <span className="listComment-icon-left" onClick={handleLeft}>
+                  <ChevronLeftIcon sx={{ fontSize: 26 }} />
+                </span>
+                <span className="listComment-icon-right" onClick={handleRight}>
+                  <ChevronRightIcon sx={{ fontSize: 26 }} />
+                </span>
+              </>
+            )}
             <div className="listComment-img-imgs">
               <img
                 src={
@@ -72,9 +69,7 @@ function ListComment(props) {
               {avatar ? (
                 <img src={avatar} />
               ) : (
-                <Avatar>
-                  {name !== null ? name.charAt(0) : user.charAt(0)}
-                </Avatar>
+                <img src="https://i.pinimg.com/564x/83/03/78/8303782dc3ae12a1fd72ad415ba7582c.jpg" />
               )}
               <span>{name || user}</span>
             </div>

@@ -4,10 +4,7 @@ import "./messenger.css";
 import React, { useRef } from "react";
 import { useCookies } from "react-cookie";
 import { useContext, useEffect, useState } from "react";
-// import { io } from "socket.io-client";
 import * as request from "../../utils/request";
-// import { APP_WEB, HOST_NAME } from "../../utils/config";
-// import { userOnline } from "../../page/home/home";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
@@ -17,13 +14,14 @@ import { SocketCon } from "../socketio/Socketcontext";
 function Messenger() {
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
+  // const handleShow = () => setShow(true);
   const value = useContext(SocketCon);
   const socket = value.socket;
   const [online, setonline] = useState([]);
   const [cookies] = useCookies();
   const [listUserMess, setlistUserMess] = useState([]);
   const [chay, setChay] = useState(false);
+  const usersop = value.usersop;
 
   const myID = cookies.userId;
   const yourID = useParams().id;
@@ -46,31 +44,18 @@ function Messenger() {
     };
     fetchApi();
   }, [chay]);
-
-  useEffect(() => {
-    socket.on("get_ol", (userOl) => {
-      setonline(userOl);
-    });
-  }, [online, socket]);
-
   const isOnline = (data, yourID) => {
-    // if (data.length > 0) {
     const isOl = data.some((user) => user.userId == yourID);
     if (isOl) {
       return (
         <span className="messenger-user-information-mes online">Online</span>
       );
-    } else {
-      return <span className="messenger-user-information-mes">Offline</span>;
     }
-    // } else {
-    //   return <span className="messenger-user-information-mes">Offline</span>;
-    // }
   };
   const [hien, setHien] = useState(false);
   const [hienUser, setHienUser] = useState(null);
+
   const handleDel = (e) => {
-    // console.log(e.id);
     setHienUser(e.id);
     setHien((pre) => !pre);
   };
@@ -109,6 +94,56 @@ function Messenger() {
     };
   }, []);
 
+  const [isread, setisread] = useState([]);
+  const [read, setread] = useState(null);
+  const handleRead = (user) => {
+    setread(true);
+    const fetchRead = async () => {
+      try {
+        const res = await request.post(`messenger/read`, {
+          sender_id: user.id,
+          recipient_id: myID,
+        });
+        if (res) {
+          // console.log("đã đọc tin nhắn của", user.id);
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    };
+    fetchRead();
+  };
+  // người nhận là myid
+  useEffect(() => {
+    if (listUserMess.length > 0) {
+      listUserMess.map(async (item) => {
+        try {
+          const res = await request.get(`messenger/isread/${item.id}/${myID}`);
+          if (res) {
+            // false = đã đọc
+            setisread((pre) => [...pre, res.data]);
+          }
+        } catch (e) {
+          console.log(e);
+          return false;
+        }
+      });
+    }
+    return () => {
+      setisread([]);
+    };
+  }, [listUserMess]);
+  // un read
+  const unreadMessagesMap = {};
+  isread.forEach((item) => {
+    if (item.success === false) {
+      if (!unreadMessagesMap[item.sender]) {
+        unreadMessagesMap[item.sender] = false;
+      }
+    } else {
+      unreadMessagesMap[item.sender] = true;
+    }
+  });
   return (
     <div className="messenger">
       <div className="messenger-users">
@@ -121,11 +156,14 @@ function Messenger() {
                 <React.Fragment key={index}>
                   <div className="messenger_child">
                     <NavLink
-                      // onClick={() => handleView(user)}
+                      onClick={() => handleRead(user)}
                       to={`/home/messenger/${user.id}`}
                       className="messenger-user"
-                      // key={index}
                     >
+                      {/* Chưa đọc */}
+                      {unreadMessagesMap[user.id] && !read && (
+                        <span className="messenger_user_dot"></span>
+                      )}
                       <img
                         src={
                           user.avatar
@@ -135,15 +173,13 @@ function Messenger() {
                         alt=""
                         className="messenger-user-img"
                       />
-
                       <div className="messenger-user-information">
                         <span className="messenger-user-information-name">
                           {user.name ? user.name : user.username}
                         </span>
-                        {isOnline(online, user.id)}
+                        {isOnline(usersop, user.id)}
                       </div>
                     </NavLink>
-
                     <span
                       className="messenger_more"
                       onClick={() => handleDel(user)}
@@ -162,15 +198,14 @@ function Messenger() {
                       )}
                     </ul>
                   </div>
+                  {/* =================================== */}
                   <Modal
                     show={show}
                     onHide={() => setShow(false)}
                     aria-labelledby="contained-modal-title-vcenter"
                     centered
                   >
-                    <Modal.Header closeButton>
-                      {/* <Modal.Title id="contained-modal-title-vcenter"></Modal.Title> */}
-                    </Modal.Header>
+                    <Modal.Header closeButton></Modal.Header>
                     <Modal.Body>
                       <p>Bạn muốn xóa tin nhắn</p>
                     </Modal.Body>
@@ -185,7 +220,6 @@ function Messenger() {
               );
             })
           : "Chưa có cuộc trò truyện nào..."}
-
         {/* ---------------------------------- */}
       </div>
       <div className="messenger-detail">

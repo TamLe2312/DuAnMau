@@ -2,12 +2,12 @@ import { useEffect, useState } from "react";
 import "./notification.css";
 import { useCookies } from "react-cookie";
 import { format } from "timeago.js";
-import { Link, NavLink, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import * as request from "../../utils/request";
 
 function Notification(props) {
   const closeModal = props.closeModal;
-  const setNum = props.setNum;
+  // const setNum = props.setNum;
   const navigate = useNavigate();
   const [cookies] = useCookies();
   const myID = cookies.userId;
@@ -33,7 +33,7 @@ function Notification(props) {
           notiID: bao.idNotifi,
         });
         if (res) {
-          setNum();
+          // setNum();
           closeModal(false);
           navigate(`/home/post/${bao.postID}/detail`);
         }
@@ -43,6 +43,7 @@ function Notification(props) {
     };
     viewNotification();
   };
+
   return (
     <div className="notification">
       {notification.length > 0 ? (
