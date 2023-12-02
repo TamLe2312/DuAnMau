@@ -84,9 +84,12 @@
   align-self: flex-end; /* Đặt tin nhắn mình ở bên phải */
   border-radius: 18px 18px 0 18px;
 }
-.detailMessContainer-time {
-  text-align: right;
-  font-size: 0.8rem;
+
+.detailMessYou a {
+  color: rgb(0, 76, 255);
+}
+.detailMessMe a {
+  color: rgb(0, 76, 255);
 }
 
 #imgs_detail {
@@ -152,7 +155,7 @@
   /* width: 48%; */
   height: 240px;
   border-radius: 8px;
-  padding-top: 12px;
+  padding: 12px 0;
   object-fit: cover;
 }
 
@@ -172,5 +175,49 @@
   color: rgb(34, 126, 144);
 }
 .detailMess_record {
-  margin-top: 20px;
+  margin-top: 4px;
+}
+.receiveCall {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: rgb(111, 171, 231);
+  padding: 12px 20px;
+  z-index: 100;
+  border-radius: 8px;
+  transition: 1s;
+}
+.receive_call_end {
+  position: fixed;
+  bottom: 20px;
+  right: -200px;
+  background-color: rgb(111, 171, 231);
+  padding: 12px 20px;
+  z-index: 100;
+  border-radius: 8px;
+  transition: 1s;
+}
+.receiveCall_btn {
+  margin-top: 8px;
+}
+/* HTML: <div class="loader"></div> */
+.detailMess_timecalltitle {
+  font-weight: 500;
+}
+.detailMess_timecall {
+  font-size: 0.9rem;
+}
+.detailMess_missedCall {
+  color: rgb(244, 25, 25);
+  font-weight: 500;
+}
+
+.detailMess_typing {
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(173, 173, 173, 0.5);
+  align-self: flex-start; /* Đặt tin nhắn bạn ở bên trái */
+  border-radius: 18px 18px 18px 0;
+  padding: 12px 12px;
+  margin: 4px;
 }

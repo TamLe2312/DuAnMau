@@ -1,0 +1,20 @@
+ {/* <div
+        className={
+          receiveCall && receiveCall === myID
+            ? "receiveCall"
+            : "receive_call_end"
+        }
+      >
+        <span>
+          Name <span style={{ fontSize: 14 }}>đang gọi...</span>
+        </span>
+        <div>
+          <button onClick={handleCancelCall} className="btn btn-danger m-2">
+            Hủy
+          </button>
+          <button onClick={handleAnswerCall} className="btn btn-success m-2">
+            Nghe
+          </button>
+        </div>
+      </div> */}
+      loader call

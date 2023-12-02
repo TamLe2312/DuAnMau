@@ -1,6 +1,4 @@
-import { Avatar } from "@mui/material";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
-import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import FavoriteIcon from "@mui/icons-material/Favorite";
@@ -8,17 +6,21 @@ import * as request from "../../../utils/request";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import "./post.css";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
 import MyModal from "../../modal/Modal";
 import MorePost from "./MorePost";
 import { useCookies } from "react-cookie";
 import ListComment from "./ListComment";
 import { APP_WEB } from "../../../utils/config";
+import { SocketCon } from "../../socketio/Socketcontext";
+
 function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
   const focusInput = useRef();
   const [cookies] = useCookies();
   const myID = cookies.userId;
+  const value = useContext(SocketCon);
+  const socket = value.socket;
   const [modalShow, setModalShow] = useState(false);
   const [modalShowComment, setModalShowComment] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -218,7 +220,7 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
             otherUserID: myID,
           });
           if (res) {
-            console.log("bạn đã thích Group post: " + groupPostId);
+            // console.log("bạn đã thích Group post: " + groupPostId);
           }
         } else {
           const res = await request.post("post/likePost", {
@@ -229,6 +231,8 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
             // console.log("bạn đã thích post: " + id);
             let thongBao = "Đã thích bài viết của bạn";
             await notification(id, myID, thongBao, userid);
+            // nguời đăng bài
+            socket.emit("add_notification", { userid, myID });
           }
         }
       };
@@ -274,6 +278,7 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
             setdymanicComment(!dymanicComment);
             console.log("bạn đã bình luận: " + id);
             setcomment("");
+            socket.emit("add_notification", { userid, myID });
           } else {
             console.log("Có vấn đề gì đó rồi");
           }
@@ -483,13 +488,6 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
           >
             {img && img.length > 0 ? title : ""}
           </p>
-          {/* {them ? (
-            <button className="post-title-btn" onClick={handleToggleExpand}>
-              {expanded ? "Thu gọn" : "Xem thêm"}
-            </button>
-          ) : (
-            ""
-          )} */}
           {hasComment && (
             <span
               className="post-footer-list-comment"

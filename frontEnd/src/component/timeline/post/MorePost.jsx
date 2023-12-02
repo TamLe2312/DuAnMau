@@ -6,11 +6,9 @@ import Button from "react-bootstrap/Button";
 // import { toast } from "react-toastify";
 import * as request from "../../../utils/request";
 import { Context } from "../../../page/home/home";
-import axios from "axios";
 
 function MorePost(props) {
   const conTent = props.title || props.content;
-  console.log(conTent);
   const againPage = useContext(Context);
   const [modalShow, setModalShow] = useState(false);
   const [edit, setEdit] = useState(false);
