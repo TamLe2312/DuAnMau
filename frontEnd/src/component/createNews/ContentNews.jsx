@@ -1,11 +1,12 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import "./new.scss";
-import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import { Context } from "../../page/home/home";
 import { useContext } from "react";
 import * as request from "../../utils/request";
+import "ldrs/leapfrog";
+// Default values shown
 function ContextNews(props) {
   const dataa = useContext(Context);
   const location = useLocation();
@@ -41,7 +42,6 @@ function ContextNews(props) {
   useEffect(() => {
     if (id) {
       const fetchData = async () => {
-        // console.log(id);
         try {
           const response = await request.get(`account/getDataUser/${id}`); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
           setUserData(response.data[0]);
@@ -53,13 +53,11 @@ function ContextNews(props) {
     }
   }, [id]);
 
-  const handleShow = () => {
-    setShow(false);
-  };
   useEffect(() => {
     setImgs(props.data);
   }, [props.data]);
   const handlePost = async () => {
+    setShow(false);
     setLoading(true);
     const postData = {
       userID: id,
@@ -121,37 +119,11 @@ function ContextNews(props) {
       {/* Add */}
       {loading ? (
         <>
-          <div className="spinner-grow text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-          <div className="spinner-grow text-secondary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-          <div className="spinner-grow text-success" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-          <div className="spinner-grow text-danger" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-          <div className="spinner-grow text-warning" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
+          <l-leapfrog size="40" speed="2.5" color="gray"></l-leapfrog>
         </>
       ) : (
         <>
           {show ? (
-            <div className="contentNews-add">
-              <button
-                // onClick={handleAdd}
-                disabled={!content}
-                type="button"
-                className="btn btn-primary contentNews-add-btn"
-                onClick={handleShow}
-              >
-                Đăng lên...
-              </button>
-            </div>
-          ) : success ? (
             <div className="contentNews-add-select">
               <button
                 disabled={!content}
@@ -165,20 +137,12 @@ function ContextNews(props) {
                   }
                 }}
               >
-                Bài viết
+                Đăng bài
               </button>
-              {/*   <button
-                // onClick={dataa}
-                disabled={!content}
-                type="button"
-                className="btn btn-primary"
-              >
-                Tin
-              </button> */}
             </div>
           ) : (
             <div>
-              {e ? "Có lỗi xảy ra xin thử lại sau" : "đăng thành công..."}
+              {e ? "Có lỗi xảy ra xin thử lại sau" : "Đã đăng bài viết"}
             </div>
           )}
         </>

@@ -31,6 +31,7 @@ import SocketContext from "./component/socketio/Socketcontext";
 import Test from "./component/adminBoss/adminchild/Test";
 import Commentad from "./component/adminBoss/adminchild/Commentad";
 import { VietNamToxic } from "./component/vietnamToxic/VietNamToxic";
+import { BaoCao } from "./component/adminBoss/adminchild/BaoCao";
 function App() {
   return (
     <div>
@@ -56,6 +57,10 @@ function App() {
             <Route path="/home/admin/account" element={<Account />} />
             <Route path="/home/admin/groups" element={<GroupsTable />} />
             <Route path="/home/admin/posts" element={<Posts />} />
+            <Route
+              path="/home/admin/posts/:idpost/baocao"
+              element={<BaoCao />}
+            />
             <Route path="/home/admin/test" element={<Test />} />
             <Route path="/home/admin/toxic" element={<VietNamToxic />} />
           </Route>

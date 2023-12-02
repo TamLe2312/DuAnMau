@@ -160,6 +160,16 @@ function Posts() {
   const handleClickShowMore = () => {
     setShowMore(!showMore);
   };
+  const handleBanPost = (data) => {
+    console.log(data);
+  };
+  const handleBaoCao = (data) => {
+    console.log(data);
+    Navigate(`/home/admin/posts/${data.id}/baocao`, {
+      replace: true,
+      state: data,
+    });
+  };
   return (
     <>
       <div>Bài viết</div>
@@ -171,6 +181,7 @@ function Posts() {
             <th scope="col">Người đăng</th>
             <th scope="col">Thời gian</th>
             <th scope="col">Quản lí</th>
+            <th scope="col">Báo cáo</th>
           </tr>
         </thead>
         <tbody>
@@ -181,7 +192,6 @@ function Posts() {
                   <tr>
                     <th scope="row">{index + 1}</th>
                     <td className="AdminDescription">
-                      {/* <span>{dataPost.content}</span> */}
                       <span>
                         {dataPost.content &&
                         dataPost.content.length > 100 &&
@@ -219,6 +229,15 @@ function Posts() {
                       >
                         <i className="fa-solid fa-info"></i>
                       </button>
+                      &nbsp;
+                      <button
+                        type="button"
+                        className="btn btn-warning"
+                        onClick={() => handleBanPost(dataPost)}
+                      >
+                        <i className="fa-solid fa-ban"></i>
+                      </button>
+                      &nbsp;
                       <Modal
                         centered
                         show={showModalConfirmDelete}
@@ -327,6 +346,16 @@ function Posts() {
                           )}
                         </Modal.Body>
                       </Modal>
+                    </td>
+                    <td>
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={() => handleBaoCao(dataPost)}
+                      >
+                        <span>0</span> {""}
+                        <i className="fa-solid fa-flag"></i>
+                      </button>
                     </td>
                   </tr>
                 </React.Fragment>

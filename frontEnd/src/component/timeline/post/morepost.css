@@ -31,3 +31,10 @@
 .edit-content-post:focus {
   outline: none !important;
 }
+.baocaonguoidung {
+  width: 100%;
+}
+.baocaonguoidung *:hover {
+  cursor: pointer;
+  color: rgb(0, 128, 255);
+}

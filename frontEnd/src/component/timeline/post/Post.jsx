@@ -410,14 +410,12 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
           </div>
           {/* -------------more------------ */}
           <span className="post-more-delete">
-            {userid === myID && (
-              <MoreHorizIcon
-                onClick={() => {
-                  handleDELETE(id);
-                  setModalShowComment(false);
-                }}
-              />
-            )}
+            <MoreHorizIcon
+              onClick={() => {
+                handleDELETE(id);
+                setModalShowComment(false);
+              }}
+            />
           </span>
         </div>
         <div className="post-img">
@@ -559,6 +557,7 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
             />
           ) : (
             <MorePost
+              userid={userid}
               id={id}
               groupPostId={groupPostId}
               title={title}
