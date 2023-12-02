@@ -10,3 +10,16 @@
     color: red;
   }
 }
+.commentAd_listimg {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 10px;
+  // justify-content: space-between;
+  .commentAd_img {
+    // width: 260px;
+    width: 260px;
+    height: 340px;
+    object-fit: cover;
+  }
+}

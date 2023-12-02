@@ -30,6 +30,7 @@ import Callvideo from "./component/callvideo/Callvideo";
 import SocketContext from "./component/socketio/Socketcontext";
 import Test from "./component/adminBoss/adminchild/Test";
 import Commentad from "./component/adminBoss/adminchild/Commentad";
+import { VietNamToxic } from "./component/vietnamToxic/VietNamToxic";
 function App() {
   return (
     <div>
@@ -55,8 +56,7 @@ function App() {
             <Route path="/home/admin/groups" element={<GroupsTable />} />
             <Route path="/home/admin/posts" element={<Posts />} />
             <Route path="/home/admin/test" element={<Test />} />
-            {/* commentAD */}
-            {/* Commentad */}
+            <Route path="/home/admin/toxic" element={<VietNamToxic />} />
           </Route>
           <Route path="/home/admin/posts/:idpost" element={<Commentad />} />
           {/* ---- */}

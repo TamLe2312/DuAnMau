@@ -20,6 +20,9 @@ function Adminn() {
           <li className="list-group-item admin_children">
             <NavLink to="/home/admin/test">Thêm</NavLink>
           </li>
+          <li className="list-group-item admin_children">
+            <NavLink to="/home/admin/toxic">vietnamtoxic</NavLink>
+          </li>
         </ul>
       </div>
       <div className="admin-page">

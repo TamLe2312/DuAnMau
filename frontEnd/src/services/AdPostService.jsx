@@ -36,5 +36,16 @@ const banComments = async (postid) => {
     console.log(e);
   }
 };
-
-export { fetchComments, delComments, banComments };
+// img post
+// http://localhost:8080/post/postimg/486
+const imgsPost = async (postid) => {
+  try {
+    const res = await request.get(`post/postimg/${postid}`);
+    if (res) {
+      return res.data;
+    }
+  } catch (e) {
+    console.log(e);
+  }
+};
+export { fetchComments, delComments, banComments, imgsPost };

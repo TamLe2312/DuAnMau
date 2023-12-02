@@ -5,6 +5,7 @@ import moment from "moment";
 import * as postService from "../../../services/AdPostService";
 import "./adComment.scss";
 import Modal from "react-bootstrap/Modal";
+import { HOST_NAME } from "../../../utils/config";
 const Commentad = () => {
   // lấy giá trị từ đường dẫn
   const location = useLocation();
@@ -55,7 +56,15 @@ const Commentad = () => {
     };
     chay();
   }, [ban]);
-  // console.log(dataComment);
+  // img post
+  const [imgs, setimgs] = useState([]);
+  useEffect(() => {
+    const chay = async () => {
+      const data = await postService.imgsPost(postDetail.id);
+      setimgs(data);
+    };
+    chay();
+  }, []);
   return (
     <>
       <div className="container-fluit comment_ad">
@@ -144,8 +153,18 @@ const Commentad = () => {
               ) : (
                 "Không có bình luận"
               )
+            ) : imgs && imgs.length > 0 ? (
+              <div className="commentAd_listimg">
+                {imgs.map((item, index) => (
+                  <img
+                    key={index}
+                    className="commentAd_img"
+                    src={HOST_NAME + "/images/" + item.img}
+                    alt=""
+                  />
+                ))}
+              </div>
             ) : (
-              //    ảnh
               <div>Bài viết không có hình ảnh</div>
             )}
           </div>

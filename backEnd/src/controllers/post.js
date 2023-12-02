@@ -520,7 +520,7 @@ const postimgs = (req, res) => {
     [postID], // Use the postID variable here
     function (err, results, fields) {
       if (err) {
-        // console.log(err);
+        console.log(err);
         return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
       }
       if (results.length > 0) {
