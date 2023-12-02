@@ -102,6 +102,7 @@
 .StoriesDisplayContainer {
     display: flex;
     gap: 20px;
+    height: auto;
 }
 
 .StoriesNewsImg,
@@ -128,6 +129,7 @@
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.2);
     padding: 16px;
     border-radius: 12px;
+    height: auto;
 }
 
 .StoriesCreateNewsContainer span {
@@ -136,6 +138,7 @@
 
 .StoriesCreateNewsBackground {
     width: 800px;
+    height: auto;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -145,8 +148,8 @@
 }
 
 .StoriesCreateImgContent {
-    height: 500px;
-    width: 500px;
+    max-height: 800px;
+    width: 800px;
     object-fit: cover;
     margin: 16px;
     display: flex;
@@ -164,6 +167,7 @@
     width: 100%;
     height: 100%;
     border-radius: 12px;
+    object-fit: cover;
 }
 
 .StoriesHandleButton {

@@ -93,7 +93,7 @@ const getDataTotalMember = (req, res) => {
   const groupId = req.params.groupId;
   if (groupId) {
     connection.query(
-      `SELECT membergroup.group_id, users.username, users.id, users.avatar, users.name, groupsTable.idUserCreatedGroup
+      `SELECT membergroup.id,membergroup.group_id, users.username, users.id, users.avatar, users.name, groupsTable.idUserCreatedGroup
    FROM membergroup 
    INNER JOIN users ON users.id = membergroup.user_id 
    INNER JOIN groupsTable ON groupsTable.id = membergroup.group_id

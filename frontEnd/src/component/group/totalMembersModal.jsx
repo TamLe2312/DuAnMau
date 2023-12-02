@@ -95,50 +95,48 @@ function TotalMemberModal() {
             {dataTotalMember && dataTotalMember.length > 0 ? (
               dataTotalMember.map((dataMember, index) => {
                 return (
-                  <>
-                    <div className="TotalMemberRowContent" key={index}>
-                      <div className="ProfileFollowImgContent">
-                        {dataMember.avatar ? (
-                          <Link
-                            to={`/home/profile/user/${dataMember.id}`}
-                            className="ProfileFollowLink"
-                          >
-                            <img src={dataMember.avatar} />
-                          </Link>
-                        ) : (
-                          <Link
-                            to={`/home/profile/user/${dataMember.id}`}
-                            className="ProfileFollowLink"
-                          >
-                            <img src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg" />
-                          </Link>
-                        )}
-                      </div>
-                      <span>
+                  <div className="TotalMemberRowContent" key={index}>
+                    <div className="ProfileFollowImgContent">
+                      {dataMember.avatar ? (
                         <Link
                           to={`/home/profile/user/${dataMember.id}`}
                           className="ProfileFollowLink"
                         >
-                          {dataMember.name
-                            ? dataMember.name
-                            : dataMember.username}
+                          <img src={dataMember.avatar} />
                         </Link>
-                      </span>
-                      {dataMember.isWhoCreatedGroup ? (
-                        <span className="TotalMemberRole">Trưởng nhóm</span>
                       ) : (
-                        <>
-                          {userId === dataMember.idUserCreatedGroup && (
-                            <button
-                              onClick={() => handleDeteleMember(dataMember.id)}
-                            >
-                              Xóa
-                            </button>
-                          )}
-                        </>
+                        <Link
+                          to={`/home/profile/user/${dataMember.id}`}
+                          className="ProfileFollowLink"
+                        >
+                          <img src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg" />
+                        </Link>
                       )}
                     </div>
-                  </>
+                    <span>
+                      <Link
+                        to={`/home/profile/user/${dataMember.id}`}
+                        className="ProfileFollowLink"
+                      >
+                        {dataMember.name
+                          ? dataMember.name
+                          : dataMember.username}
+                      </Link>
+                    </span>
+                    {dataMember.isWhoCreatedGroup ? (
+                      <span className="TotalMemberRole">Trưởng nhóm</span>
+                    ) : (
+                      <>
+                        {userId === dataMember.idUserCreatedGroup && (
+                          <button
+                            onClick={() => handleDeteleMember(dataMember.id)}
+                          >
+                            Xóa
+                          </button>
+                        )}
+                      </>
+                    )}
+                  </div>
                 );
               })
             ) : (
