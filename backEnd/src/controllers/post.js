@@ -773,74 +773,6 @@ const countCommentPost = (req, res) => {
   }
 };
 
-// post admin
-const listCommenOnetPost = (req, res) => {
-  const idpost = parseInt(req.params.postID);
-  const page = parseInt(req.params.page);
-  const sl = 10;
-  const offset = (page - 1) * sl;
-
-  connection.query(
-    `SELECT comments.*, users.name, users.username
-     FROM comments 
-     INNER JOIN users ON comments.user_id = users.id
-     WHERE post_id = ? ORDER BY comments.id DESC LIMIT ? OFFSET ?`,
-    [idpost, sl, offset],
-    function (err, results, fields) {
-      if (err) {
-        console.log(err);
-        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
-      }
-
-      return res.status(200).json(results);
-    }
-  );
-};
-const banComment = (req, res) => {
-  const idcomment = parseInt(req.body.commentID);
-  connection.query(
-    "SELECT ban FROM comments WHERE id = ? ",
-    [idcomment],
-    function (err, results, fields) {
-      if (err) {
-        console.log(err);
-        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
-      }
-      if (results[0].ban != 1) {
-        // chưa ban
-        connection.query(
-          "UPDATE comments SET ban = 1 WHERE id = ? ",
-          [idcomment],
-          function (err, results, fields) {
-            if (err) {
-              console.log(err);
-              return res
-                .status(500)
-                .json({ error: "Có lỗi xảy ra xin thử lại sau" });
-            }
-            return res.status(200).json({ success: "Đã ban" });
-          }
-        );
-      } else {
-        // ban
-        connection.query(
-          "UPDATE comments SET ban = NULL WHERE id = ? ",
-          [idcomment],
-          function (err, results, fields) {
-            if (err) {
-              console.log(err);
-              return res
-                .status(500)
-                .json({ error: "Có lỗi xảy ra xin thử lại sau" });
-            }
-            return res.status(200).json({ success: "Đã hủy ban" });
-          }
-        );
-      }
-    }
-  );
-};
-
 const storiesImg = (req, res) => {
   const { id } = req.body;
   if (req.file) {
@@ -915,6 +847,159 @@ GROUP BY
   );
 };
 
+// post admin
+const listCommenOnetPost = (req, res) => {
+  const idpost = parseInt(req.params.postID);
+  const page = parseInt(req.params.page);
+  const sl = 8;
+  const offset = (page - 1) * sl;
+
+  connection.query(
+    `SELECT comments.*, users.name, users.username
+     FROM comments 
+     INNER JOIN users ON comments.user_id = users.id
+     WHERE post_id = ? ORDER BY comments.id DESC LIMIT ? OFFSET ?`,
+    [idpost, sl, offset],
+    function (err, results, fields) {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+      }
+
+      return res.status(200).json(results);
+    }
+  );
+};
+const banComment = (req, res) => {
+  const idcomment = parseInt(req.body.commentID);
+  connection.query(
+    "SELECT ban FROM comments WHERE id = ? ",
+    [idcomment],
+    function (err, results, fields) {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+      }
+      if (results[0].ban != 1) {
+        // chưa ban
+        connection.query(
+          "UPDATE comments SET ban = 1 WHERE id = ? ",
+          [idcomment],
+          function (err, results, fields) {
+            if (err) {
+              console.log(err);
+              return res
+                .status(500)
+                .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+            }
+            return res.status(200).json({ success: "Đã ban" });
+          }
+        );
+      } else {
+        // ban
+        connection.query(
+          "UPDATE comments SET ban = NULL WHERE id = ? ",
+          [idcomment],
+          function (err, results, fields) {
+            if (err) {
+              console.log(err);
+              return res
+                .status(500)
+                .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+            }
+            return res.status(200).json({ success: "Đã hủy ban" });
+          }
+        );
+      }
+    }
+  );
+};
+// flag post
+const flagPost = (req, res) => {
+  const postID = parseInt(req.body.postID);
+  const userID = parseInt(req.body.userID);
+  const contentFlag = req.body.contentFlag;
+  connection.query(
+    "SELECT countflag FROM posts WHERE id =? ",
+    [postID],
+    function (err, results, fields) {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+      }
+      if (results[0].countflag) {
+        // != null
+        connection.query(
+          `UPDATE posts
+            SET countflag = countflag + 1
+            WHERE id =? `,
+          [postID],
+          function (err, results, fields) {
+            if (err) {
+              console.log(err);
+              return res
+                .status(500)
+                .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+            }
+            if (results) {
+              connection.query(
+                `INSERT INTO flagpost (user_id,post_id,flagcontent)
+                VALUES (?, ?, ?) `,
+                [userID, postID, contentFlag],
+                function (err, results, fields) {
+                  if (err) {
+                    console.log(err);
+                    return res
+                      .status(500)
+                      .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+                  }
+                  return res
+                    .status(200)
+                    .json({ success: "Bạn đã spam bài viết" });
+                }
+              );
+            }
+          }
+        );
+      } else {
+        // null
+        connection.query(
+          `UPDATE posts
+            SET countflag = 1
+            WHERE id =? `,
+          [postID],
+          function (err, results, fields) {
+            if (err) {
+              console.log(err);
+              return res
+                .status(500)
+                .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+            }
+            if (results) {
+              connection.query(
+                `INSERT INTO flagpost (user_id,post_id,flagcontent)
+                VALUES (?, ?, ?) `,
+                [userID, postID, contentFlag],
+                function (err, results, fields) {
+                  if (err) {
+                    console.log(err);
+                    return res
+                      .status(500)
+                      .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+                  }
+                  return res.status(200).json({
+                    success: "Bạn đã spam bài viết",
+                  });
+                }
+              );
+            }
+          }
+        );
+      }
+    }
+  );
+};
+
 module.exports = {
   createPost,
   createGroupPost,
@@ -945,4 +1030,6 @@ module.exports = {
   storiesImg,
   storiesContent,
   getDataNews,
+  // flagposst
+  flagPost,
 };

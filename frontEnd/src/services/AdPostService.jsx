@@ -48,4 +48,17 @@ const imgsPost = async (postid) => {
     console.log(e);
   }
 };
-export { fetchComments, delComments, banComments, imgsPost };
+
+//localhost:8080/post/countCommentPost/488&0
+const countPost = async (postid) => {
+  try {
+    const res = await request.get(`post/countCommentPost/${postid}&0`);
+    if (res) {
+      return res.data;
+    }
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+export { fetchComments, delComments, banComments, imgsPost, countPost };

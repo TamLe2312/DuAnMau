@@ -6,6 +6,7 @@ import * as postService from "../../../services/AdPostService";
 import "./adComment.scss";
 import Modal from "react-bootstrap/Modal";
 import { HOST_NAME } from "../../../utils/config";
+import Previous from "../../previous/Previous";
 const Commentad = () => {
   // lấy giá trị từ đường dẫn
   const location = useLocation();
@@ -47,37 +48,44 @@ const Commentad = () => {
     };
     fetchDel();
   };
+  // number page
+  const [pagechay, setpagechay] = useState(1);
   //   call api list comment
   const [dataComment, setdataComment] = useState([]);
   useEffect(() => {
     const chay = async () => {
-      const data = await postService.fetchComments(postDetail.id, 1);
+      const data = await postService.fetchComments(postDetail.id, pagechay);
       setdataComment(data);
     };
     chay();
-  }, [ban]);
+  }, [ban, pagechay]);
   // img post
   const [imgs, setimgs] = useState([]);
+  const [so, setSo] = useState(null);
   useEffect(() => {
     const chay = async () => {
       const data = await postService.imgsPost(postDetail.id);
+      const dataCount = await postService.countPost(postDetail.id);
       setimgs(data);
+      setSo(dataCount[0].countcomment);
     };
     chay();
   }, []);
   return (
     <>
       <div className="container-fluit comment_ad">
-        <Link to="/home/admin/posts">Quay lại</Link>
-        <div>
+        <Link className="btn btn-outline-primary" to="/home/admin/posts">
+          <i className="fa-regular fa-circle-left"></i> Quay lại
+        </Link>
+        <div className="user_comment_ad mt-4 mb-4">
           {postDetail && (
             <>
-              <span>{postDetail.username}: </span>
+              <span className="text-primary">{postDetail.username}: </span>
               <span>{postDetail.content}</span>
             </>
           )}
         </div>
-        <div className="row mt-4">
+        <div className="row ">
           <div className="col-md-3">
             <ul className="list-group comment_ad_listmenu">
               <li
@@ -107,49 +115,53 @@ const Commentad = () => {
             {photos ? (
               //   comment
               dataComment && dataComment.length > 0 ? (
-                <table className="table table-hover ">
-                  <thead>
-                    <tr>
-                      <th scope="col">#</th>
-                      <th scope="col">Tác giả</th>
-                      <th scope="col">Nội dung</th>
-                      <th scope="col">Thời gian</th>
-                      <th scope="col">Xử lí</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {/* loop ở đây */}
-                    {dataComment.map((item, index) => (
-                      <React.Fragment key={index}>
-                        <tr>
-                          <th scope="row">{index + 1}</th>
-                          <td>{item.name ?? item.username}</td>
-                          <td>{item.content}</td>
-                          <td>{format(item.created_at)}</td>
+                <>
+                  <table className="table table-hover ">
+                    <thead>
+                      <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Tác giả</th>
+                        <th scope="col">Nội dung</th>
+                        <th scope="col">Thời gian</th>
+                        <th scope="col">Xử lí</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {/* loop ở đây */}
+                      {dataComment.map((item, index) => (
+                        <React.Fragment key={index}>
+                          <tr>
+                            <th scope="row">{index + 1}</th>
+                            <td>{item.name ?? item.username}</td>
+                            <td>{item.content}</td>
+                            <td>{format(item.created_at)}</td>
 
-                          <td>
-                            <span
-                              className="btn btn-danger"
-                              onClick={() => handleDel(item)}
-                            >
-                              Xóa
-                            </span>{" "}
-                            <span
-                              className={
-                                item.ban == 1
-                                  ? "btn btn-warning"
-                                  : "btn btn-secondary"
-                              }
-                              onClick={() => handleCam(item)}
-                            >
-                              {item.ban == 1 ? "UnBan" : "Ban"}
-                            </span>
-                          </td>
-                        </tr>
-                      </React.Fragment>
-                    ))}
-                  </tbody>
-                </table>
+                            <td>
+                              <span
+                                className="btn btn-danger"
+                                onClick={() => handleDel(item)}
+                              >
+                                Xóa
+                              </span>{" "}
+                              <span
+                                className={
+                                  item.ban == 1
+                                    ? "btn btn-warning"
+                                    : "btn btn-secondary"
+                                }
+                                onClick={() => handleCam(item)}
+                              >
+                                {item.ban == 1 ? "UnBan" : "Ban"}
+                              </span>
+                            </td>
+                          </tr>
+                        </React.Fragment>
+                      ))}
+                    </tbody>
+                  </table>
+                  {/* pre */}
+                  <Previous so={so} setpagechay={setpagechay} />
+                </>
               ) : (
                 "Không có bình luận"
               )
