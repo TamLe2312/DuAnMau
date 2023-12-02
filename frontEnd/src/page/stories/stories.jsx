@@ -20,6 +20,7 @@ function Stories() {
   const [searchValue, setSearchValue] = useState("");
   const [newsImg, setNewsImg] = useState([]);
   const [dataNews, setDataNews] = useState([]);
+  const [dataUser, setDataUser] = useState([]);
   const [isCreateNewsImg, setIsCreateNewsImg] = useState(false);
   const [isCreateNewsContent, setIsCreateNewsContent] = useState(false);
 
@@ -157,7 +158,8 @@ function Stories() {
       try {
         const response = await request.get(`post/getDataNews`);
         setDataNews(response.data);
-        console.log(response.data);
+        const respone1 = await request.get(`account/getDataUser/${id}`);
+        setDataUser(respone1.data[0]);
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
@@ -180,9 +182,15 @@ function Stories() {
           <div className="StoriesNavBarInform">
             <img
               className="StoriesAvatarImg"
-              src="https://i.pinimg.com/564x/e3/0f/28/e30f28122578d6a5fc183376718d46c3.jpg"
+              src={
+                dataUser.avatar
+                  ? dataUser.avatar
+                  : "https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg"
+              }
             />
-            <span className="StoriesName">Tâm</span>
+            <span className="StoriesName">
+              {dataUser.name ? dataUser.name : dataUser.username}
+            </span>
           </div>
           {isCreateNewsImg || isCreateNewsContent ? (
             <>
