@@ -9,8 +9,8 @@
   justify-content: center;
 }
 
-.tin::-webkit-scrollbar {
-  width: 0;
+.tin-group-new-container a {
+  text-decoration: none;
 }
 
 .tin-group {
@@ -61,6 +61,22 @@
   transition: 0.5s;
   cursor: pointer;
   background-color: rgba(128, 128, 128, 0.8);
+}
+
+.tin-group .tin-group-new {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 1px solid #000;
+  padding: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tin-group .tin-group-new .fa-plus {
+  font-size: 1.2rem;
 }
 
 @media (max-width: 1033px) {

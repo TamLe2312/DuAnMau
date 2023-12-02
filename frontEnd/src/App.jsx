@@ -50,6 +50,7 @@ function App() {
             <Route path="/home/messenger" element={<Messenger />} />
             <Route path="/home/messenger/:id" element={<Messenger />} />
           </Route>
+
           {/* admin */}
           <Route path="/home/admin" element={<Adminn />}>
             <Route path="/home/admin/account" element={<Account />} />
@@ -61,6 +62,7 @@ function App() {
           <Route path="/home/admin/posts/:idpost" element={<Commentad />} />
           {/* ---- */}
           <Route path="/stories/:idStory" element={<Stories />} />
+
           <Route path="/home/messenger/:id/call" element={<Callvideo />} />
           <Route path="/verifyToken" element={<VerifyToken />} />
           <Route path="*" element={<NoMath />} />
