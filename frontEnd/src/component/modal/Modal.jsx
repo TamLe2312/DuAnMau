@@ -14,7 +14,11 @@ function MyModal(props) {
           {props.text}
         </Modal.Title>
       </Modal.Header>
-      <Modal.Body className="modal-body">{props.childrens}</Modal.Body>
+      <Modal.Body
+        className={props.display === "block" ? "modal-display" : "modal-body"}
+      >
+        {props.childrens}
+      </Modal.Body>
       <Modal.Footer>
         {/* <Button onClick={props.onHide}>Hủy</Button> */}
       </Modal.Footer>

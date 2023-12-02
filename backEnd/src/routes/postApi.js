@@ -22,11 +22,31 @@ const {
   countCommentPost,
   oneCommentPost,
   dataPostAndUser,
+  // list comment post
+  listCommenOnetPost,
+  banComment,
+
+  storiesImg,
+  storiesContent,
+  getDataNews,
 } = require("../controllers/post");
 const Router = express.Router();
+const multer = require("multer");
 
+const storage = multer.diskStorage({
+  destination: function (req, file, cb) {
+    cb(null, "../frontEnd/uploads/");
+  },
+  filename: function (req, file, cb) {
+    cb(null, Date.now() + "-" + file.originalname);
+  },
+});
+
+const upload = multer({ storage: storage });
 // api login;
 Router.post("/create", createPost);
+Router.post("/storiesImg", upload.single("newsImg"), storiesImg);
+Router.post("/storiesContent", storiesContent);
 Router.post("/createGroupPost", createGroupPost);
 Router.post("/upimgs", upImgs);
 Router.post("/groupUpImgs", groupUpImgs);
@@ -49,4 +69,9 @@ Router.post("/onCommentPostLast", onCommentPostLast);
 Router.get("/listCommentPost/:postID&:groupPostId", listCommentPost);
 Router.get("/oneCommentPost/:commentID", oneCommentPost);
 Router.get("/countCommentPost/:postID&:groupPostId", countCommentPost);
+
+// listCommenOnetPost;
+Router.get("/lisComents/:postID/:page", listCommenOnetPost);
+Router.post("/banComment", banComment);
+Router.get("/getDataNews", getDataNews);
 module.exports = Router;

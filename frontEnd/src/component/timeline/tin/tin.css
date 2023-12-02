@@ -3,8 +3,14 @@
   flex-direction: row;
   /* background-color: rgb(235, 139, 188); */
   width: 100%;
-  overflow: hidden;
+  overflow-x: auto;
   padding: 30px 60px;
+  position: relative;
+  justify-content: center;
+}
+
+.tin-group-new-container a {
+  text-decoration: none;
 }
 
 .tin-group {
@@ -12,23 +18,73 @@
   flex-direction: column;
   margin: 12px;
   text-align: center;
+  cursor: pointer;
 }
+
 .tin-group-img {
-  width: 60px;
-  height: 60px;
+  width: 80px;
+  height: 80px;
   object-fit: cover;
   border-radius: 50%;
   border: 1px solid white;
   padding: 3px;
 }
+
 .tin-group-name {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
+
+.NewsNextButton {
+  color: #fff;
+  background-color: #3e4042;
+  right: 20% !important;
+  width: 40px !important;
+  height: 40px !important;
+}
+
+.NewsPrevButton {
+  color: #fff;
+  background-color: #3e4042;
+  border-radius: 50%;
+  position: absolute;
+  width: 40px;
+  height: 40px;
+  top: 50%;
+  left: 20%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.NewsPrevButton:hover {
+  transition: 0.5s;
+  cursor: pointer;
+  background-color: rgba(128, 128, 128, 0.8);
+}
+
+.tin-group .tin-group-new {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 1px solid #000;
+  padding: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tin-group .tin-group-new .fa-plus {
+  font-size: 1.2rem;
+}
+
 @media (max-width: 1033px) {
   .tin {
     padding: 30px;
   }
 }
+
 @media (max-width: 875px) {
   .tin {
     padding: 10px;

@@ -218,8 +218,8 @@ function GroupsTable() {
             AllDataGroup && AllDataGroup.length > 0 ? (
               AllDataGroup.map((dataGroup, index) => {
                 return (
-                  <>
-                    <tr key={index}>
+                  <React.Fragment key={index}>
+                    <tr>
                       <th scope="row">{index + 1}</th>
                       <td>{dataGroup.name}</td>
                       <td className="AdminDescription">
@@ -381,7 +381,7 @@ function GroupsTable() {
                         </Modal>
                       </td>
                     </tr>
-                  </>
+                  </React.Fragment>
                 );
               })
             ) : (

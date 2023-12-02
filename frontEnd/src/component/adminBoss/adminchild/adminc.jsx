@@ -1,20 +1,27 @@
-import { Link, Outlet } from "react-router-dom";
+import { Link, NavLink, Outlet } from "react-router-dom";
 import "./admin.css";
 
 function Adminn() {
   return (
     <div className="admin">
       <div className="admin-nav">
+        <Link to="/home">Home</Link>
         <p>Admin (quản lí)</p>
         <ul className="list-group">
-          <li className="list-group-item">
-            <Link to="/home/admin/account">Tài khoản</Link>
+          <li className="list-group-item admin_children">
+            <NavLink to="/home/admin/account">Tài khoản</NavLink>
           </li>
-          <li className="list-group-item">
-            <Link to="/home/admin/groups">Nhóm</Link>
+          <li className="list-group-item admin_children">
+            <NavLink to="/home/admin/groups">Nhóm</NavLink>
           </li>
-          <li className="list-group-item">
-            <Link to="/home/admin/posts">Bài viết</Link>
+          <li className="list-group-item admin_children">
+            <NavLink to="/home/admin/posts">Bài viết</NavLink>
+          </li>
+          <li className="list-group-item admin_children">
+            <NavLink to="/home/admin/test">Thêm</NavLink>
+          </li>
+          <li className="list-group-item admin_children">
+            <NavLink to="/home/admin/toxic">vietnamtoxic</NavLink>
           </li>
         </ul>
       </div>

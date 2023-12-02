@@ -1,0 +1,25 @@
+.comment_ad {
+  padding: 20px;
+  position: relative;
+
+  .comment_ad_listmenu li:hover {
+    cursor: pointer;
+    color: red;
+  }
+  .comment_aitem {
+    color: red;
+  }
+}
+.commentAd_listimg {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 10px;
+  // justify-content: space-between;
+  .commentAd_img {
+    // width: 260px;
+    width: 260px;
+    height: 340px;
+    object-fit: cover;
+  }
+}
