@@ -4,7 +4,7 @@ import { Modal, Button, Form } from "react-bootstrap";
 import { toast } from "sonner";
 import * as request from "../../../utils/request";
 import { useNavigate } from "react-router-dom";
-
+import * as postService from "../../../services/AdPostService";
 function Posts() {
   const Navigate = useNavigate();
   const [AllDataPost, setAllDataPost] = useState([]);
@@ -16,6 +16,7 @@ function Posts() {
   const [showModalMoreDetailPost, setShowModalMoreDetailPost] = useState(false);
   const [TotalPage, setTotalPage] = useState(1);
   const [indexPagination, setIndexPagination] = useState(1);
+  const [ban, setban] = useState(false);
   const handleShowModalConfirmDelete = (id) => {
     setIdPostDelete(id);
     setShowModalConfirmDelete(true);
@@ -152,16 +153,19 @@ function Posts() {
       }
     };
     fetchData();
-  }, []);
+  }, [ban]);
   const [showMore, setShowMore] = useState(false);
   const handleClickShowMore = () => {
     setShowMore(!showMore);
   };
-  const handleBanPost = (data) => {
-    console.log(data);
+  const handleBanPost = async (data) => {
+    const res = await postService.banPost(data.id);
+    if (res) {
+      setban((pre) => !pre);
+    }
   };
   const handleBaoCao = (data) => {
-    console.log(data);
+    // console.log(data);
     Navigate(`/home/admin/posts/${data.id}/baocao`, {
       replace: true,
       state: data,
@@ -178,7 +182,7 @@ function Posts() {
             <th scope="col">Người đăng</th>
             <th scope="col">Thời gian</th>
             <th scope="col">Quản lí</th>
-            <th scope="col">Báo cáo</th>
+            {/* <th scope="col">Báo cáo</th> */}
           </tr>
         </thead>
         <tbody>
@@ -229,10 +233,25 @@ function Posts() {
                       &nbsp;
                       <button
                         type="button"
-                        className="btn btn-warning"
+                        className={
+                          dataPost.ban !== null
+                            ? "btn btn-danger"
+                            : "btn btn-warning"
+                        }
                         onClick={() => handleBanPost(dataPost)}
                       >
                         <i className="fa-solid fa-ban"></i>
+                      </button>
+                      &nbsp;
+                      <button
+                        type="button"
+                        className="btn btn-secondary"
+                        onClick={() => handleBaoCao(dataPost)}
+                      >
+                        {dataPost.countflag && (
+                          <span>{dataPost.countflag}</span>
+                        )}{" "}
+                        <i className="fa-solid fa-flag"></i>
                       </button>
                       &nbsp;
                       <Modal
@@ -255,16 +274,6 @@ function Posts() {
                           </div>
                         </Modal.Body>
                       </Modal>
-                    </td>
-                    <td>
-                      <button
-                        type="button"
-                        className="btn btn-secondary"
-                        onClick={() => handleBaoCao(dataPost)}
-                      >
-                        <span>0</span> {""}
-                        <i className="fa-solid fa-flag"></i>
-                      </button>
                     </td>
                   </tr>
                 </React.Fragment>

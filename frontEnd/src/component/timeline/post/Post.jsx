@@ -14,6 +14,7 @@ import { useCookies } from "react-cookie";
 import ListComment from "./ListComment";
 import { APP_WEB } from "../../../utils/config";
 import { SocketCon } from "../../socketio/Socketcontext";
+import * as toxic from "../../vietnamToxic/VietNamToxic";
 
 function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
   const focusInput = useRef();
@@ -249,44 +250,50 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
     userID: "",
     groupPostId: "",
   });
-
+  const [vipham2, setvipham2] = useState(false);
   const hanldleSentComment = () => {
-    try {
-      const fetchApi = async () => {
-        if (groupPostId) {
-          const res = await request.post("post/commentPost", {
-            groupPostId: groupPostId,
-            userID: myID,
-            content: comment.trim(),
-          });
-          if (res.status == 200) {
-            setdymanicComment(!dymanicComment);
-            console.log("bạn đã bình luận: " + groupPostId);
-            setcomment("");
+    const isToxic = toxic.VietNamToxic(comment);
+    // console.log(isToxic);
+    if (isToxic) {
+      setvipham2(true);
+    } else {
+      try {
+        const fetchApi = async () => {
+          if (groupPostId) {
+            const res = await request.post("post/commentPost", {
+              groupPostId: groupPostId,
+              userID: myID,
+              content: comment.trim(),
+            });
+            if (res.status == 200) {
+              setdymanicComment(!dymanicComment);
+              console.log("bạn đã bình luận: " + groupPostId);
+              setcomment("");
+            } else {
+              console.log("Có vấn đề gì đó rồi");
+            }
           } else {
-            console.log("Có vấn đề gì đó rồi");
+            const res = await request.post("post/commentPost", {
+              postID: id,
+              userID: myID,
+              content: comment.trim(),
+            });
+            if (res.status == 200) {
+              let thongBao = "Đã bình luận bài viết của bạn";
+              await notification(id, myID, thongBao, userid);
+              setdymanicComment(!dymanicComment);
+              console.log("bạn đã bình luận: " + id);
+              setcomment("");
+              socket.emit("add_notification", { userid, myID });
+            } else {
+              console.log("Có vấn đề gì đó rồi");
+            }
           }
-        } else {
-          const res = await request.post("post/commentPost", {
-            postID: id,
-            userID: myID,
-            content: comment.trim(),
-          });
-          if (res.status == 200) {
-            let thongBao = "Đã bình luận bài viết của bạn";
-            await notification(id, myID, thongBao, userid);
-            setdymanicComment(!dymanicComment);
-            console.log("bạn đã bình luận: " + id);
-            setcomment("");
-            socket.emit("add_notification", { userid, myID });
-          } else {
-            console.log("Có vấn đề gì đó rồi");
-          }
-        }
-      };
-      fetchApi();
-    } catch (error) {
-      console.log(error);
+        };
+        fetchApi();
+      } catch (error) {
+        console.log(error);
+      }
     }
   };
 
@@ -514,16 +521,24 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
             </div>
           </>
         )}
-
+        {vipham2 && (
+          <span style={{ fontSize: "0.9rem" }} className="text-danger">
+            Hãy dùng từ lịch sự
+          </span>
+        )}
         <div className="post-footer-input">
           <input
             ref={focusInput}
             type="text"
             placeholder="Thêm bình luận"
             value={comment}
-            onChange={(e) => setcomment(e.target.value)}
+            onChange={(e) => {
+              setcomment(e.target.value);
+              setvipham2(false);
+            }}
           />
           {/* <SentimentSatisfiedAltIcon /> */}
+
           <button
             disabled={!comment}
             className={comment && "post-comment"}

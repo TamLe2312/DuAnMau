@@ -3,11 +3,10 @@ import "./morepost.css";
 import { useState, useContext, useEffect } from "react";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
-// import { toast } from "react-toastify";
 import * as request from "../../../utils/request";
 import { Context } from "../../../page/home/home";
 import { useCookies } from "react-cookie";
-
+import * as postService from "../../../services/AdPostService";
 function MorePost(props) {
   const [cookies] = useCookies();
   const myID = cookies.userId;
@@ -117,8 +116,9 @@ function MorePost(props) {
     "Ngôn từ gây thù gét",
     "Vấn đề khác",
   ];
-  const handleBaoCaoOK = (data) => {
-    console.log({ spam: data, idpost: props.id });
+  const handleBaoCaoOK = async (data) => {
+    const res = await postService.flagPost(myID, props.id, data);
+    toast.success(res.success);
     setModalShow(false);
   };
   return (

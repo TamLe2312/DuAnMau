@@ -7,6 +7,7 @@ import { useContext } from "react";
 import * as request from "../../utils/request";
 import "ldrs/leapfrog";
 // Default values shown
+import * as toxic from "../vietnamToxic/VietNamToxic";
 function ContextNews(props) {
   const dataa = useContext(Context);
   const location = useLocation();
@@ -23,7 +24,7 @@ function ContextNews(props) {
   const [success, setSuccess] = useState(true);
   const [e, setE] = useState(false);
   const [userData, setUserData] = useState("");
-
+  const [viPham, setviPham] = useState(false);
   useEffect(() => {
     setId(cookies.userId);
     const contentNews = document.getElementById("contentNews");
@@ -36,6 +37,7 @@ function ContextNews(props) {
         contentNews.textContent = "Thêm gì đó...";
     });
     contentNews.addEventListener("input", () => {
+      setviPham(false);
       setContent(contentNews.textContent);
     });
   }, []);
@@ -57,36 +59,42 @@ function ContextNews(props) {
     setImgs(props.data);
   }, [props.data]);
   const handlePost = async () => {
-    setShow(false);
-    setLoading(true);
-    const postData = {
-      userID: id,
-      content: content,
-    };
-    const formData = new FormData();
-    if (imgs.length > 0) {
-      try {
-        const response = await request.post("post/create", postData);
-        imgs.forEach((img, index) => {
-          formData.append(`image${index}`, img);
-        });
-        formData.append("post_id", response.data.lastID);
-        await request.post("post/upimgs", formData);
-        setSuccess(false);
-      } catch (error) {
-        setE(true);
-        console.log(error);
-      }
+    const isToxic = toxic.VietNamToxic(content);
+    if (isToxic) {
+      console.log("vi phạm");
+      setviPham(true);
     } else {
-      try {
-        await request.post("post/create", postData);
-        setSuccess(false);
-      } catch (error) {
-        setE(true);
-        console.log(error);
+      setShow(false);
+      setLoading(true);
+      const postData = {
+        userID: id,
+        content: content,
+      };
+      const formData = new FormData();
+      if (imgs.length > 0) {
+        try {
+          const response = await request.post("post/create", postData);
+          imgs.forEach((img, index) => {
+            formData.append(`image${index}`, img);
+          });
+          formData.append("post_id", response.data.lastID);
+          await request.post("post/upimgs", formData);
+          setSuccess(false);
+        } catch (error) {
+          setE(true);
+          console.log(error);
+        }
+      } else {
+        try {
+          await request.post("post/create", postData);
+          setSuccess(false);
+        } catch (error) {
+          setE(true);
+          console.log(error);
+        }
       }
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -139,6 +147,12 @@ function ContextNews(props) {
               >
                 Đăng bài
               </button>
+              {viPham && (
+                <>
+                  <br />
+                  <span>Chứa từ không hợp lệ</span>
+                </>
+              )}
             </div>
           ) : (
             <div>

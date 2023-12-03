@@ -497,6 +497,7 @@ const dataPost = (req, res) => {
     `SELECT posts.id,posts.content,posts.created_at,users.id as userid, users.username,users.avatar,users.name
     FROM posts  
     JOIN users ON posts.user_id = users.id
+    WHERE posts.ban IS NULL
     ORDER BY posts.id DESC
     LIMIT ? OFFSET ?
     `,
@@ -999,6 +1000,69 @@ const flagPost = (req, res) => {
     }
   );
 };
+// list flag
+const listFlagPost = (req, res) => {
+  const postID = parseInt(req.params.postID);
+  connection.query(
+    `SELECT flagpost.*, users.name, users.username
+    FROM flagpost
+    INNER JOIN users ON flagpost.user_id=users.id
+    WHERE flagpost.post_id = ? `,
+    [postID],
+    function (err, results, fields) {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+      }
+      return res.status(200).json(results);
+    }
+  );
+};
+// ban post
+const banPost = (req, res) => {
+  const postID = parseInt(req.body.postID);
+  connection.query(
+    "SELECT ban FROM posts WHERE id = ? ",
+    [postID],
+    function (err, results, fields) {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+      }
+      if (results[0].ban != 1) {
+        // chưa ban
+        connection.query(
+          "UPDATE posts SET ban = 1 WHERE id = ? ",
+          [postID],
+          function (err, results, fields) {
+            if (err) {
+              console.log(err);
+              return res
+                .status(500)
+                .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+            }
+            return res.status(200).json({ success: "Đã ban post" });
+          }
+        );
+      } else {
+        // ban
+        connection.query(
+          "UPDATE posts SET ban = NULL WHERE id = ? ",
+          [postID],
+          function (err, results, fields) {
+            if (err) {
+              console.log(err);
+              return res
+                .status(500)
+                .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+            }
+            return res.status(200).json({ success: "Đã hủy ban post" });
+          }
+        );
+      }
+    }
+  );
+};
 
 module.exports = {
   createPost,
@@ -1032,4 +1096,6 @@ module.exports = {
   getDataNews,
   // flagposst
   flagPost,
+  listFlagPost,
+  banPost,
 };
