@@ -18,6 +18,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    position: relative;
 }
 
 .StoriesNavBarHeader {
@@ -67,6 +68,11 @@
     margin-top: 12px;
     padding-bottom: 20px;
     border-bottom: 1px solid #3e4042;
+}
+
+.StoriesNavBarInform a {
+    text-decoration: none;
+    color: #000;
 }
 
 .StoriesName {
@@ -149,6 +155,7 @@
 
 .StoriesCreateImgContent {
     max-height: 800px;
+    min-height: 400px;
     width: 800px;
     object-fit: cover;
     margin: 16px;
@@ -164,6 +171,7 @@
 }
 
 .StoriesCreateImgContent img {
+    max-height: 800px;
     width: 100%;
     height: 100%;
     border-radius: 12px;
@@ -199,4 +207,120 @@
 
 #StoriesNewsImgInput {
     display: none;
+}
+
+.StoriesWatchNews {
+    width: 600px;
+    height: 800px;
+    border: 1px solid black;
+    position: relative;
+    border-radius: 12px;
+
+}
+
+.StoriesWatchInformUser {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    margin: 8px;
+}
+
+.StoriesWatchInformUser .fa-ellipsis {
+    font-size: 1.2rem;
+    margin-left: auto;
+    margin-right: 8px;
+    cursor: pointer;
+}
+
+.StoriesWatchImgHeader {
+    width: 50px;
+    height: 50px;
+}
+
+.StoriesWatchImgHeader img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.StoriesWatchContainer {
+    width: 600px;
+    position: relative;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: center;
+}
+
+.StoriesWatchContainer img {
+    width: 100%;
+    height: 100%;
+    max-height: 600px;
+    object-fit: cover;
+}
+
+.StoriesWatchContainer span {
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.StoriesWatchInformUser span {
+    font-weight: 600;
+}
+
+.StoriesWatchInformUser a {
+    text-decoration: none;
+    color: #000;
+}
+
+.StoriesWatchHeader {
+    width: 600px;
+    position: absolute;
+}
+
+.StoriesTimeline span {
+    margin-left: 12px;
+    font-weight: 600;
+}
+
+.StoriesDisplay .fa-chevron-left,
+.fa-chevron-right {
+    width: 50px;
+    height: 50px;
+    color: white;
+    border-radius: 50%;
+    position: absolute;
+
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #999;
+}
+
+.StoriesDisplay .fa-chevron-left:hover,
+.fa-chevron-right:hover {
+    background-color: #77838A;
+}
+
+.StoriesDisplay .fa-chevron-left {
+    top: 50%;
+    left: 20vw;
+}
+
+.StoriesDisplay .fa-chevron-right {
+    top: 50%;
+    right: 20vw;
+}
+
+.ModalStories {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+}
+
+.StoriesButtonHandleContainer {
+    margin: 12px auto;
 }

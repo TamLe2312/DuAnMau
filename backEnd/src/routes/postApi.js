@@ -25,6 +25,8 @@ const {
   storiesImg,
   storiesContent,
   getDataNews,
+  getDataNewsUser,
+  storiesDelete,
 } = require("../controllers/post");
 const Router = express.Router();
 const multer = require("multer");
@@ -51,6 +53,7 @@ Router.get("/datapost/:page", dataPost);
 Router.get("/postimg/:postID", postimgs);
 Router.get("/postGroupImgs/:postGroupId", postGroupImgs);
 Router.post("/deldete", deletePost);
+Router.post("/storiesDelete", storiesDelete);
 Router.post("/deletePostImgs", deletePostImgs);
 Router.post("/editPost", editPost);
 Router.post("/likePost", likePost);
@@ -66,4 +69,5 @@ Router.get("/listCommentPost/:postID&:groupPostId", listCommentPost);
 Router.get("/oneCommentPost/:commentID", oneCommentPost);
 Router.get("/countCommentPost/:postID&:groupPostId", countCommentPost);
 Router.get("/getDataNews", getDataNews);
+Router.get("/getDataNewsUser/:idNews", getDataNewsUser);
 module.exports = Router;
