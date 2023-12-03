@@ -92,11 +92,6 @@
   color: rgb(0, 76, 255);
 }
 
-/* .detailMessContainer-time {
-  text-align: right;
-  font-size: 0.8rem;
-} */
-
 #imgs_detail {
   display: none;
 }
@@ -215,4 +210,14 @@
 .detailMess_missedCall {
   color: rgb(244, 25, 25);
   font-weight: 500;
+}
+
+.detailMess_typing {
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(173, 173, 173, 0.5);
+  align-self: flex-start; /* Đặt tin nhắn bạn ở bên trái */
+  border-radius: 18px 18px 18px 0;
+  padding: 12px 12px;
+  margin: 4px;
 }

@@ -1,14 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import "./comments.css";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import { useCookies } from "react-cookie";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
 import { Avatar } from "@mui/material";
-// import { Toaster, toast } from "sonner";
 import * as request from "../../../utils/request";
+import { SocketCon } from "../../socketio/Socketcontext";
 
 function Comments(props) {
+  let value = useContext(SocketCon);
+  const socket = value.socket;
   const handleRun = props.handlerun;
   const [cookies] = useCookies();
   const myID = cookies.userId;
@@ -108,6 +110,7 @@ function Comments(props) {
             // console.log(userid);
             let thongBao = "Đã bình luận bài viết của bạn";
             await notification(id, myID, thongBao, userid);
+            socket.emit("add_notification", { userid, myID });
             setcontent("");
             setdoi((e) => !e);
             handleRun();
@@ -195,7 +198,11 @@ function Comments(props) {
           {avatar ? (
             <img className="post-avatar" src={avatar} alt="" />
           ) : (
-            <Avatar>{name ? name.charAt(0) : user.charAt(0)}</Avatar>
+            <img
+              className="post-avatar"
+              src="https://i.pinimg.com/564x/13/59/5c/13595cf982c1fa5bd1d16b4627f8ce56.jpg"
+              alt=""
+            />
           )}
           <span>
             <span className="commentschild-usercomment">{name || user}</span>
@@ -203,16 +210,16 @@ function Comments(props) {
           </span>
         </div>
       )}
-
       <div
         className={img.length > 0 ? "commentschild" : "commentschild-notimg"}
       >
+        {/* {console.log(userComment)} */}
         {listComment.length > 0
           ? listComment.map((comment, index) => {
               const user = userComment.find(
                 (user) => user.id === comment.user_id
               );
-              const username = user ? user.username : null;
+              // const username = user ? user.username : null;
 
               return (
                 <div className="commentschild-once" key={index}>
@@ -222,7 +229,7 @@ function Comments(props) {
                   />
                   <span>
                     <span className="commentschild-usercomment">
-                      {username}
+                      {user && (user.name ?? user.username)}
                     </span>
                     &nbsp; {comment.content}
                   </span>
@@ -239,7 +246,6 @@ function Comments(props) {
             })
           : "Không có ai bình luận"}
       </div>
-
       <div className="commentschild-input">
         <div className="input-group">
           <input
@@ -288,7 +294,6 @@ function Comments(props) {
           </ul>
         </Modal.Body>
       </Modal>
-
       <Modal
         show={show}
         onHide={() => setShow(false)}

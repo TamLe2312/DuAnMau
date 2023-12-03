@@ -309,7 +309,82 @@ const listMess = (req, res) => {
     );
   }
 };
+// read
+const read = (req, res) => {
+  const sender_id = parseInt(req.body.sender_id);
+  const recipient_id = parseInt(req.body.recipient_id);
+  if (sender_id === recipient_id) {
+    return res.status(400).json({ error: "không có tin nhắn với bản thân??" });
+  } else {
+    connection.query(
+      `UPDATE messenger 
+      SET isread = true
+      WHERE  (sender_id = ? AND recipient_id = ?) `,
+      [sender_id, recipient_id],
+      function (err, results, fields) {
+        if (err) {
+          console.log(err);
+          return res
+            .status(500)
+            .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+        }
+        return res.status(200).json({ success: "Bạn đã đọc tin nhắn" });
+      }
+    );
+  }
+};
 
+const isread = (req, res) => {
+  const sender_id = parseInt(req.params.sender_id);
+  const recipient_id = parseInt(req.params.recipient_id);
+  if (sender_id === recipient_id) {
+    return res.status(400).json({ error: "không có tin nhắn với bản thân??" });
+  } else {
+    connection.query(
+      `SELECT DISTINCT sender_id,isread FROM messenger 
+       WHERE (sender_id = ? AND recipient_id = ?) AND isread IS NULL`,
+      [sender_id, recipient_id],
+      function (err, results, fields) {
+        if (err) {
+          console.log(err);
+          return res
+            .status(500)
+            .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+        }
+        // return res.status(200).json(results);
+        if (results.length === 0) {
+          // Đã đọc
+          return res.status(200).json({ success: false, sender: sender_id });
+        }
+        return res.status(200).json({ success: true, sender: sender_id });
+      }
+    );
+  }
+};
+
+// noti mes
+
+const notimes = (req, res) => {
+  const recipient_id = parseInt(req.params.recipient_id);
+  connection.query(
+    `SELECT DISTINCT sender_id,isread FROM messenger 
+       WHERE (recipient_id = ?) AND isread IS NULL`,
+    [recipient_id],
+    function (err, results, fields) {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+      }
+      // return res.status(200).json(results);
+      // đã đọc
+      if (results.length === 0) {
+        return res.status(200).json({ success: false });
+      }
+      // chưa đọc
+      return res.status(200).json({ success: true });
+    }
+  );
+};
 // view
 const viewMess = (req, res) => {
   const { sender_id, recipient_id } = req.body;
@@ -483,5 +558,7 @@ module.exports = {
   // deletePostImgsMess,
   test,
   upRecordMes,
-  // delRecord,
+  read,
+  isread,
+  notimes,
 };
