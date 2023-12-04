@@ -821,32 +821,6 @@ const storiesContent = (req, res) => {
     );
   }
 };
-const getDataNews = (req, res) => {
-  //Max lấy giá trị mới nhất của người dùng
-  connection.query(
-    `SELECT
-  users.id AS user_id,
-  users.avatar,
-  users.username,
-  users.name,
-  MAX(stories.id) AS story_id,
-  MAX(stories.content) AS content,
-  MAX(stories.created_at) AS created_at
-FROM
-  users
-  INNER JOIN stories ON users.id = stories.user_id
-GROUP BY
-  users.id, users.avatar, users.username, users.name;
-`,
-    function (err, results, fields) {
-      if (err) {
-        console.log(err);
-        return res.status(500).json({ error: "Lỗi máy chủ" });
-      }
-      return res.status(200).json(results);
-    }
-  );
-};
 
 // post admin
 const listCommenOnetPost = (req, res) => {
@@ -1084,44 +1058,11 @@ const getDataNews = (req, res) => {
     GROUP BY
       users.id, users.avatar, users.username, users.name;
     `,
-
     function (err, results, fields) {
       if (err) {
         console.log(err);
-        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+        return res.status(500).json({ error: "Lỗi máy chủ" });
       }
-      if (results[0].ban != 1) {
-        // chưa ban
-        connection.query(
-          "UPDATE posts SET ban = 1 WHERE id = ? ",
-          [postID],
-          function (err, results, fields) {
-            if (err) {
-              console.log(err);
-              return res
-                .status(500)
-                .json({ error: "Có lỗi xảy ra xin thử lại sau" });
-            }
-            return res.status(200).json({ success: "Đã ban post" });
-          }
-        );
-      } else {
-        // ban
-        connection.query(
-          "UPDATE posts SET ban = NULL WHERE id = ? ",
-          [postID],
-          function (err, results, fields) {
-            if (err) {
-              console.log(err);
-              return res
-                .status(500)
-                .json({ error: "Có lỗi xảy ra xin thử lại sau" });
-            }
-            return res.status(200).json({ success: "Đã hủy ban post" });
-          }
-        );
-      }
-
 
       const twentyFourHoursAgo = new Date();
       twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
@@ -1143,7 +1084,6 @@ const getDataNews = (req, res) => {
     }
   );
 };
-
 const getDataNewsUser = (req, res) => {
   const { idNews } = req.params;
   if (idNews) {
@@ -1304,7 +1244,6 @@ const storiesDelete = (req, res) => {
   }
 };
 
-
 module.exports = {
   createPost,
   createGroupPost,
@@ -1343,5 +1282,4 @@ module.exports = {
 
   getDataNewsUser,
   storiesDelete,
-
 };
