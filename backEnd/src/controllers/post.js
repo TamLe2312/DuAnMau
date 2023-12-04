@@ -497,6 +497,7 @@ const dataPost = (req, res) => {
     `SELECT posts.id,posts.content,posts.created_at,users.id as userid, users.username,users.avatar,users.name
     FROM posts  
     JOIN users ON posts.user_id = users.id
+    WHERE posts.ban IS NULL
     ORDER BY posts.id DESC
     LIMIT ? OFFSET ?
     `,
@@ -773,11 +774,85 @@ const countCommentPost = (req, res) => {
   }
 };
 
+const storiesImg = (req, res) => {
+  const { id } = req.body;
+  if (req.file) {
+    const fileName = req.file.filename;
+    const filePath = "/uploads/" + fileName;
+    const baseURL = process.env.APP_URL;
+    const imageURL = `${baseURL.slice(0, -1)}${filePath}`;
+    connection.query(
+      "INSERT INTO stories (user_id) VALUES (?)",
+      [id],
+      function (err, results, fields) {
+        if (err) {
+          console.log(err);
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
+        const insertedId = results.insertId;
+        connection.query(
+          "INSERT INTO listdata (stories_id,img) VALUES (?,?)",
+          [insertedId, imageURL],
+          function (err, results, fields) {
+            if (err) {
+              console.log(err);
+              return res.status(500).json({ error: "Lỗi máy chủ" });
+            }
+            return res.status(200).json({ success: "Đăng tin thành công" });
+          }
+        );
+      }
+    );
+  }
+};
+const storiesContent = (req, res) => {
+  const { id, searchValue } = req.body;
+  if (id && searchValue) {
+    connection.query(
+      "INSERT INTO stories (user_id,content) VALUES (?,?)",
+      [id, searchValue],
+      function (err, results, fields) {
+        if (err) {
+          console.log(err);
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
+        return res.status(200).json({ success: "Đăng tin thành công" });
+      }
+    );
+  }
+};
+const getDataNews = (req, res) => {
+  //Max lấy giá trị mới nhất của người dùng
+  connection.query(
+    `SELECT
+  users.id AS user_id,
+  users.avatar,
+  users.username,
+  users.name,
+  MAX(stories.id) AS story_id,
+  MAX(stories.content) AS content,
+  MAX(stories.created_at) AS created_at
+FROM
+  users
+  INNER JOIN stories ON users.id = stories.user_id
+GROUP BY
+  users.id, users.avatar, users.username, users.name;
+`,
+    function (err, results, fields) {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Lỗi máy chủ" });
+      }
+      return res.status(200).json(results);
+    }
+  );
+};
+
 // post admin
 const listCommenOnetPost = (req, res) => {
   const idpost = parseInt(req.params.postID);
   const page = parseInt(req.params.page);
-  const sl = 10;
+  const sl = 8;
   const offset = (page - 1) * sl;
 
   connection.query(
@@ -840,54 +915,156 @@ const banComment = (req, res) => {
     }
   );
 };
-
-const storiesImg = (req, res) => {
-  const { id } = req.body;
-  if (req.file) {
-    const fileName = req.file.filename;
-    const filePath = "/uploads/" + fileName;
-    const baseURL = process.env.APP_URL;
-    const imageURL = `${baseURL.slice(0, -1)}${filePath}`;
-    connection.query(
-      "INSERT INTO stories (user_id) VALUES (?)",
-      [id],
-      function (err, results, fields) {
-        if (err) {
-          console.log(err);
-          return res.status(500).json({ error: "Lỗi máy chủ" });
-        }
-        const insertedId = results.insertId;
+// flag post
+const flagPost = (req, res) => {
+  const postID = parseInt(req.body.postID);
+  const userID = parseInt(req.body.userID);
+  const contentFlag = req.body.contentFlag;
+  connection.query(
+    "SELECT countflag FROM posts WHERE id =? ",
+    [postID],
+    function (err, results, fields) {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+      }
+      if (results[0].countflag) {
+        // != null
         connection.query(
-          "INSERT INTO listdata (stories_id,img) VALUES (?,?)",
-          [insertedId, imageURL],
+          `UPDATE posts
+            SET countflag = countflag + 1
+            WHERE id =? `,
+          [postID],
           function (err, results, fields) {
             if (err) {
               console.log(err);
-              return res.status(500).json({ error: "Lỗi máy chủ" });
+              return res
+                .status(500)
+                .json({ error: "Có lỗi xảy ra xin thử lại sau" });
             }
-            return res.status(200).json({ success: "Đăng tin thành công" });
+            if (results) {
+              connection.query(
+                `INSERT INTO flagpost (user_id,post_id,flagcontent)
+                VALUES (?, ?, ?) `,
+                [userID, postID, contentFlag],
+                function (err, results, fields) {
+                  if (err) {
+                    console.log(err);
+                    return res
+                      .status(500)
+                      .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+                  }
+                  return res
+                    .status(200)
+                    .json({ success: "Bạn đã spam bài viết" });
+                }
+              );
+            }
+          }
+        );
+      } else {
+        // null
+        connection.query(
+          `UPDATE posts
+            SET countflag = 1
+            WHERE id =? `,
+          [postID],
+          function (err, results, fields) {
+            if (err) {
+              console.log(err);
+              return res
+                .status(500)
+                .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+            }
+            if (results) {
+              connection.query(
+                `INSERT INTO flagpost (user_id,post_id,flagcontent)
+                VALUES (?, ?, ?) `,
+                [userID, postID, contentFlag],
+                function (err, results, fields) {
+                  if (err) {
+                    console.log(err);
+                    return res
+                      .status(500)
+                      .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+                  }
+                  return res.status(200).json({
+                    success: "Bạn đã spam bài viết",
+                  });
+                }
+              );
+            }
           }
         );
       }
-    );
-  }
+    }
+  );
 };
-const storiesContent = (req, res) => {
-  const { id, searchValue } = req.body;
-  if (id && searchValue) {
-    connection.query(
-      "INSERT INTO stories (user_id,content) VALUES (?,?)",
-      [id, searchValue],
-      function (err, results, fields) {
-        if (err) {
-          console.log(err);
-          return res.status(500).json({ error: "Lỗi máy chủ" });
-        }
-        return res.status(200).json({ success: "Đăng tin thành công" });
+// list flag
+const listFlagPost = (req, res) => {
+  const postID = parseInt(req.params.postID);
+  connection.query(
+    `SELECT flagpost.*, users.name, users.username
+    FROM flagpost
+    INNER JOIN users ON flagpost.user_id=users.id
+    WHERE flagpost.post_id = ? `,
+    [postID],
+    function (err, results, fields) {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
       }
-    );
-  }
+      return res.status(200).json(results);
+    }
+  );
 };
+
+// ban post
+const banPost = (req, res) => {
+  const postID = parseInt(req.body.postID);
+  connection.query(
+    "SELECT ban FROM posts WHERE id = ? ",
+    [postID],
+    function (err, results, fields) {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+      }
+      if (results[0].ban != 1) {
+        // chưa ban
+        connection.query(
+          "UPDATE posts SET ban = 1 WHERE id = ? ",
+          [postID],
+          function (err, results, fields) {
+            if (err) {
+              console.log(err);
+              return res
+                .status(500)
+                .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+            }
+            return res.status(200).json({ success: "Đã ban post" });
+          }
+        );
+      } else {
+        // ban
+        connection.query(
+          "UPDATE posts SET ban = NULL WHERE id = ? ",
+          [postID],
+          function (err, results, fields) {
+            if (err) {
+              console.log(err);
+              return res
+                .status(500)
+                .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+            }
+            return res.status(200).json({ success: "Đã hủy ban post" });
+          }
+        );
+      }
+    }
+  );
+};
+
 const getDataNews = (req, res) => {
   // Max lấy giá trị mới nhất của người dùng
   connection.query(
@@ -907,11 +1084,44 @@ const getDataNews = (req, res) => {
     GROUP BY
       users.id, users.avatar, users.username, users.name;
     `,
+
     function (err, results, fields) {
       if (err) {
         console.log(err);
-        return res.status(500).json({ error: "Lỗi máy chủ" });
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
       }
+      if (results[0].ban != 1) {
+        // chưa ban
+        connection.query(
+          "UPDATE posts SET ban = 1 WHERE id = ? ",
+          [postID],
+          function (err, results, fields) {
+            if (err) {
+              console.log(err);
+              return res
+                .status(500)
+                .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+            }
+            return res.status(200).json({ success: "Đã ban post" });
+          }
+        );
+      } else {
+        // ban
+        connection.query(
+          "UPDATE posts SET ban = NULL WHERE id = ? ",
+          [postID],
+          function (err, results, fields) {
+            if (err) {
+              console.log(err);
+              return res
+                .status(500)
+                .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+            }
+            return res.status(200).json({ success: "Đã hủy ban post" });
+          }
+        );
+      }
+
 
       const twentyFourHoursAgo = new Date();
       twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
@@ -1094,6 +1304,7 @@ const storiesDelete = (req, res) => {
   }
 };
 
+
 module.exports = {
   createPost,
   createGroupPost,
@@ -1124,6 +1335,13 @@ module.exports = {
   storiesImg,
   storiesContent,
   getDataNews,
+
+  // flagposst
+  flagPost,
+  listFlagPost,
+  banPost,
+
   getDataNewsUser,
   storiesDelete,
+
 };

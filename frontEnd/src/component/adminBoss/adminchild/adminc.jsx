@@ -5,7 +5,9 @@ function Adminn() {
   return (
     <div className="admin">
       <div className="admin-nav">
-        <Link to="/home">Home</Link>
+        <Link className="btn btn-outline-primary" to="/home">
+          <i className="fa-solid fa-house"></i> Home
+        </Link>
         <p>Admin (quản lí)</p>
         <ul className="list-group">
           <li className="list-group-item admin_children">

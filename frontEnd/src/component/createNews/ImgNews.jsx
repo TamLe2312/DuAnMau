@@ -50,7 +50,7 @@ function ImgNews() {
               }}
             />
             <label htmlFor="imgNews-img" className="imgNews-label">
-              Chọn hình ảnh <img src={logoImg} alt="" />
+              <img src={logoImg} alt="" />
             </label>
           </>
         )}
