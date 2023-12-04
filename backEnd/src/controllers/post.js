@@ -1063,7 +1063,7 @@ const banPost = (req, res) => {
     }
   );
 };
-
+// name space
 module.exports = {
   createPost,
   createGroupPost,
