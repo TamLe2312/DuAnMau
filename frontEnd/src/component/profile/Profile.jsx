@@ -785,6 +785,7 @@ function Profile() {
                                   searchUserFollower.map(
                                     (dataSearch, index) => {
                                       return (
+
                                         <>
                                           <React.Fragment key={index}>
                                             <div className="ProfileFollowRowContent">
@@ -815,6 +816,7 @@ function Profile() {
                                                 )}
                                               </div>
                                               <span>
+
                                                 <Link
                                                   to={`/home/profile/user/${dataSearch.id}`}
                                                   className="ProfileFollowLink"
@@ -822,6 +824,7 @@ function Profile() {
                                                     handleCloseModalFollower
                                                   }
                                                 >
+
                                                   {dataSearch.name
                                                     ? dataSearch.name
                                                     : dataSearch.username}
@@ -830,6 +833,7 @@ function Profile() {
                                             </div>
                                           </React.Fragment>
                                         </>
+
                                       );
                                     }
                                   )
@@ -841,6 +845,7 @@ function Profile() {
                               ) : followerData && followerData.length > 0 ? (
                                 followerData.map((dataFollower, index) => {
                                   return (
+
                                     <React.Fragment key={index}>
                                       <div className="ProfileFollowRowContent">
                                         <div className="ProfileFollowImgContent">
@@ -882,6 +887,7 @@ function Profile() {
                                         </span>
                                       </div>
                                     </React.Fragment>
+
                                   );
                                 })
                               ) : (
@@ -1180,6 +1186,7 @@ function Profile() {
           {postsData.length > 0 ? (
             postsData.map((data, index) => {
               return (
+
                 <React.Fragment key={index}>
                   <div className="container ProfilePostContent">
                     <Post
@@ -1195,6 +1202,7 @@ function Profile() {
                     />
                   </div>
                 </React.Fragment>
+
               );
             })
           ) : (

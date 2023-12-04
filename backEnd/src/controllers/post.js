@@ -1018,6 +1018,7 @@ const listFlagPost = (req, res) => {
     }
   );
 };
+
 // ban post
 const banPost = (req, res) => {
   const postID = parseInt(req.body.postID);
@@ -1063,7 +1064,247 @@ const banPost = (req, res) => {
     }
   );
 };
-// name space
+
+const getDataNews = (req, res) => {
+  // Max lấy giá trị mới nhất của người dùng
+  connection.query(
+    `SELECT
+      users.id AS user_id,
+      users.avatar,
+      users.username,
+      users.name,
+      MAX(stories.id) AS story_id,
+      MAX(stories.content) AS content,
+      MAX(stories.created_at) AS created_at
+    FROM
+      users
+      INNER JOIN stories ON users.id = stories.user_id
+    WHERE
+      stories.isExpired != 1
+    GROUP BY
+      users.id, users.avatar, users.username, users.name;
+    `,
+
+    function (err, results, fields) {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+      }
+      if (results[0].ban != 1) {
+        // chưa ban
+        connection.query(
+          "UPDATE posts SET ban = 1 WHERE id = ? ",
+          [postID],
+          function (err, results, fields) {
+            if (err) {
+              console.log(err);
+              return res
+                .status(500)
+                .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+            }
+            return res.status(200).json({ success: "Đã ban post" });
+          }
+        );
+      } else {
+        // ban
+        connection.query(
+          "UPDATE posts SET ban = NULL WHERE id = ? ",
+          [postID],
+          function (err, results, fields) {
+            if (err) {
+              console.log(err);
+              return res
+                .status(500)
+                .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+            }
+            return res.status(200).json({ success: "Đã hủy ban post" });
+          }
+        );
+      }
+
+
+      const twentyFourHoursAgo = new Date();
+      twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
+
+      connection.query(
+        `UPDATE stories SET isExpired = 1 WHERE created_at < ?`,
+        [twentyFourHoursAgo],
+        function (updateErr, updateResults, updateFields) {
+          if (updateErr) {
+            console.log(updateErr);
+            return res
+              .status(500)
+              .json({ error: "Lỗi máy chủ khi cập nhật trạng thái stories" });
+          }
+
+          return res.status(200).json(results);
+        }
+      );
+    }
+  );
+};
+
+const getDataNewsUser = (req, res) => {
+  const { idNews } = req.params;
+  if (idNews) {
+    connection.query(
+      `SELECT id, user_id, content, created_at FROM stories WHERE user_id = ? AND isExpired != 1`,
+      [idNews],
+      function (err, results, fields) {
+        if (err) {
+          console.log(err);
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
+
+        // Extract stories with content as null
+        const nullContentStories = results.filter(
+          (story) => story.content === null
+        );
+
+        // Check if there are stories with null content
+        if (nullContentStories.length > 0) {
+          // Extract story IDs with null content
+          const nullContentStoryIds = nullContentStories.map(
+            (story) => story.id
+          );
+
+          connection.query(
+            `SELECT stories_id, img FROM listdata WHERE stories_id IN (?)`,
+            [nullContentStoryIds],
+            function (errListdata, resultsListdata, fieldsListdata) {
+              if (errListdata) {
+                console.log(errListdata);
+                return res.status(500).json({ error: "Lỗi máy chủ" });
+              }
+
+              // Merge the results from stories and listdata
+              const combinedResults = results.map((story) => {
+                const matchingListdata = resultsListdata.find(
+                  (item) => item.stories_id === story.id
+                );
+                return {
+                  ...story,
+                  img: matchingListdata ? matchingListdata.img : null,
+                };
+              });
+
+              return res.status(200).json(combinedResults);
+            }
+          );
+        } else {
+          // No stories with null content, return results as is
+          return res.status(200).json(results);
+        }
+      }
+    );
+  } else {
+    return res.status(200).json([]);
+  }
+};
+
+const storiesDelete = (req, res) => {
+  const { id } = req.body;
+  if (id) {
+    connection.query(
+      "SELECT content FROM stories WHERE id = ?",
+      [id],
+      function (err, results, fields) {
+        if (err) {
+          return res
+            .status(500)
+            .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+        }
+
+        if (results.length > 0) {
+          const storyContent = results[0].content;
+
+          if (storyContent === null) {
+            // Content is null, retrieve img from listdata
+            connection.query(
+              "SELECT img FROM listdata WHERE stories_id = ?",
+              [id],
+              function (err, results, fields) {
+                if (err) {
+                  return res
+                    .status(500)
+                    .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+                }
+
+                if (results.length > 0) {
+                  const img = results[0].img;
+                  const imgPath = img.replace(
+                    "http://localhost:5173/uploads/",
+                    ""
+                  );
+                  connection.query(
+                    "DELETE FROM stories WHERE id = ?",
+                    [id],
+                    function (err, results, fields) {
+                      if (err) {
+                        return res
+                          .status(500)
+                          .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+                      }
+                      if (results) {
+                        const uploadDir = path.join(
+                          __dirname,
+                          "../../../frontEnd/uploads"
+                        );
+                        const filePath = path.join(uploadDir, imgPath);
+                        fs.access(filePath, fs.constants.F_OK, (err) => {
+                          if (err) {
+                            // Tệp tin không tồn tại, trả về lỗi hoặc thông báo không tìm thấy tệp tin
+                            return res
+                              .status(404)
+                              .json({ error: "Tệp tin không tồn tại" });
+                          }
+                          // Xóa tệp tin
+                          fs.unlink(filePath, (error) => {
+                            if (error) {
+                              // Lỗi khi xóa tệp tin, trả về lỗi hoặc thông báo lỗi xóa tệp tin
+                              return res
+                                .status(500)
+                                .json({ error: "Lỗi khi xóa tệp tin" });
+                            }
+
+                            // Xóa thành công, trả về thông báo thành công hoặc mã thành công
+                            return res
+                              .status(200)
+                              .json({ success: "Xóa ảnh thành công" });
+                          });
+                        });
+                      }
+                    }
+                  );
+                }
+              }
+            );
+          } else {
+            connection.query(
+              "DELETE FROM stories WHERE id = ?",
+              [id],
+              function (err, results, fields) {
+                if (err) {
+                  return res
+                    .status(500)
+                    .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+                }
+
+                if (results) {
+                  return res
+                    .status(200)
+                    .json({ success: "Bạn đã xóa tin thành công" });
+                }
+              }
+            );
+          }
+        }
+      }
+    );
+  }
+};
+
+
 module.exports = {
   createPost,
   createGroupPost,
@@ -1094,8 +1335,13 @@ module.exports = {
   storiesImg,
   storiesContent,
   getDataNews,
+
   // flagposst
   flagPost,
   listFlagPost,
   banPost,
+
+  getDataNewsUser,
+  storiesDelete,
+
 };
