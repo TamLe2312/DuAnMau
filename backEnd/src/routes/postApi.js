@@ -25,6 +25,9 @@ const {
   // list comment post
   listCommenOnetPost,
   banComment,
+  flagPost,
+  listFlagPost,
+  banPost,
 
   storiesImg,
   storiesContent,
@@ -77,5 +80,14 @@ Router.get("/countCommentPost/:postID&:groupPostId", countCommentPost);
 Router.get("/lisComents/:postID/:page", listCommenOnetPost);
 Router.post("/banComment", banComment);
 Router.get("/getDataNews", getDataNews);
+
+Router.post("/banPost", banPost);
+
+// flag
+Router.post("/flagPost", flagPost);
+Router.get("/listFlagPost/:postID", listFlagPost);
+
+
 Router.get("/getDataNewsUser/:idNews", getDataNewsUser);
+
 module.exports = Router;

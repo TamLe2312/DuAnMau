@@ -1,11 +1,13 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import "./new.scss";
-import { useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import { Context } from "../../page/home/home";
 import { useContext } from "react";
 import * as request from "../../utils/request";
+import "ldrs/leapfrog";
+// Default values shown
+import * as toxic from "../vietnamToxic/VietNamToxic";
 function ContextNews(props) {
   const dataa = useContext(Context);
   const location = useLocation();
@@ -22,7 +24,7 @@ function ContextNews(props) {
   const [success, setSuccess] = useState(true);
   const [e, setE] = useState(false);
   const [userData, setUserData] = useState("");
-
+  const [viPham, setviPham] = useState(false);
   useEffect(() => {
     setId(cookies.userId);
     const contentNews = document.getElementById("contentNews");
@@ -35,13 +37,13 @@ function ContextNews(props) {
         contentNews.textContent = "Thêm gì đó...";
     });
     contentNews.addEventListener("input", () => {
+      setviPham(false);
       setContent(contentNews.textContent);
     });
   }, []);
   useEffect(() => {
     if (id) {
       const fetchData = async () => {
-        // console.log(id);
         try {
           const response = await request.get(`account/getDataUser/${id}`); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
           setUserData(response.data[0]);
@@ -53,42 +55,46 @@ function ContextNews(props) {
     }
   }, [id]);
 
-  const handleShow = () => {
-    setShow(false);
-  };
   useEffect(() => {
     setImgs(props.data);
   }, [props.data]);
   const handlePost = async () => {
-    setLoading(true);
-    const postData = {
-      userID: id,
-      content: content,
-    };
-    const formData = new FormData();
-    if (imgs.length > 0) {
-      try {
-        const response = await request.post("post/create", postData);
-        imgs.forEach((img, index) => {
-          formData.append(`image${index}`, img);
-        });
-        formData.append("post_id", response.data.lastID);
-        await request.post("post/upimgs", formData);
-        setSuccess(false);
-      } catch (error) {
-        setE(true);
-        console.log(error);
-      }
+    const isToxic = toxic.VietNamToxic(content);
+    if (isToxic) {
+      console.log("vi phạm");
+      setviPham(true);
     } else {
-      try {
-        await request.post("post/create", postData);
-        setSuccess(false);
-      } catch (error) {
-        setE(true);
-        console.log(error);
+      setShow(false);
+      setLoading(true);
+      const postData = {
+        userID: id,
+        content: content,
+      };
+      const formData = new FormData();
+      if (imgs.length > 0) {
+        try {
+          const response = await request.post("post/create", postData);
+          imgs.forEach((img, index) => {
+            formData.append(`image${index}`, img);
+          });
+          formData.append("post_id", response.data.lastID);
+          await request.post("post/upimgs", formData);
+          setSuccess(false);
+        } catch (error) {
+          setE(true);
+          console.log(error);
+        }
+      } else {
+        try {
+          await request.post("post/create", postData);
+          setSuccess(false);
+        } catch (error) {
+          setE(true);
+          console.log(error);
+        }
       }
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
@@ -121,37 +127,11 @@ function ContextNews(props) {
       {/* Add */}
       {loading ? (
         <>
-          <div className="spinner-grow text-primary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-          <div className="spinner-grow text-secondary" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-          <div className="spinner-grow text-success" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-          <div className="spinner-grow text-danger" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
-          <div className="spinner-grow text-warning" role="status">
-            <span className="visually-hidden">Loading...</span>
-          </div>
+          <l-leapfrog size="40" speed="2.5" color="gray"></l-leapfrog>
         </>
       ) : (
         <>
           {show ? (
-            <div className="contentNews-add">
-              <button
-                // onClick={handleAdd}
-                disabled={!content}
-                type="button"
-                className="btn btn-primary contentNews-add-btn"
-                onClick={handleShow}
-              >
-                Đăng lên...
-              </button>
-            </div>
-          ) : success ? (
             <div className="contentNews-add-select">
               <button
                 disabled={!content}
@@ -165,20 +145,18 @@ function ContextNews(props) {
                   }
                 }}
               >
-                Bài viết
+                Đăng bài
               </button>
-              {/*   <button
-                // onClick={dataa}
-                disabled={!content}
-                type="button"
-                className="btn btn-primary"
-              >
-                Tin
-              </button> */}
+              {viPham && (
+                <>
+                  <br />
+                  <span>Chứa từ không hợp lệ</span>
+                </>
+              )}
             </div>
           ) : (
             <div>
-              {e ? "Có lỗi xảy ra xin thử lại sau" : "đăng thành công..."}
+              {e ? "Có lỗi xảy ra xin thử lại sau" : "Đã đăng bài viết"}
             </div>
           )}
         </>

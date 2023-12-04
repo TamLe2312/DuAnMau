@@ -785,24 +785,38 @@ function Profile() {
                                   searchUserFollower.map(
                                     (dataSearch, index) => {
                                       return (
-                                        <div
-                                          className="ProfileFollowRowContent"
-                                          key={index}
-                                        >
-                                          <div className="ProfileFollowImgContent">
-                                            {dataSearch.avatar ? (
-                                              <>
-                                                <Link
-                                                  to={`/home/profile/user/${dataSearch.id}`}
-                                                  className="suggestionFriend-title-link"
-                                                >
-                                                  <img
-                                                    src={dataSearch.avatar}
-                                                  />
-                                                </Link>
-                                              </>
-                                            ) : (
-                                              <>
+
+                                        <>
+                                          <React.Fragment key={index}>
+                                            <div className="ProfileFollowRowContent">
+                                              <div className="ProfileFollowImgContent">
+                                                {dataSearch.avatar ? (
+                                                  <>
+                                                    <Link
+                                                      to={`/home/profile/user/${dataSearch.id}`}
+                                                      className="suggestionFriend-title-link"
+                                                    >
+                                                      <img
+                                                        src={dataSearch.avatar}
+                                                      />
+                                                    </Link>
+                                                  </>
+                                                ) : (
+                                                  <>
+                                                    <Link
+                                                      to={`/home/profile/user/${dataSearch.id}`}
+                                                      className="ProfileFollowLink"
+                                                      onClick={
+                                                        handleCloseModalFollower
+                                                      }
+                                                    >
+                                                      <img src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg" />
+                                                    </Link>
+                                                  </>
+                                                )}
+                                              </div>
+                                              <span>
+
                                                 <Link
                                                   to={`/home/profile/user/${dataSearch.id}`}
                                                   className="ProfileFollowLink"
@@ -810,23 +824,16 @@ function Profile() {
                                                     handleCloseModalFollower
                                                   }
                                                 >
-                                                  <img src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg" />
+
+                                                  {dataSearch.name
+                                                    ? dataSearch.name
+                                                    : dataSearch.username}
                                                 </Link>
-                                              </>
-                                            )}
-                                          </div>
-                                          <span>
-                                            <Link
-                                              to={`/home/profile/user/${dataSearch.id}`}
-                                              className="ProfileFollowLink"
-                                              onClick={handleCloseModalFollower}
-                                            >
-                                              {dataSearch.name
-                                                ? dataSearch.name
-                                                : dataSearch.username}
-                                            </Link>
-                                          </span>
-                                        </div>
+                                              </span>
+                                            </div>
+                                          </React.Fragment>
+                                        </>
+
                                       );
                                     }
                                   )
@@ -838,44 +845,49 @@ function Profile() {
                               ) : followerData && followerData.length > 0 ? (
                                 followerData.map((dataFollower, index) => {
                                   return (
-                                    <div
-                                      className="ProfileFollowRowContent"
-                                      key={index}
-                                    >
-                                      <div className="ProfileFollowImgContent">
-                                        {dataFollower.avatar ? (
-                                          <>
-                                            <Link
-                                              to={`/home/profile/user/${dataFollower.id}`}
-                                              className="suggestionFriend-title-link"
-                                            >
-                                              <img src={dataFollower.avatar} />
-                                            </Link>
-                                          </>
-                                        ) : (
-                                          <>
-                                            <Link
-                                              to={`/home/profile/user/${dataFollower.id}`}
-                                              className="ProfileFollowLink"
-                                              onClick={handleCloseModalFollower}
-                                            >
-                                              <img src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg" />
-                                            </Link>
-                                          </>
-                                        )}
+
+                                    <React.Fragment key={index}>
+                                      <div className="ProfileFollowRowContent">
+                                        <div className="ProfileFollowImgContent">
+                                          {dataFollower.avatar ? (
+                                            <>
+                                              <Link
+                                                to={`/home/profile/user/${dataFollower.id}`}
+                                                className="suggestionFriend-title-link"
+                                              >
+                                                <img
+                                                  src={dataFollower.avatar}
+                                                />
+                                              </Link>
+                                            </>
+                                          ) : (
+                                            <>
+                                              <Link
+                                                to={`/home/profile/user/${dataFollower.id}`}
+                                                className="ProfileFollowLink"
+                                                onClick={
+                                                  handleCloseModalFollower
+                                                }
+                                              >
+                                                <img src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg" />
+                                              </Link>
+                                            </>
+                                          )}
+                                        </div>
+                                        <span>
+                                          <Link
+                                            to={`/home/profile/user/${dataFollower.id}`}
+                                            className="ProfileFollowLink"
+                                            onClick={handleCloseModalFollower}
+                                          >
+                                            {dataFollower.name
+                                              ? dataFollower.name
+                                              : dataFollower.username}
+                                          </Link>
+                                        </span>
                                       </div>
-                                      <span>
-                                        <Link
-                                          to={`/home/profile/user/${dataFollower.id}`}
-                                          className="ProfileFollowLink"
-                                          onClick={handleCloseModalFollower}
-                                        >
-                                          {dataFollower.name
-                                            ? dataFollower.name
-                                            : dataFollower.username}
-                                        </Link>
-                                      </span>
-                                    </div>
+                                    </React.Fragment>
+
                                   );
                                 })
                               ) : (
@@ -970,11 +982,8 @@ function Profile() {
                                   searchUserFollowed.map(
                                     (searchUserFollowed, index) => {
                                       return (
-                                        <>
-                                          <div
-                                            className="ProfileFollowRowContent"
-                                            key={index}
-                                          >
+                                        <React.Fragment key={index}>
+                                          <div className="ProfileFollowRowContent">
                                             <div className="ProfileFollowImgContent">
                                               {searchUserFollowed.avatar ? (
                                                 <>
@@ -1038,7 +1047,7 @@ function Profile() {
                                               </button>
                                             )}
                                           </div>
-                                        </>
+                                        </React.Fragment>
                                       );
                                     }
                                   )
@@ -1050,11 +1059,8 @@ function Profile() {
                               ) : followedData && followedData.length > 0 ? (
                                 followedData.map((followedData, index) => {
                                   return (
-                                    <>
-                                      <div
-                                        className="ProfileFollowRowContent"
-                                        key={index}
-                                      >
+                                    <React.Fragment key={index}>
+                                      <div className="ProfileFollowRowContent">
                                         <div className="ProfileFollowImgContent">
                                           {followedData.avatar ? (
                                             <>
@@ -1110,7 +1116,7 @@ function Profile() {
                                           </button>
                                         )}
                                       </div>
-                                    </>
+                                    </React.Fragment>
                                   );
                                 })
                               ) : (
@@ -1169,7 +1175,7 @@ function Profile() {
                   <span>bài viết</span>
                 </a>
               </div>
-              {/*   <div className="col-md-3 ColumnProfileFeature">
+              {/* <div className="col-md-3 ColumnProfileFeature">
                 <a>
                   <BookmarkIcon />
                   <span>đã lưu</span>
@@ -1180,19 +1186,23 @@ function Profile() {
           {postsData.length > 0 ? (
             postsData.map((data, index) => {
               return (
-                <div className="container ProfilePostContent" key={index}>
-                  <Post
-                    key={index}
-                    id={data.id}
-                    userid={data.userid}
-                    user={data.username}
-                    name={data.name}
-                    time={data.created_at}
-                    avatar={data.avatar}
-                    title={data.content}
-                    // like={100}
-                  />
-                </div>
+
+                <React.Fragment key={index}>
+                  <div className="container ProfilePostContent">
+                    <Post
+                      key={index}
+                      id={data.id}
+                      userid={data.userid}
+                      user={data.username}
+                      name={data.name}
+                      time={data.created_at}
+                      avatar={data.avatar}
+                      title={data.content}
+                      // like={100}
+                    />
+                  </div>
+                </React.Fragment>
+
               );
             })
           ) : (

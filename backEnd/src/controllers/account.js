@@ -217,6 +217,7 @@ const changeAvatar = (req, res) => {
     const filePath = "/uploads/" + fileName;
     const baseURL = process.env.APP_URL;
     const imageURL = `${baseURL.slice(0, -1)}${filePath}`;
+
     const uploadDir = path.join(__dirname, "../../../frontEnd/uploads");
     const filePathOldAvatar = path.join(uploadDir, hasAvatar);
     connection.query(
