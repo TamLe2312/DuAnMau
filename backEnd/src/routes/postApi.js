@@ -87,7 +87,6 @@ Router.post("/banPost", banPost);
 Router.post("/flagPost", flagPost);
 Router.get("/listFlagPost/:postID", listFlagPost);
 
-
 Router.get("/getDataNewsUser/:idNews", getDataNewsUser);
 
 module.exports = Router;
