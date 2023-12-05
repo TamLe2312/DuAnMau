@@ -219,6 +219,18 @@ const Callvideo = () => {
     }
   }, [cam]);
 
+  const [blur, setblur] = useState(false);
+  const handleBlur = () => {
+    setblur((pre) => !pre);
+    socket.emit("blurStatus", { youID: youID, blur: blur });
+  };
+  useEffect(() => {
+    socket.on("blurStatus", (data) => console.log(data));
+    return () => {
+      socket.off("blurStatus");
+    };
+  }, [blur]);
+
   return (
     <div className="modalvideo_header">
       <h3 className="modalvideo_name">{receptor.username}</h3>
@@ -244,6 +256,9 @@ const Callvideo = () => {
           </div>
         </div>
         <div className="modalvideo_setting">
+          <button className="btn btn-success m-2" onClick={handleBlur}>
+            Mờ
+          </button>
           <button className="btn btn-success m-2" onClick={handleCloseMic}>
             {!mic ? <MicIcon /> : <MicOffIcon />}
           </button>

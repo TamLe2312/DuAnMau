@@ -109,6 +109,14 @@ io.on("connection", (socket) => {
       io.to(user.socketId).emit("typingstop", data);
     }
   });
+  // blur
+  socket.on("blurStatus", (data) => {
+    const { youID, blur } = data;
+    const user = activeUsers.find((user) => user.userId == youID);
+    if (user) {
+      io.to(user.socketId).emit("blurStatus", data);
+    }
+  });
 });
 
 // });
