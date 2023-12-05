@@ -542,9 +542,7 @@ function DetailMess(props) {
                   <AddPhotoAlternateIcon sx={{ fontSize: 28 }} />
                 </label>
               </div>
-
               {/* -------------------------------------------- */}
-
               <InputEmoji
                 ref={input}
                 value={text}
@@ -570,6 +568,7 @@ function DetailMess(props) {
               >
                 <SendIcon sx={{ fontSize: 28 }} />
               </span>
+              {/* --------------------------- */}
             </div>
           </>
         ) : (
