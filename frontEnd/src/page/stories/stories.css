@@ -5,16 +5,18 @@
     margin: 0;
     box-sizing: border-box;
     display: flex;
-
+    overflow: hidden;
 }
 
 .StoriesNavBar {
     width: 20%;
+    height: 100svh;
     border-right: 1px solid black;
 }
 
 .StoriesDisplay {
     width: 80%;
+    height: 100svh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -211,7 +213,7 @@
 
 .StoriesWatchNews {
     width: 600px;
-    height: 800px;
+    height: 700px;
     border: 1px solid black;
     position: relative;
     border-radius: 12px;
@@ -247,7 +249,7 @@
 .StoriesWatchContainer {
     width: 600px;
     position: relative;
-    top: 50%;
+    top: 52%;
     transform: translateY(-50%);
     display: flex;
     justify-content: center;
@@ -256,7 +258,7 @@
 .StoriesWatchContainer img {
     width: 100%;
     height: 100%;
-    max-height: 600px;
+    max-height: 500px;
     object-fit: cover;
 }
 
