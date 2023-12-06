@@ -158,7 +158,24 @@ function PostDetail() {
 
   // Like //
   const [liked, setliked] = useState(false);
-  const [like, setlike] = useState(0);
+  const [like, setlike] = useState("");
+
+  useEffect(() => {
+    try {
+      const fetchApi = async () => {
+        const res = await request.post("post/countLikedPost", {
+          postID: userDataPost.id,
+        });
+        if (res) {
+          setlike(res.data[0].countlike);
+        }
+      };
+      fetchApi();
+    } catch (error) {
+      console.log(error);
+    }
+  }, [userDataPost]);
+
   const handleLikePost = () => {
     setlike((pre) => pre - 1);
     setliked(false);
@@ -257,7 +274,6 @@ function PostDetail() {
                   src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg"
                   alt="Avatar"
                 />
-                // <img className="post-avatar" src="" />
               )}
               &nbsp;
               <span>
@@ -275,7 +291,7 @@ function PostDetail() {
           </div>
           {/* -------------more------------ */}
           <span className="post-more-delete">
-            {userDataPost.userid === myID && (
+            {userDataPost.userid == myID && (
               <MoreHorizIcon
                 onClick={() => {
                   handleDELETE(postId);
@@ -353,13 +369,6 @@ function PostDetail() {
           >
             {img && img.length > 0 ? userDataPost.content : ""}
           </p>
-          {/* {them ? (
-            <button className="post-title-btn" onClick={handleToggleExpand}>
-              {expanded ? "Thu gọn" : "Xem thêm"}
-            </button>
-          ) : (
-            ""
-          )} */}
           {hasComment && (
             <span
               className="post-footer-list-comment"
@@ -412,7 +421,6 @@ function PostDetail() {
         show={modalShow}
         onHide={handleHide}
         childrens={
-          //  user(tk), time, avatar, title, name, id, userid
           modalShowComment ? (
             <ListComment
               id={userDataPost.id}
