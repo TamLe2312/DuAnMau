@@ -245,7 +245,11 @@ function Posts() {
                       &nbsp;
                       <button
                         type="button"
-                        className="btn btn-secondary"
+                        className={
+                          dataPost.countflag > 5
+                            ? "btn btn-danger"
+                            : "btn btn-secondary"
+                        }
                         onClick={() => handleBaoCao(dataPost)}
                       >
                         {dataPost.countflag && (

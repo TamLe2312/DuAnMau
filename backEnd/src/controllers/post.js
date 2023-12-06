@@ -981,7 +981,8 @@ const listFlagPost = (req, res) => {
     `SELECT flagpost.*, users.name, users.username
     FROM flagpost
     INNER JOIN users ON flagpost.user_id=users.id
-    WHERE flagpost.post_id = ? `,
+    WHERE flagpost.post_id = ? 
+    `,
     [postID],
     function (err, results, fields) {
       if (err) {
