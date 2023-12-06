@@ -3,6 +3,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import GridOnIcon from "@mui/icons-material/GridOn";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import FavoriteIcon from "@mui/icons-material/Favorite";
+import Select from "react-select";
 import SearchIcon from "@mui/icons-material/Search";
 import InfiniteScroll from "react-infinite-scroll-component";
 import "bootstrap/dist/css/bootstrap.min.css";
@@ -15,6 +16,7 @@ import { toast } from "sonner";
 import "./Profile.css";
 import { Link, useParams } from "react-router-dom";
 import * as request from "../../utils/request";
+import axios from "axios";
 
 function Profile() {
   // id user khác
@@ -154,6 +156,11 @@ function Profile() {
       moTa: "",
       birthday: "",
     });
+    setProvince(null);
+    setDistrict(null);
+    setWards(null);
+    setDistrictSelect([]);
+    setWardsSelect([]);
     setShowModalInformationProfile(true);
   };
 
@@ -258,6 +265,9 @@ function Profile() {
         moTa: formValues.moTa,
         date: moment(formValues.birthday).toISOString(),
         id: id,
+        province: province ? province.value : null,
+        district: district ? district.value : null,
+        wards: wards ? wards.value : null,
       });
       if (response.data.success) {
         toast.success(response.data.success);
@@ -274,7 +284,9 @@ function Profile() {
       }));
       handleCloseModalInformationProfile();
     } catch (error) {
-      toast.error(error.response.data.error);
+      console.error(error);
+      /*       toast.error(error.response.data.error); */
+
       setLoading(false);
     }
   };
@@ -543,6 +555,53 @@ function Profile() {
     };
     fetchDataCountFollow();
   }, [id]);
+  const [provinceSelect, setProvinceSelect] = useState([]);
+  const [districtSelect, setDistrictSelect] = useState([]);
+  const [wardsSelect, setWardsSelect] = useState([]);
+  const [province, setProvince] = useState(null);
+  const [district, setDistrict] = useState(null);
+  const [wards, setWards] = useState(null);
+  useEffect(() => {
+    const ProvinceSelect = async () => {
+      const res = await axios.get("https://provinces.open-api.vn/api/?depth=3");
+      if (res) {
+        const updateProvinceSelect = res.data.map((item) => ({
+          value: item.name,
+          label: item.name,
+          huyen: item.districts,
+        }));
+        setProvinceSelect(updateProvinceSelect);
+      }
+      return () => {};
+    };
+    ProvinceSelect();
+  }, []);
+  useEffect(() => {
+    if (province) {
+      const updateDistrict = province.huyen.map((item) => ({
+        value: item.name,
+        label: item.name,
+        xa: item.wards,
+      }));
+      setDistrictSelect(updateDistrict); // Corrected function name
+    }
+  }, [province]);
+
+  useEffect(() => {
+    if (district) {
+      const updateWards = district.xa.map((item) => ({
+        value: item.name,
+        label: item.name,
+      }));
+      setWardsSelect(updateWards);
+    }
+  }, [district]);
+  useEffect(() => {
+    if (wards) {
+      setIsHaveInform(true);
+    }
+  }, [wards]);
+
   return (
     <>
       <div className="container-fluid" style={{ overflowX: "hidden" }}>
@@ -689,6 +748,27 @@ function Profile() {
                               className="form-control"
                             />
                           </Form.Group>
+                          <Form.Group controlId="formProvince">
+                            <Form.Label>Province</Form.Label>
+                            <Select
+                              options={provinceSelect}
+                              onChange={(e) => setProvince(e)}
+                            />
+                          </Form.Group>
+                          <Form.Group controlId="formDistrict">
+                            <Form.Label>District</Form.Label>
+                            <Select
+                              options={districtSelect}
+                              onChange={(e) => setDistrict(e)}
+                            />
+                          </Form.Group>
+                          <Form.Group controlId="formWards">
+                            <Form.Label>Wards</Form.Label>
+                            <Select
+                              options={wardsSelect}
+                              onChange={(e) => setWards(e)}
+                            />
+                          </Form.Group>
                           <br />
                         </Form>
                       </Modal.Body>
@@ -785,7 +865,6 @@ function Profile() {
                                   searchUserFollower.map(
                                     (dataSearch, index) => {
                                       return (
-
                                         <>
                                           <React.Fragment key={index}>
                                             <div className="ProfileFollowRowContent">
@@ -816,7 +895,6 @@ function Profile() {
                                                 )}
                                               </div>
                                               <span>
-
                                                 <Link
                                                   to={`/home/profile/user/${dataSearch.id}`}
                                                   className="ProfileFollowLink"
@@ -824,7 +902,6 @@ function Profile() {
                                                     handleCloseModalFollower
                                                   }
                                                 >
-
                                                   {dataSearch.name
                                                     ? dataSearch.name
                                                     : dataSearch.username}
@@ -833,7 +910,6 @@ function Profile() {
                                             </div>
                                           </React.Fragment>
                                         </>
-
                                       );
                                     }
                                   )
@@ -845,7 +921,6 @@ function Profile() {
                               ) : followerData && followerData.length > 0 ? (
                                 followerData.map((dataFollower, index) => {
                                   return (
-
                                     <React.Fragment key={index}>
                                       <div className="ProfileFollowRowContent">
                                         <div className="ProfileFollowImgContent">
@@ -887,7 +962,6 @@ function Profile() {
                                         </span>
                                       </div>
                                     </React.Fragment>
-
                                   );
                                 })
                               ) : (
@@ -1186,7 +1260,6 @@ function Profile() {
           {postsData.length > 0 ? (
             postsData.map((data, index) => {
               return (
-
                 <React.Fragment key={index}>
                   <div className="container ProfilePostContent">
                     <Post
@@ -1202,7 +1275,6 @@ function Profile() {
                     />
                   </div>
                 </React.Fragment>
-
               );
             })
           ) : (

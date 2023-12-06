@@ -318,8 +318,8 @@ const CountPost = (req, res) => {
 };
 
 const UpdateInformationProfile = (req, res) => {
-  const { name, moTa, date, id } = req.body;
-  if (!name && !moTa) {
+  const { name, moTa, date, id, province, district, wards } = req.body;
+  if (!name && !moTa && !province && !district && !wards) {
     const formattedDate = moment(date).format("YYYY-MM-DD");
     connection.query(
       "UPDATE Users SET birddate = ? WHERE id = ?",
@@ -347,7 +347,7 @@ const UpdateInformationProfile = (req, res) => {
         );
       }
     );
-  } else if (!name) {
+  } else if (!name && !date && !province && !district && !wards) {
     connection.query(
       "UPDATE Users SET moTa = ? WHERE id = ?",
       [moTa, id],
@@ -374,45 +374,62 @@ const UpdateInformationProfile = (req, res) => {
         );
       }
     );
-  } else {
+  } else if (!name && !moTa && !date) {
+    const address = wards + " " + district + " " + province;
+    console.log(address);
     connection.query(
-      "SELECT * FROM Users WHERE name = ?",
-      [name],
+      "UPDATE Users SET address = ? WHERE id = ?",
+      [address, id],
       function (err, results, fields) {
         if (err) {
           console.error(err);
           return res.status(500).json({ error: "Lỗi máy chủ" });
         }
-        if (results.length > 0) {
-          return res.status(400).json({ error: "Tên người dùng đã tồn tại" });
-        } else {
-          connection.query(
-            "UPDATE Users SET name = ? WHERE id = ?",
-            [name, id],
-            function (err, results, fields) {
-              if (err) {
-                console.error(err);
-                return res.status(500).json({ error: "Lỗi máy chủ" });
-              }
-              connection.query(
-                "SELECT name,username,moTa FROM Users WHERE id = ?",
-                [id],
-                function (err, results, fields) {
-                  if (err) {
-                    console.error(err);
-                    return res.status(500).json({ error: "Lỗi máy chủ" });
-                  }
-                  return res.status(200).json({
-                    name: results[0].name,
-                    moTa: results[0].moTa,
-                    username: results[0].username,
-                    success: "Cập nhật thông tin thành công",
-                  });
-                }
-              );
+        connection.query(
+          "SELECT name,username,moTa FROM Users WHERE id = ?",
+          [id],
+          function (err, results, fields) {
+            if (err) {
+              console.error(err);
+              return res.status(500).json({ error: "Lỗi máy chủ" });
             }
-          );
+            console.log("OK");
+            return res.status(200).json({
+              name: results[0].name,
+              moTa: results[0].moTa,
+              username: results[0].username,
+              success: "Cập nhật thông tin thành công",
+            });
+          }
+        );
+      }
+    );
+  }
+  if (name) {
+    connection.query(
+      "UPDATE Users SET name = ? WHERE id = ?",
+      [name, id],
+      function (err, results, fields) {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ error: "Lỗi máy chủ" });
         }
+        connection.query(
+          "SELECT name,username,moTa FROM Users WHERE id = ?",
+          [id],
+          function (err, results, fields) {
+            if (err) {
+              console.error(err);
+              return res.status(500).json({ error: "Lỗi máy chủ" });
+            }
+            return res.status(200).json({
+              name: results[0].name,
+              moTa: results[0].moTa,
+              username: results[0].username,
+              success: "Cập nhật thông tin thành công",
+            });
+          }
+        );
       }
     );
   }
@@ -716,24 +733,57 @@ WHERE follows.follower_id = ?`,
 const suggestFollow = (req, res) => {
   const idUser = parseInt(req.params.id);
   const limit = parseInt(req.params.limit) || 5;
+
   if (idUser) {
     connection.query(
-      "SELECT id, username, name, avatar FROM users WHERE id <> ? AND id NOT IN (SELECT followed_id FROM follows WHERE follower_id = ?) ORDER BY RAND() LIMIT ?",
-      [idUser, idUser, limit],
-      function (err, results, fields) {
+      "SELECT address FROM users WHERE id = ?",
+      [idUser],
+      function (err, addressResults, fields) {
         if (err) {
           console.error(err);
           return res.status(500).json({ error: "Lỗi máy chủ" });
         }
-        if (results.length > 0) {
-          return res.status(200).json(results);
+
+        if (addressResults.length > 0 && addressResults[0].address !== null) {
+          // If idUser has an address
+          connection.query(
+            "SELECT id, username, name, avatar, address FROM users WHERE id <> ? AND id NOT IN (SELECT followed_id FROM follows WHERE follower_id = ?) AND address = ? ORDER BY RAND() LIMIT ?",
+            [idUser, idUser, addressResults[0].address, limit],
+            function (err, results, fields) {
+              if (err) {
+                console.error(err);
+                return res.status(500).json({ error: "Lỗi máy chủ" });
+              }
+              if (results.length > 0) {
+                return res.status(200).json(results);
+              } else {
+                return res.status(400).json({ error: "Không có người dùng" });
+              }
+            }
+          );
         } else {
-          return res.status(400).json({ error: "Không có người dùng" });
+          // If idUser does not have an address or the address is null
+          connection.query(
+            "SELECT id, username, name, avatar, address FROM users WHERE id <> ? AND id NOT IN (SELECT followed_id FROM follows WHERE follower_id = ?) ORDER BY RAND() LIMIT ?",
+            [idUser, idUser, limit],
+            function (err, results, fields) {
+              if (err) {
+                console.error(err);
+                return res.status(500).json({ error: "Lỗi máy chủ" });
+              }
+              if (results.length > 0) {
+                return res.status(200).json(results);
+              } else {
+                return res.status(400).json({ error: "Không có người dùng" });
+              }
+            }
+          );
         }
       }
     );
   }
 };
+
 const countFollow = (req, res) => {
   const idUser = parseInt(req.params.userId);
   connection.query(
@@ -834,6 +884,27 @@ const searchUserProfile = (req, res) => {
     );
   }
 };
+const FindArena = (req, res) => {
+  const { id, address } = req.body;
+  const limit = 20;
+  if (id) {
+    connection.query(
+      "SELECT id, username, name, avatar, address FROM users WHERE id <> ? AND id NOT IN (SELECT followed_id FROM follows WHERE follower_id = ?) AND LOWER(address) LIKE ? ORDER BY RAND() LIMIT ?",
+      [id, id, `%${address}%`, limit],
+      function (err, results, fields) {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
+        if (results.length > 0) {
+          return res.status(200).json(results);
+        } else {
+          return res.status(200).json([]);
+        }
+      }
+    );
+  }
+};
 
 module.exports = {
   login,
@@ -859,4 +930,5 @@ module.exports = {
   searchUserFollower,
   searchUserFollowed,
   searchUserProfile,
+  FindArena,
 };

@@ -460,3 +460,22 @@ display: block;
     justify-content: center;
     position: relative;
 }
+
+.FindArena {
+    display: flex;
+    align-items: center;
+}
+
+.FindArena .css-b62m3t-container {
+    width: 30%;
+    margin: 0 8px;
+}
+
+.FindArena .btn-primary {
+    margin: 0 auto !important;
+}
+
+.FindArena .btn-primary .fa-magnifying-glass,
+.fa-arrow-rotate-right {
+    color: #fff;
+}
