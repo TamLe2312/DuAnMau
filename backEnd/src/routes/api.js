@@ -24,6 +24,7 @@ const {
   searchUserFollowed,
   searchUserProfile,
   isFollowed,
+  FindArena,
 } = require("../controllers/account");
 const Router = express.Router();
 const multer = require("multer");
@@ -55,6 +56,7 @@ Router.post("/searchUserFollower", searchUserFollower);
 Router.post("/searchUserFollowed", searchUserFollowed);
 Router.post("/verifyToken", verifyToken);
 Router.post("/ChangePassword", ChangePassword);
+Router.post("/findArena", FindArena);
 Router.get("/detail/:id", detail);
 Router.get("/listUsers/:slug", listUsers);
 Router.get("/countPost/:userId", CountPost);
