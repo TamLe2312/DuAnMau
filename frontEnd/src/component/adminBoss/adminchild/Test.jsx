@@ -30,6 +30,7 @@ const Test = () => {
 
   useEffect(() => {
     if (tinh) {
+      console.log(tinh);
       setA(tinh.value);
       const updateHuyen = tinh.huyen.map((item) => ({
         value: item.name,
@@ -69,10 +70,29 @@ const Test = () => {
     setC("Nam dong");
   };
   const handleLogin = () => {
-    if (tinh && huyen && xa) {
+    /*  if (tinh && huyen && xa) {
       setan(false);
       let diaCHi = xa + ", " + huyen.value + ", " + tinh.value;
+      const Test = "Phường Phúc Xá, Quận Ba Đình, Thành phố Hà Nội";
+      if (Test === diaCHi) {
+        console.log("OK ");
+      }
       console.log(diaCHi);
+    } else {
+      console.log("Chưa nhập thông tin");
+    } */
+    if (tinh) {
+      const TestA = tinh.value ? tinh.value : "";
+      const TestB = huyen ? huyen.value : "";
+      const TestC = xa ? xa : "";
+      const diaChi = TestC + " " + TestB + " " + TestA;
+      setan(false);
+      /*   let diaCHi = xa + ", " + huyen.value + ", " + tinh.value; */
+      const Test = "Phường Phúc Xá, Quận Ba Đình, Thành phố Hà Nội";
+      /*  if (Test === diaCHi) {
+        console.log("OK ");
+      } */
+      console.log(diaChi);
     } else {
       console.log("Chưa nhập thông tin");
     }
@@ -113,7 +133,12 @@ const Test = () => {
           )}
         </div>
       </div>
-      {tinh && huyen && xa && (
+      {/*    {tinh && huyen && xa && (
+        <button className="btn btn-success mt-2" onClick={handleLogin}>
+          Đăng kí
+        </button>
+      )} */}
+      {tinh && (
         <button className="btn btn-success mt-2" onClick={handleLogin}>
           Đăng kí
         </button>

@@ -45,7 +45,7 @@ function Suggestions() {
           )}
         </Link>
         <div className="suggestions-title">
-          <Link to={`/home/profile/user/${id}`} className="suggestions-link">
+          <Link to={`/home/profile`} className="suggestions-link">
             {userData.name ? (
               <span className="suggestions-title-name">{userData.name}</span>
             ) : (

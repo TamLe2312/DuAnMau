@@ -1,5 +1,11 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { useEffect, useRef, useContext, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useContext,
+  useState,
+  useLayoutEffect,
+} from "react";
 import Peer from "simple-peer";
 import { useCookies } from "react-cookie";
 import { SocketCon } from "../socketio/Socketcontext";
@@ -9,6 +15,10 @@ import VideocamIcon from "@mui/icons-material/Videocam";
 import VideocamOffIcon from "@mui/icons-material/VideocamOff";
 import MicIcon from "@mui/icons-material/Mic";
 import MicOffIcon from "@mui/icons-material/MicOff";
+import Callanimation from "./Callanimation";
+import BlurOnIcon from "@mui/icons-material/BlurOn";
+import BlurOffIcon from "@mui/icons-material/BlurOff";
+import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
 const Callvideo = () => {
   const [cookies] = useCookies();
   const location = useLocation();
@@ -219,6 +229,59 @@ const Callvideo = () => {
     }
   }, [cam]);
 
+  const [blur, setblur] = useState(false);
+  const [blurMe, setblurMe] = useState(false);
+  const [blurYou, setblurYou] = useState(false);
+  const handleBlur = () => {
+    setblur((pre) => !pre);
+    if (!blurMe) {
+      setblurMe(true);
+    } else {
+      setblurMe(false);
+    }
+    socket.emit("blurStatus", { youID: youID, blur: blur });
+  };
+  useLayoutEffect(() => {
+    socket.on("blurStatus", () => {
+      if (!blurYou) {
+        setblurYou(true);
+      } else {
+        setblurYou(false);
+      }
+    });
+    return () => {
+      socket.off("blurStatus");
+    };
+  }, [blur, blurYou]);
+  // like
+  const [likelike, setlikelike] = useState(false);
+  const [ckeckLike, setckeckLike] = useState(false);
+  const handleLike = () => {
+    if (!ckeckLike) {
+      setckeckLike(true);
+    } else {
+      setckeckLike(false);
+    }
+    socket.emit("likelike", { youID: youID });
+  };
+  const chay = useRef();
+  useEffect(() => {
+    socket.on("likelike", () => {
+      if (!likelike) {
+        setlikelike(true);
+      }
+    });
+    if (likelike) {
+      chay.current = setTimeout(() => {
+        setlikelike(false);
+      }, 5000);
+    }
+    return () => {
+      socket.off("likelike");
+      clearTimeout(chay.current);
+    };
+  }, [ckeckLike, likelike]);
+
   return (
     <div className="modalvideo_header">
       <h3 className="modalvideo_name">{receptor.username}</h3>
@@ -226,6 +289,7 @@ const Callvideo = () => {
         <div className="modalvideo_child">
           <div className="modalvideo_me">
             <video
+              style={blurMe ? { filter: "blur(8px)" } : {}}
               className="modalvideo_me_video"
               muted
               ref={myVideo}
@@ -235,6 +299,7 @@ const Callvideo = () => {
           <div className="modalvideo_you">
             <div>
               <video
+                style={blurYou ? { filter: "blur(8px)" } : {}}
                 className="modalvideo_you_video"
                 ref={userVideo}
                 autoPlay
@@ -244,6 +309,12 @@ const Callvideo = () => {
           </div>
         </div>
         <div className="modalvideo_setting">
+          <button className="btn btn-success m-2" onClick={handleLike}>
+            <ThumbUpAltIcon />
+          </button>
+          <button className="btn btn-success m-2" onClick={handleBlur}>
+            {blurMe ? <BlurOffIcon /> : <BlurOnIcon />}
+          </button>
           <button className="btn btn-success m-2" onClick={handleCloseMic}>
             {!mic ? <MicIcon /> : <MicOffIcon />}
           </button>
@@ -256,6 +327,7 @@ const Callvideo = () => {
           </button>
         </div>
       </div>
+      {likelike && <Callanimation />}
     </div>
   );
 };

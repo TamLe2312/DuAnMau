@@ -241,7 +241,11 @@ function Navigation() {
         {/* {showMore && ( */}
         <div className={`dropdown-more ${showMore ? "active" : "inactive"}`}>
           <ul className="dropdown-more-ul">
-            {isAdmin ? <Drop text={admin} path={"home/admin"} /> : <></>}
+            {isAdmin ? (
+              <Drop text={admin} path={"home/admin/account"} />
+            ) : (
+              <></>
+            )}
             <div onClick={handleLogout} className="dropdown-more-title">
               <Drop Title={logout} path={""} />
             </div>
