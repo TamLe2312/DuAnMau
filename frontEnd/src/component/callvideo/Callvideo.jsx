@@ -265,8 +265,10 @@ const Callvideo = () => {
     socket.emit("likelike", { youID: youID });
   };
   const chay = useRef();
+  const [emoji, setemoji] = useState(null);
   useEffect(() => {
-    socket.on("likelike", () => {
+    socket.on("likelike", (data) => {
+      setemoji(data.emoij);
       if (!likelike) {
         setlikelike(true);
       }
@@ -274,14 +276,17 @@ const Callvideo = () => {
     if (likelike) {
       chay.current = setTimeout(() => {
         setlikelike(false);
-      }, 5000);
+      }, 2500);
     }
     return () => {
       socket.off("likelike");
       clearTimeout(chay.current);
     };
   }, [ckeckLike, likelike]);
-
+  const handleLikes = (e) => {
+    setckeckLike(true);
+    socket.emit("likelike", { youID: youID, emoij: e });
+  };
   return (
     <div className="modalvideo_header">
       <h3 className="modalvideo_name">{receptor.username}</h3>
@@ -289,17 +294,20 @@ const Callvideo = () => {
         <div className="modalvideo_child">
           <div className="modalvideo_me">
             <video
-              style={blurMe ? { filter: "blur(8px)" } : {}}
+              style={blurMe ? { filter: "blur(20px)" } : {}}
               className="modalvideo_me_video"
               muted
               ref={myVideo}
               autoPlay
             />
+            <span className="modalvideo_you_video_animation">
+              {likelike && <Callanimation emoji={emoji} />}
+            </span>
           </div>
           <div className="modalvideo_you">
             <div>
               <video
-                style={blurYou ? { filter: "blur(8px)" } : {}}
+                style={blurYou ? { filter: "blur(20px)" } : {}}
                 className="modalvideo_you_video"
                 ref={userVideo}
                 autoPlay
@@ -308,9 +316,44 @@ const Callvideo = () => {
             </div>
           </div>
         </div>
+
         <div className="modalvideo_setting">
-          <button className="btn btn-success m-2" onClick={handleLike}>
-            <ThumbUpAltIcon />
+          <button
+            className="btn btn-success m-2 enoij_hover"
+            // onClick={handleLike}
+          >
+            icon
+            <ul className="emoij">
+              <li
+                onClick={() =>
+                  handleLikes("fa-solid fa-thumbs-up text-primary")
+                }
+              >
+                <i className="fa-solid fa-thumbs-up text-primary"></i>
+              </li>
+              <li onClick={() => handleLikes("fa-solid fa-heart text-danger")}>
+                <i className="fa-solid fa-heart text-danger"></i>
+              </li>
+              <li
+                onClick={() =>
+                  handleLikes("fa-solid fa-face-smile text-warning")
+                }
+              >
+                <i className="fa-solid fa-face-smile text-warning"></i>
+              </li>
+              <li
+                onClick={() => handleLikes("fa-solid fa-hand-fist text-dark")}
+              >
+                <i className="fa-solid fa-hand-fist text-dark"></i>
+              </li>
+              <li
+                onClick={() =>
+                  handleLikes("fa-solid fa-money-bill-1 text-info")
+                }
+              >
+                <i className="fa-solid fa-money-bill-1 text-info"></i>
+              </li>
+            </ul>
           </button>
           <button className="btn btn-success m-2" onClick={handleBlur}>
             {blurMe ? <BlurOffIcon /> : <BlurOnIcon />}
@@ -327,7 +370,6 @@ const Callvideo = () => {
           </button>
         </div>
       </div>
-      {likelike && <Callanimation />}
     </div>
   );
 };
