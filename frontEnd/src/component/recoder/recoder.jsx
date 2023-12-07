@@ -1,6 +1,4 @@
 import { useEffect, useState } from "react";
-import * as request from "../../utils/request";
-
 import vmsg from "vmsg";
 
 function Recorder(props) {
@@ -10,13 +8,22 @@ function Recorder(props) {
   const recorder = new vmsg.Recorder({
     wasmURL: "https://unpkg.com/vmsg@0.4.0/vmsg.wasm",
   });
-
-  const handleRecording = async () => {
-    await recorder.initAudio();
-    await recorder.initWorker();
-    recorder.startRecording();
-  };
+  const [loading, setloading] = useState(false);
+  useEffect(() => {
+    setloading(true);
+  }, []);
+  useEffect(() => {
+    if (loading) {
+      const chay = async () => {
+        await recorder.initAudio();
+        await recorder.initWorker();
+        recorder.startRecording();
+      };
+      chay();
+    }
+  }, [loading]);
   const handleRecordingStop = async () => {
+    setloading(false);
     const blob = await recorder.stopRecording();
     setRecordings(URL.createObjectURL(blob));
     setBanghi(blob);
@@ -32,24 +39,18 @@ function Recorder(props) {
   }, [youID]);
   return (
     <>
-      <div className="recordMess mt-2" style={mystyle}>
-        <>
-          <button className="btn btn-success" onClick={handleRecording}>
-            Ghi
+      <div className="recordMess m-2" style={mystyle}>
+        {loading ? (
+          <button
+            style={{ borderRadius: 50 }}
+            className="btn btn-primary "
+            onClick={handleRecordingStop}
+          >
+            Dừng <l-mirage size="60" speed="4" color="black"></l-mirage>
           </button>
-          {/* <l-mirage size="60" speed="4" color="black"></l-mirage> */}
-        </>
-        {/* )} */}
-        <button
-          //   disabled={recordings}
-          className="btn btn-primary m-2"
-          onClick={handleRecordingStop}
-        >
-          Dừng
-        </button>
-        {recordings && recordings !== null ? (
+        ) : (
           <audio src={recordings} controls></audio>
-        ) : null}
+        )}
       </div>
     </>
   );

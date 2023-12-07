@@ -15,8 +15,10 @@ import VideocamIcon from "@mui/icons-material/Videocam";
 import VideocamOffIcon from "@mui/icons-material/VideocamOff";
 import MicIcon from "@mui/icons-material/Mic";
 import MicOffIcon from "@mui/icons-material/MicOff";
-import { colors } from "@mui/material";
 import Callanimation from "./Callanimation";
+import BlurOnIcon from "@mui/icons-material/BlurOn";
+import BlurOffIcon from "@mui/icons-material/BlurOff";
+import ThumbUpAltIcon from "@mui/icons-material/ThumbUpAlt";
 const Callvideo = () => {
   const [cookies] = useCookies();
   const location = useLocation();
@@ -287,7 +289,7 @@ const Callvideo = () => {
         <div className="modalvideo_child">
           <div className="modalvideo_me">
             <video
-              style={blurMe ? { filter: "blur(5px)" } : {}}
+              style={blurMe ? { filter: "blur(8px)" } : {}}
               className="modalvideo_me_video"
               muted
               ref={myVideo}
@@ -297,7 +299,7 @@ const Callvideo = () => {
           <div className="modalvideo_you">
             <div>
               <video
-                style={blurYou ? { filter: "blur(5px)" } : {}}
+                style={blurYou ? { filter: "blur(8px)" } : {}}
                 className="modalvideo_you_video"
                 ref={userVideo}
                 autoPlay
@@ -308,10 +310,10 @@ const Callvideo = () => {
         </div>
         <div className="modalvideo_setting">
           <button className="btn btn-success m-2" onClick={handleLike}>
-            Like
+            <ThumbUpAltIcon />
           </button>
           <button className="btn btn-success m-2" onClick={handleBlur}>
-            {blurMe ? "Xóa" : "Blur"}
+            {blurMe ? <BlurOffIcon /> : <BlurOnIcon />}
           </button>
           <button className="btn btn-success m-2" onClick={handleCloseMic}>
             {!mic ? <MicIcon /> : <MicOffIcon />}

@@ -212,10 +212,12 @@ function DetailMess(props) {
     setImgsMes([...imgsMes, ...list]);
   };
   const handleDelImgBlob = (e) => {
-    URL.revokeObjectURL(e);
-    const updatedImgBlob = imgBlob.filter((img) => img !== e);
-    console.log(imgBlob);
+    // console.log(e);
+    URL.revokeObjectURL(e.img);
+    const updatedImgBlob = imgBlob.filter((img) => img !== e.img);
+    imgsMes.splice(e.index, 1);
     setImgBlob(updatedImgBlob);
+    setImgsMes(imgsMes);
   };
 
   const [mic, setMic] = useState(false);
@@ -518,7 +520,7 @@ function DetailMess(props) {
                     <img className="detailMess_blob_img" src={img} alt="" />
                     <span
                       className="detailMess_blob_imgs_del"
-                      onClick={() => handleDelImgBlob(img)}
+                      onClick={() => handleDelImgBlob({ img, index })}
                     >
                       <HighlightOffIcon />
                     </span>

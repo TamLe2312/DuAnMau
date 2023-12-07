@@ -4,7 +4,6 @@ import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import { useCookies } from "react-cookie";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
-import { Avatar } from "@mui/material";
 import * as request from "../../../utils/request";
 import { SocketCon } from "../../socketio/Socketcontext";
 import * as toxic from "../../vietnamToxic/VietNamToxic";
@@ -89,7 +88,6 @@ function Comments(props) {
   const handleSend = () => {
     // console.log(content);
     const isToxic = toxic.VietNamToxic(content);
-    console.log(isToxic);
     if (isToxic) {
       setviPhamComment(true);
     } else {
