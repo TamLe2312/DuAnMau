@@ -886,23 +886,24 @@ const banComment = (req, res) => {
           }
         );
       }
-
-const storiesImg = (req, res) => {
-  const { id } = req.body;
-  if (req.file) {
-    const fileName = req.file.filename;
-    const filePath = "/uploads/" + fileName;
-    const baseURL = process.env.APP_URL;
-    const imageURL = `${baseURL.slice(0, -1)}${filePath}`;
-    connection.query(
-      "INSERT INTO stories (user_id) VALUES (?)",
-      [id],
-      function (err, results, fields) {
-        if (err) {
-          console.log(err);
-          return res.status(500).json({ error: "Lỗi máy chủ" });
-        }
-        const insertedId = results.insertId;
+    }
+  );
+};
+// flag post
+const flagPost = (req, res) => {
+  const postID = parseInt(req.body.postID);
+  const userID = parseInt(req.body.userID);
+  const contentFlag = req.body.contentFlag;
+  connection.query(
+    "SELECT countflag FROM posts WHERE id =? ",
+    [postID],
+    function (err, results, fields) {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+      }
+      if (results[0].countflag) {
+        // != null
         connection.query(
           `UPDATE posts
             SET countflag = countflag + 1
@@ -1063,8 +1064,24 @@ const getDataNews = (req, res) => {
         console.log(err);
         return res.status(500).json({ error: "Lỗi máy chủ" });
       }
-      return res.status(200).json(results);
 
+      const twentyFourHoursAgo = new Date();
+      twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
+
+      connection.query(
+        `UPDATE stories SET isExpired = 1 WHERE created_at < ?`,
+        [twentyFourHoursAgo],
+        function (updateErr, updateResults, updateFields) {
+          if (updateErr) {
+            console.log(updateErr);
+            return res
+              .status(500)
+              .json({ error: "Lỗi máy chủ khi cập nhật trạng thái stories" });
+          }
+
+          return res.status(200).json(results);
+        }
+      );
     }
   );
 };
@@ -1259,4 +1276,11 @@ module.exports = {
   storiesContent,
   getDataNews,
 
+  // flagposst
+  flagPost,
+  listFlagPost,
+  banPost,
+
+  getDataNewsUser,
+  storiesDelete,
 };
