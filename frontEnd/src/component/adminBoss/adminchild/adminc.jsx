@@ -22,12 +22,12 @@ function Adminn() {
           <li className="list-group-item admin_children">
             <NavLink to="/home/admin/advertisement">Quảng cáo</NavLink>
           </li>
-          <li className="list-group-item admin_children">
+          {/* <li className="list-group-item admin_children">
             <NavLink to="/home/admin/test">Thêm</NavLink>
-          </li>
-          <li className="list-group-item admin_children">
+          </li> */}
+          {/* <li className="list-group-item admin_children">
             <NavLink to="/home/admin/toxic">vietnamtoxic</NavLink>
-          </li>
+          </li> */}
         </ul>
       </div>
       <div className="admin-page">

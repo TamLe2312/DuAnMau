@@ -32,6 +32,7 @@ const getDataAllUser = (req, res) => {
     }
   );
 };
+
 const getDataAllAds = (req, res) => {
   const page = parseInt(req.params.page) || 1; // Trang hiện tại
   const limit = 10; // Số lượng người dùng hiển thị trên mỗi trang
@@ -62,6 +63,7 @@ const getDataAllAds = (req, res) => {
     }
   );
 };
+// số lượng cờ
 const getDataAllPost = (req, res) => {
   const page = parseInt(req.params.page) || 1; // Trang hiện tại
   const limit = 10; // Số lượng người dùng hiển thị trên mỗi trang
@@ -78,6 +80,7 @@ const getDataAllPost = (req, res) => {
         `SELECT posts.*, users.name, users.username
         FROM posts
         INNER JOIN users ON posts.user_id = users.id
+        ORDER BY posts.countflag DESC
         LIMIT ? OFFSET ?`,
         [limit, offset],
         async function (err, results, fields) {
