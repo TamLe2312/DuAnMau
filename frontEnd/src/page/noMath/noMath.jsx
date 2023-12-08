@@ -1,13 +1,16 @@
 import { Link } from "react-router-dom";
-
+import "./noMath.css";
 function NoMath() {
   return (
-    <>
-      <h2>Page 404</h2>
+    <div className="page_notfound">
+      <h1>404</h1>
+      <span className="mb-2">Trang không tồn tại</span>
       <div>
-        <Link to="/home">Về trang chủ</Link>
+        <Link className="btn btn-secondary" to="/home">
+          Trang chủ
+        </Link>
       </div>
-    </>
+    </div>
   );
 }
 

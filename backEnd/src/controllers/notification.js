@@ -13,7 +13,7 @@ const sendNotifcation = (req, res) => {
         if (results.length > 0) {
           connection.query(
             `UPDATE notification
-            SET view = 0
+            SET view = 0, created_ad = NOW()
             WHERE sender_id =? AND post_id =? AND title =? `,
             [parseInt(userID), parseInt(postID), title],
             function (err, results, fields) {

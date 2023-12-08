@@ -7,7 +7,8 @@ import { useEffect, useRef, useState } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import { toast } from "sonner";
 import request from "../../utils/request";
-import { useSpring, animated } from "react-spring";
+import MyModal from "../../component/modal/Modal";
+import ModalStories from "./modalStories";
 
 function Stories() {
   const idUserNews = useParams();
@@ -20,22 +21,12 @@ function Stories() {
   const [searchValue, setSearchValue] = useState("");
   const [newsImg, setNewsImg] = useState([]);
   const [dataNews, setDataNews] = useState([]);
+  const [dataWatch, setDataWatch] = useState([]);
+  const [dataUser, setDataUser] = useState([]);
   const [isCreateNewsImg, setIsCreateNewsImg] = useState(false);
   const [isCreateNewsContent, setIsCreateNewsContent] = useState(false);
-
-  const { width } = useSpring({
-    from: { width: "0%" },
-    to: { width: "100%" },
-    config: { duration: 10000 },
-  });
-
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      console.log("Xong");
-    }, 10000);
-
-    return () => clearTimeout(timeoutId);
-  }, []);
+  const [indexWatch, setIndexWatch] = useState(0);
+  const [modalStories, setModalStories] = useState(false);
 
   const handleInputChange = async (event) => {
     const selectedFile = event.target.files[0];
@@ -138,7 +129,52 @@ function Stories() {
 
     return `${value} ${unit.unit} trước`;
   };
+
+  const handleRowContainerClick = (userId) => {
+    setIndexWatch(0);
+    Navigate(`/stories/${userId}`, { replace: true });
+  };
+
+  const getLinkTo = () => {
+    if (dataNews && dataNews.length > 0 && id) {
+      const foundItem = dataNews.find((item) => item.user_id === Number(id));
+      if (foundItem) {
+        return `/stories/${id}`;
+      } else {
+        return `/stories/create`;
+      }
+    }
+  };
+
+  const handlePrevStories = (index) => {
+    if (index - 1 >= 0) {
+      setIndexWatch(index - 1);
+    } else {
+      if (currentIndex >= 0) {
+        const prevNews = currentIndex - 1;
+        setIndexWatch(0);
+        Navigate(`/stories/${dataNews[prevNews].user_id}`, { replace: true });
+      }
+    }
+  };
+
+  const handleNextStories = (index) => {
+    if (index + 1 < dataWatch.length) {
+      setIndexWatch(index + 1);
+    } else {
+      if (currentIndex < dataNews.length) {
+        const nextNews = currentIndex + 1;
+        setIndexWatch(0);
+        Navigate(`/stories/${dataNews[nextNews].user_id}`, { replace: true });
+      }
+    }
+  };
+
   const [isButtonDisabled, setIsButtonDisabled] = useState(true);
+
+  const handleModal = () => {
+    setModalStories(!modalStories);
+  };
 
   useEffect(() => {
     const fetchData = () => {
@@ -152,18 +188,49 @@ function Stories() {
     // Enable the button if there is some text entered or an image is selected
     setIsButtonDisabled(!(searchValue.length > 0 || newsImg));
   }, [searchValue, newsImg]);
+  const [currentIndex, setCurrentIndex] = useState(0);
   useEffect(() => {
     const fetchData = async () => {
       try {
         const response = await request.get(`post/getDataNews`);
+        if (!isNaN(idUserNews.idStory)) {
+          const index = response.data.findIndex(
+            (item) => item.user_id === Number(idUserNews.idStory)
+          );
+          if (index !== -1) {
+            setCurrentIndex(index);
+          }
+        }
         setDataNews(response.data);
-        console.log(response.data);
+        const respone1 = await request.get(`account/getDataUser/${id}`);
+        setDataUser(respone1.data[0]);
       } catch (error) {
         console.error("Error fetching user data:", error);
       }
     };
     fetchData();
-  }, []);
+  }, [id]);
+  useEffect(() => {
+    const fetchData = async () => {
+      const idNews = idUserNews.idStory;
+      try {
+        const res = await request.get(`post/getDataNewsUser/${idNews}`);
+        setDataWatch(res.data);
+        if (!isNaN(idUserNews.idStory)) {
+          const index = dataNews.findIndex(
+            (item) => item.user_id === Number(idUserNews.idStory)
+          );
+          if (index !== -1) {
+            setCurrentIndex(index);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+    fetchData();
+  }, [idUserNews]);
+
   return (
     <div className="StoriesContainer">
       <div className="StoriesNavBar">
@@ -178,11 +245,21 @@ function Stories() {
         <div className="StoriesNavBarContainer">
           <h3>Tin</h3>
           <div className="StoriesNavBarInform">
-            <img
-              className="StoriesAvatarImg"
-              src="https://i.pinimg.com/564x/e3/0f/28/e30f28122578d6a5fc183376718d46c3.jpg"
-            />
-            <span className="StoriesName">Tâm</span>
+            <Link to={getLinkTo()}>
+              <img
+                className="StoriesAvatarImg"
+                src={
+                  dataUser.avatar
+                    ? dataUser.avatar
+                    : "https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg"
+                }
+              />
+            </Link>
+            <Link to={getLinkTo()}>
+              <span className="StoriesName">
+                {dataUser.name ? dataUser.name : dataUser.username}
+              </span>
+            </Link>
           </div>
           {isCreateNewsImg || isCreateNewsContent ? (
             <>
@@ -223,7 +300,11 @@ function Stories() {
             <div className="StoriesRowContainer">
               {dataNews && dataNews.length > 0 ? (
                 dataNews.map((data, index) => (
-                  <div className="StoriesNavBarRow" key={index}>
+                  <div
+                    className="StoriesNavBarRow"
+                    key={index}
+                    onClick={() => handleRowContainerClick(data.user_id)}
+                  >
                     <img
                       className="StoriesAvatarImg"
                       src={
@@ -251,24 +332,92 @@ function Stories() {
       </div>
       {!isNaN(idUserNews.idStory) ? (
         <div className="StoriesDisplay">
+          <i
+            className="fa-solid fa-chevron-left"
+            onClick={() => handlePrevStories(indexWatch)}
+          ></i>
           <div className="StoriesDisplayContainer">
             <div className="StoriesWatchNews">
-              <div>
-                <span>Hello,Test 11231232</span>
+              <div className="StoriesWatchHeader">
+                <div className="StoriesWatchInformUser">
+                  {dataNews && dataNews[currentIndex] && (
+                    <>
+                      <Link
+                        to={
+                          dataNews[currentIndex].user_id === id
+                            ? `/home/profile`
+                            : `/home/profile/user/${dataNews[currentIndex].user_id}`
+                        }
+                      >
+                        <div className="StoriesWatchImgHeader">
+                          <img
+                            src={
+                              dataNews[currentIndex].avatar
+                                ? dataNews[currentIndex].avatar
+                                : "https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg"
+                            }
+                          />
+                        </div>
+                      </Link>
+                      <Link
+                        to={
+                          dataNews[currentIndex].user_id === id
+                            ? `/home/profile`
+                            : `/home/profile/user/${dataNews[currentIndex].user_id}`
+                        }
+                      >
+                        <span>
+                          {dataNews[currentIndex].name
+                            ? dataNews[currentIndex].name
+                            : dataNews[currentIndex].username}
+                        </span>
+                      </Link>
+                    </>
+                  )}
+                  {dataNews &&
+                    dataNews[currentIndex] &&
+                    dataNews[currentIndex].user_id === id && (
+                      <i
+                        className="fa-solid fa-ellipsis"
+                        onClick={handleModal}
+                      ></i>
+                    )}
+                  <MyModal
+                    text={""}
+                    show={modalStories}
+                    onHide={handleModal}
+                    display={"block"}
+                    childrens={
+                      <ModalStories
+                        idNews={
+                          dataWatch[indexWatch] && dataWatch[indexWatch].id
+                        }
+                      />
+                    }
+                  />
+                </div>
+                <div className="StoriesTimeline">
+                  <span>
+                    {indexWatch + 1}/{dataWatch.length}
+                  </span>
+                </div>
               </div>
-              <div className="StoriesTimeline">
-                <animated.div
-                  className="progress-bar"
-                  style={{
-                    width,
-                    height: "8px",
-                    backgroundColor: "#ff0000", // Màu đỏ
-                    borderRadius: "4px",
-                  }}
-                />
+              <div className="StoriesWatchContainer">
+                {dataWatch &&
+                  dataWatch.length > 0 &&
+                  dataWatch[indexWatch] &&
+                  (dataWatch[indexWatch].content ? (
+                    <span>{dataWatch[indexWatch].content}</span>
+                  ) : (
+                    <img src={dataWatch[indexWatch].img} />
+                  ))}
               </div>
             </div>
           </div>
+          <i
+            className="fa-solid fa-chevron-right"
+            onClick={() => handleNextStories(indexWatch)}
+          ></i>
         </div>
       ) : (
         <div className="StoriesDisplay">

@@ -24,6 +24,8 @@ const {
   searchUserFollowed,
   searchUserProfile,
   isFollowed,
+  FindArena,
+  getDataAd,
 } = require("../controllers/account");
 const Router = express.Router();
 const multer = require("multer");
@@ -55,6 +57,7 @@ Router.post("/searchUserFollower", searchUserFollower);
 Router.post("/searchUserFollowed", searchUserFollowed);
 Router.post("/verifyToken", verifyToken);
 Router.post("/ChangePassword", ChangePassword);
+Router.post("/findArena", FindArena);
 Router.get("/detail/:id", detail);
 Router.get("/listUsers/:slug", listUsers);
 Router.get("/countPost/:userId", CountPost);
@@ -64,4 +67,5 @@ Router.get("/followedData/:id&:page", FollowedData);
 Router.get("/isFollowed/:id", isFollowed);
 Router.get("/suggestFollow/:id&:limit", suggestFollow);
 Router.get("/searchUserProfile/:value&:id", searchUserProfile);
+Router.get("/getDataAd", getDataAd);
 module.exports = Router;

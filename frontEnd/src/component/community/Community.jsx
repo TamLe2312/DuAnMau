@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import Validation from "../../component/validation/validation";
 import { Modal, Button, Form } from "react-bootstrap";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 import { useCookies } from "react-cookie";
 import AddCircleOutlineIcon from "@mui/icons-material/AddCircleOutline";
 import SearchIcon from "@mui/icons-material/Search";
@@ -11,6 +12,7 @@ import * as request from "../../utils/request";
 import SearchGroupValue from "./searchGroupValue";
 
 function Community() {
+  const Navigate = useNavigate();
   const [dataGroup, setDataGroup] = useState([]);
   const [hasJoined, setHasJoined] = useState([]);
   const [error, setError] = useState({});
@@ -143,24 +145,17 @@ function Community() {
       });
       if (response.data.success) {
         toast.success(response.data.success);
-        const formattedData = response.data.results.map((item) => {
-          const createdAt = item.createdAt;
-          const formattedDate = moment(createdAt).format("MMMM Do, YYYY");
-          return {
-            ...item,
-            created_at: formattedDate,
-          };
-        });
-        setDataGroup(formattedData);
-        fetchDataJoined();
+        fetchDataGroup();
+        setLoading(false);
+        handleCloseModalCreateGroup();
       }
-      setLoading(false);
-      handleCloseModalCreateGroup();
     } catch (error) {
       if (error.response && error.response.data) {
         toast.error(error.response.data.error);
+        fetchDataGroup();
+        Navigate("/home/community", { replace: true });
+        setLoading(false);
       }
-      setLoading(false);
     }
   };
   const handleJoinGroup = async (groupId) => {
@@ -186,57 +181,57 @@ function Community() {
       if (response.data.success) {
         toast.success(response.data.success);
         fetchDataJoined();
+      } else {
+        toast.error(response.data.error);
+      }
+    } catch (error) {}
+  };
+  const fetchDataGroup = async () => {
+    setLoading(true);
+    try {
+      const response = await request.get(`groups/getDataGroup/${id}`);
+      if (response && response.data) {
+        const formattedData = response.data.map((item) => {
+          const createdAt = item.created_at;
+          const formattedDate = moment(createdAt).format("MMMM Do, YYYY");
+          return {
+            ...item,
+            created_at: formattedDate,
+          };
+        });
+        setDataGroup(formattedData);
+      } else {
+        setDataGroup([]);
+      }
+      fetchDataHasJoined();
+      setLoading(false);
+    } catch (error) {
+      if (error.response && error.response.status === 400) {
+        setDataGroup([]);
+      }
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchDataGroup();
+  }, []);
+  const fetchDataHasJoined = async () => {
+    try {
+      const response = await request.get(`groups/getDataGroupJoined/${id}`);
+
+      if (response && response.data) {
+        setHasJoined(response.data);
+      } else {
+        setHasJoined([]);
       }
     } catch (error) {
-      if (error.response && error.response.data && error.response.data.error) {
-        toast.error(error.response.data.error);
+      if (error.response && error.response.status === 400) {
+        setHasJoined([]);
       }
     }
   };
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const response = await request.get(`groups/getDataGroup/${id}`);
-        if (response && response.data) {
-          const formattedData = response.data.map((item) => {
-            const createdAt = item.created_at;
-            const formattedDate = moment(createdAt).format("MMMM Do, YYYY");
-            return {
-              ...item,
-              created_at: formattedDate,
-            };
-          });
-          setDataGroup(formattedData);
-        } else {
-          setDataGroup([]);
-        }
-        setLoading(false);
-      } catch (error) {
-        if (error.response && error.response.status === 400) {
-          setDataGroup([]);
-        }
-        setLoading(false);
-      }
-    };
-    fetchData();
-  }, []);
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await request.get(`groups/getDataGroupJoined/${id}`);
-        if (response && response.data) {
-          setHasJoined(response.data);
-        } else {
-          setHasJoined([]);
-        }
-      } catch (error) {
-        if (error.response && error.response.status === 400) {
-          setHasJoined([]);
-        }
-      }
-    };
-    fetchData();
+    fetchDataHasJoined();
   }, [id]);
 
   return (

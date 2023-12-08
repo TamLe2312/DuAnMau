@@ -9,6 +9,7 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt";
 import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
 import * as request from "../../utils/request";
+import Advertisement from "../advertisement/advertisement";
 function Timeline() {
   const [pageData, setpageData] = useState(2);
 
@@ -103,6 +104,7 @@ function Timeline() {
       </div>
       <div className="timeline-suggestions">
         <Suggestions />
+        <Advertisement />
       </div>
       <InfiniteScroll
         dataLength={postsData.length + 1}

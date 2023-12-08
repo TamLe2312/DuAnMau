@@ -19,7 +19,6 @@ function PostDetail() {
   const focusInput = useRef();
   const [userDataPost, setUserDataPost] = useState([]);
   const [modalShowComment, setModalShowComment] = useState(false);
-  const [expanded, setExpanded] = useState(false);
   const [img, setImg] = useState([]);
   const [minute, setMinute] = useState(0);
   const [comment, setcomment] = useState("");
@@ -31,31 +30,7 @@ function PostDetail() {
   };
   const handleHide = () => {
     setModalShow(false);
-    // setModalShowComment(false);
   };
-  const handlerun = () => {
-    setdymanicComment(!dymanicComment);
-  };
-  /*
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await request.get(
-          `post/postimg/${PostInform.id}`
-        );
-        if (response.data.length > 0) {
-          setImgs(response.data);
-        }
-      } catch (error) {
-        console.error("Error fetching user data:", error);
-      }
-    };
-    fetchData();
-  }, [PostInform.id]);
-  if (imgs && imgs.length > 0 && imgs.length === 1) {
-    console.log(imgs);
-  }
-  */
   const handleDataFromChild = (data) => {
     setModalShow(data);
   };
@@ -66,6 +41,9 @@ function PostDetail() {
     user: "",
     userID: "",
   });
+  const handlerun = () => {
+    setdymanicComment(!dymanicComment);
+  };
   // comment //
   useEffect(() => {
     const fetchApi = async () => {
@@ -117,33 +95,14 @@ function PostDetail() {
   const hanldleSentComment = () => {
     try {
       const fetchApi = async () => {
-        /*  if (groupPostId) {
-          const res = await request.post(
-            "post/commentPost",
-            {
-              groupPostId: groupPostId,
-              userID: myID,
-              content: comment.trim(),
-            }
-          );
-          if (res.status == 200) {
-            setdymanicComment(!dymanicComment);
-            console.log("bạn đã bình luận: " + groupPostId);
-            setcomment("");
-          } else {
-            console.log("Có vấn đề gì đó rồi");
-          }
-        } else {
-         
-        } */
         const res = await request.post("post/commentPost", {
-          postID: postId,
+          postID: userDataPost.id,
           userID: myID,
           content: comment.trim(),
         });
         if (res.status == 200) {
           setdymanicComment(!dymanicComment);
-          console.log("bạn đã bình luận: " + postId);
+          console.log("bạn đã bình luận: " + userDataPost.id);
           setcomment("");
         } else {
           console.log("Có vấn đề gì đó rồi");
@@ -158,18 +117,56 @@ function PostDetail() {
 
   // Like //
   const [liked, setliked] = useState(false);
-  const [like, setlike] = useState(0);
+  const [like, setlike] = useState("");
+
+  useEffect(() => {
+    try {
+      const fetchApi = async () => {
+        const res = await request.post("post/countLikedPost", {
+          postID: userDataPost.id,
+        });
+        if (res) {
+          setlike(res.data[0].countlike);
+        }
+      };
+      fetchApi();
+    } catch (error) {
+      console.log(error);
+    }
+  }, [userDataPost]);
+
+  useEffect(() => {
+    try {
+      const fetchApi = async () => {
+        const res = await request.get("post/likedPost", {
+          params: {
+            postID: userDataPost.id,
+            otherUserID: myID,
+          },
+        });
+        if (res.data.success) {
+          setliked(true);
+        } else {
+          setliked(false);
+        }
+      };
+      fetchApi();
+    } catch (error) {
+      console.log(error);
+    }
+  }, [userDataPost.id]);
+
   const handleLikePost = () => {
     setlike((pre) => pre - 1);
     setliked(false);
     try {
       const fetchApi = async () => {
         const res = await request.post("post/UnLikePost", {
-          postID: postId,
+          postID: postId.post_id,
           otherUserID: myID,
         });
         if (res) {
-          console.log("bạn đã bỏ thích post: " + postId);
+          console.log("bạn đã bỏ thích post: " + postId.post_id);
         }
       };
       fetchApi();
@@ -197,7 +194,7 @@ function PostDetail() {
   };
   // Like //
 
-  const handleRun = (e) => {
+  const handleRuns = (e) => {
     if (img) {
       const id = e.currentTarget.id;
       const length = img.length;
@@ -240,6 +237,35 @@ function PostDetail() {
     };
     fetchData();
   }, [postId]);
+  const notification = async (postID, userID, notifi, recipient_id) => {
+    try {
+      const res = await request.post(`notification/sendNotification`, {
+        postID: postID,
+        userID: userID,
+        title: notifi,
+        recipient_id: recipient_id,
+      });
+      if (res) {
+        console.log("Bạn đã gửi thông báo tới bài viết: " + postID);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  const unNotification = async (postID, sender_id, notifi) => {
+    try {
+      const res = await request.post(`notification/unNotifcation`, {
+        postID: postID,
+        sender_id: sender_id,
+        title: notifi,
+      });
+      if (res) {
+        console.log("Bạn đã hủy thông báo tới bài viết: " + postID);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <>
       <div className="post">
@@ -257,7 +283,6 @@ function PostDetail() {
                   src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg"
                   alt="Avatar"
                 />
-                // <img className="post-avatar" src="" />
               )}
               &nbsp;
               <span>
@@ -275,7 +300,7 @@ function PostDetail() {
           </div>
           {/* -------------more------------ */}
           <span className="post-more-delete">
-            {userDataPost.userid === myID && (
+            {userDataPost.userid == myID && (
               <MoreHorizIcon
                 onClick={() => {
                   handleDELETE(postId);
@@ -300,14 +325,14 @@ function PostDetail() {
                   <span
                     id="post-img-left"
                     className="post-img-run"
-                    onClick={(e) => handleRun(e)}
+                    onClick={(e) => handleRuns(e)}
                   >
                     <ChevronLeftIcon sx={{ fontSize: 28 }} />
                   </span>
                   <span
                     id="post-img-right"
                     className="post-img-run"
-                    onClick={(e) => handleRun(e)}
+                    onClick={(e) => handleRuns(e)}
                   >
                     <ChevronRightIcon sx={{ fontSize: 28 }} />
                   </span>
@@ -347,19 +372,9 @@ function PostDetail() {
             </span>
           </div>
           <b>{like} lượt thích</b>
-          <p
-            ref={postFooterRef}
-            className={`post-title ${expanded ? "expanded" : ""}`}
-          >
+          <p ref={postFooterRef} className={`post-title`}>
             {img && img.length > 0 ? userDataPost.content : ""}
           </p>
-          {/* {them ? (
-            <button className="post-title-btn" onClick={handleToggleExpand}>
-              {expanded ? "Thu gọn" : "Xem thêm"}
-            </button>
-          ) : (
-            ""
-          )} */}
           {hasComment && (
             <span
               className="post-footer-list-comment"
@@ -389,7 +404,7 @@ function PostDetail() {
           </>
         )}
 
-        {/* <div className="post-footer-input">
+        <div className="post-footer-input">
           <input
             ref={focusInput}
             type="text"
@@ -404,7 +419,7 @@ function PostDetail() {
           >
             Đăng
           </button>
-        </div> */}
+        </div>
         <hr />
       </div>
       <MyModal
@@ -412,7 +427,6 @@ function PostDetail() {
         show={modalShow}
         onHide={handleHide}
         childrens={
-          //  user(tk), time, avatar, title, name, id, userid
           modalShowComment ? (
             <ListComment
               id={userDataPost.id}
@@ -424,9 +438,12 @@ function PostDetail() {
               name={userDataPost.name}
               userid={userDataPost.userid}
               handlerun={handlerun}
+              notification={notification}
+              unNotification={unNotification}
             />
           ) : (
             <MorePost
+              userid={userDataPost.userid}
               id={userDataPost.id}
               groupPostId={null}
               title={userDataPost.content}
