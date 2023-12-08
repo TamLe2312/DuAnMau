@@ -905,6 +905,21 @@ const FindArena = (req, res) => {
     );
   }
 };
+const getDataAd = (req, res) => {
+  connection.query(
+    "SELECT * FROM advertisement",
+    async function (err, results, fields) {
+      if (err) {
+        return res.status(500).json({ error: "Lỗi máy chủ" });
+      }
+      if (results.length > 0) {
+        return res.status(200).json(results);
+      } else {
+        return res.status(200).json([]);
+      }
+    }
+  );
+};
 
 module.exports = {
   login,
@@ -931,4 +946,5 @@ module.exports = {
   searchUserFollowed,
   searchUserProfile,
   FindArena,
+  getDataAd,
 };

@@ -7,7 +7,6 @@ const Mustache = require("mustache");
 const fs = require("fs");
 const schedule = require("node-schedule");
 const moment = require("moment");
-const { group } = require("console");
 
 const createGroup = (req, res) => {
   const { name, moTa, idCreatedGroup, privacy } = req.body;
@@ -18,6 +17,7 @@ const createGroup = (req, res) => {
   const filePath = "/uploads/" + fileName;
   const baseURL = process.env.APP_URL;
   const imageURL = `${baseURL}${filePath}`;
+
   connection.query(
     "SELECT * FROM groupsTable WHERE name = ?",
     [name],
@@ -28,10 +28,10 @@ const createGroup = (req, res) => {
       if (results.length > 0) {
         return res
           .status(400)
-          .json({ error: "Tên nhóm đã tồn tại.Vui lòng nhập tên khác" });
+          .json({ error: "Tên nhóm đã tồn tại. Vui lòng nhập tên khác" });
       } else {
         connection.query(
-          "INSERT INTO groupsTable (name, moTaNhom, avatarGroup,idUserCreatedGroup,privacy) VALUES (?, ?, ?,?,?)",
+          "INSERT INTO groupsTable (name, moTaNhom, avatarGroup, idUserCreatedGroup, privacy) VALUES (?, ?, ?, ?, ?)",
           [name, moTa, imageURL, idCreatedGroup, privacy],
           function (err, results, fields) {
             if (err) {
@@ -40,27 +40,43 @@ const createGroup = (req, res) => {
             }
             const groupId = results.insertId;
             connection.query(
-              "SELECT * FROM groupsTable",
+              "INSERT INTO membergroup (group_id, user_id) VALUES (?, ?)",
+              [groupId, idCreatedGroup],
               async function (err, results, fields) {
                 if (err) {
                   return res.status(500).json({ error: "Lỗi máy chủ" });
                 }
-                if (results.length > 0) {
-                  connection.query(
-                    "INSERT INTO membergroup (group_id,user_id) VALUES (?, ?)",
-                    [groupId, idCreatedGroup],
-                    async function (err, results, fields) {
-                      if (err) {
-                        return res.status(500).json({ error: "Lỗi máy chủ" });
-                      }
+                /* connection.query(
+                  `SELECT * FROM groupsTable 
+                  WHERE idUserCreatedGroup IN (SELECT user_id FROM membergroup WHERE user_id = ?)
+                  AND (privacy = 'private' OR privacy = 'public')`,
+                  [idCreatedGroup],
+                  async function (err, results, fields) {
+                    if (err) {
+                      return res.status(500).json({ error: "Lỗi máy chủ" });
                     }
-                  );
-                  return res
-                    .status(200)
-                    .json({ results, success: "Tạo nhóm thành công" });
-                } else {
-                  return res.status(400).json({ error: "Lỗi máy chủ" });
-                }
+                    if (results.length > 0) {
+                      return res
+                        .status(200)
+                        .json({ results, success: "Tạo nhóm thành công" });
+                    } else {
+                      connection.query(
+                        "SELECT * FROM groupsTable WHERE privacy = 'public'",
+                        function (err, results, fields) {
+                          if (err) {
+                            return res
+                              .status(500)
+                              .json({ error: "Lỗi máy chủ" });
+                          }
+                          return res
+                            .status(200)
+                            .json({ results, success: "Tạo nhóm thành công" });
+                        }
+                      );
+                    }
+                  }
+                ); */
+                return res.status(200).json({ success: "Tạo nhóm thành công" });
               }
             );
           }
@@ -69,6 +85,7 @@ const createGroup = (req, res) => {
     }
   );
 };
+
 const getDataGroup = (req, res) => {
   const id = req.params.idUser;
   connection.query(
@@ -118,7 +135,7 @@ const searchGroup = (req, res) => {
   const searchValue = req.body.searchValue;
   if (searchValue) {
     connection.query(
-      "SELECT * FROM groupsTable WHERE name LIKE CONCAT('%', ?, '%')",
+      "SELECT * FROM groupsTable WHERE name LIKE CONCAT('%', ?, '%') AND privacy = 'public'",
       [searchValue],
       async function (err, results, fields) {
         if (err) {
@@ -127,7 +144,7 @@ const searchGroup = (req, res) => {
         if (results.length > 0) {
           return res.status(200).json(results);
         } else {
-          return res.status(400).json({ error: "Group không tồn tại" });
+          return res.status(200).json({ error: "Không tìm thấy nhóm" });
         }
       }
     );
@@ -135,6 +152,7 @@ const searchGroup = (req, res) => {
     return res.status(200).json([]);
   }
 };
+
 const getDataGroupProfile = (req, res) => {
   const groupIdProfile = req.params.groupId;
   if (!groupIdProfile) {
@@ -361,7 +379,7 @@ const getDataGroupJoined = (req, res) => {
       if (results.length > 0) {
         return res.status(200).json(results);
       } else {
-        return res.status(400).json([]);
+        return res.status(200).json([]);
       }
     }
   );
@@ -407,7 +425,7 @@ const outGroup = (req, res) => {
       if (results.length > 0) {
         if (results[0].idUserCreatedGroup === idUser) {
           return res
-            .status(400)
+            .status(200)
             .json({ error: "Bạn là admin không thể rời nhóm" });
         } else {
           connection.query(
@@ -429,7 +447,7 @@ const outGroup = (req, res) => {
                       .json({ results, success: "Rời nhóm thành công" });
                   } else {
                     return res
-                      .status(400)
+                      .status(200)
                       .json({ error: "Không có dữ liệu Member Group" });
                   }
                 }
@@ -438,7 +456,7 @@ const outGroup = (req, res) => {
           );
         }
       } else {
-        return res.status(400).json({ error: "Group không tồn tại" });
+        return res.status(200).json({ error: "Group không tồn tại" });
       }
     }
   );
