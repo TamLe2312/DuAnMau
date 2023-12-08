@@ -14,6 +14,9 @@ const {
   postImgs,
   deletePost,
   deletePostImgs,
+  getDataAllAds,
+  deleteAds,
+  createNewAds,
 } = require("../controllers/adminController");
 const Router = express.Router();
 
@@ -34,13 +37,17 @@ const upload = multer({ storage: storage });
 Router.post("/deleteUser", deleteUser);
 Router.post("/deleteGroup", deleteGroup);
 Router.post("/deletePost", deletePost);
+Router.post("/deleteAds", deleteAds);
 Router.post("/deletePostImgs", deletePostImgs);
 Router.post("/adjustInformUser", AdjustInformUser);
 Router.post("/adjustGroupInformContent", adjustGroupInformContent);
 Router.post("/createNewUser", createNewUser);
+Router.post("/createNewAds", upload.array("images"), createNewAds);
+
 Router.get("/getDataAllUser/:page", getDataAllUser);
 Router.get("/getDataAllGroup/:page", getDataAllGroup);
 Router.get("/getDataAllPost/:page", getDataAllPost);
+Router.get("/getDataAllAds/:page", getDataAllAds);
 Router.get("/getDataCreatedGroupUser/:id", getDataCreatedGroupUser);
 Router.get("/postImgs/:id", postImgs);
 Router.post("/adjustGroupInform", upload.single("avatar"), adjustGroupInform);

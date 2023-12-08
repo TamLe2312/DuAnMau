@@ -32,6 +32,36 @@ const getDataAllUser = (req, res) => {
     }
   );
 };
+const getDataAllAds = (req, res) => {
+  const page = parseInt(req.params.page) || 1; // Trang hiện tại
+  const limit = 10; // Số lượng người dùng hiển thị trên mỗi trang
+  const offset = (page - 1) * limit; // Vị trí bắt đầu lấy dữ liệu
+  connection.query(
+    `SELECT COUNT(*) AS total FROM advertisement`,
+    async function (err, results, fields) {
+      if (err) {
+        return res.status(500).json({ error: "Lỗi máy chủ" });
+      }
+      const totalPosts = results[0].total;
+      const pageCount = Math.ceil(totalPosts / limit);
+      connection.query(
+        `SELECT * FROM advertisement
+        LIMIT ? OFFSET ?`,
+        [limit, offset],
+        async function (err, results, fields) {
+          if (err) {
+            return res.status(500).json({ error: "Lỗi máy chủ" });
+          }
+          if (results.length > 0) {
+            return res.status(200).json({ pageCount: pageCount, results });
+          } else {
+            return res.status(200).json([]);
+          }
+        }
+      );
+    }
+  );
+};
 const getDataAllPost = (req, res) => {
   const page = parseInt(req.params.page) || 1; // Trang hiện tại
   const limit = 10; // Số lượng người dùng hiển thị trên mỗi trang
@@ -486,6 +516,62 @@ const createNewUser = (req, res) => {
     }
   });
 };
+const createNewAds = (req, res) => {
+  const { brand } = req.body;
+  const files = req.files;
+  if (req.files && brand) {
+    connection.query(
+      `SELECT * FROM advertisement WHERE brand = ?`,
+      [brand],
+      function (err, results, fields) {
+        if (err) {
+          res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+        }
+        if (results.length > 0) {
+          const uploadDir = path.join(__dirname, "../../../frontEnd/uploads");
+          files.forEach((file) => {
+            const fileName = file.filename;
+            const filePathOld = path.join(uploadDir, fileName);
+            if (fs.existsSync(filePathOld)) {
+              try {
+                fs.unlinkSync(filePathOld);
+              } catch (error) {
+                return res.status(500).json({ error: "Lỗi khi xóa ảnh" });
+              }
+            }
+          });
+          res.status(200).json({ error: "Đã có thương hiệu,nội dung này" });
+        } else {
+          let completed = 0;
+          files.forEach((file) => {
+            const fileName = file.filename;
+            const filePath = "/uploads/" + fileName;
+            const baseURL = process.env.APP_URL;
+            const imageURL = `${baseURL.slice(0, -1)}${filePath}`;
+            connection.query(
+              "INSERT INTO advertisement (brand,img) VALUES (?,?)",
+              [brand, imageURL],
+              function (err, results, fields) {
+                completed++;
+                if (err) {
+                  return res
+                    .status(500)
+                    .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+                } else {
+                  if (completed == files.length) {
+                    return res
+                      .status(200)
+                      .json({ success: "Bạn đã tải hình ảnh lên" });
+                  }
+                }
+              }
+            );
+          });
+        }
+      }
+    );
+  }
+};
 
 const adjustGroupInform = (req, res) => {
   const { hasAvatar, idGroup, avatar } = req.body;
@@ -573,6 +659,53 @@ const deletePost = (req, res) => {
     return res.status(400).json({ error: "Id Post không tồn tại" });
   }
 };
+const deleteAds = (req, res) => {
+  const idAds = req.body.idAds;
+  if (idAds) {
+    connection.query(
+      "SELECT * FROM advertisement WHERE id = ?",
+      [idAds],
+      async function (err, results, fields) {
+        if (err) {
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
+        if (results.length > 0) {
+          connection.query(
+            "DELETE FROM advertisement WHERE id = ?",
+            [idAds],
+            function (err, results, fields) {
+              if (err) {
+                return res
+                  .status(500)
+                  .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+              }
+              if (results) {
+                connection.query(
+                  `SELECT COUNT(*) AS total FROM advertisement`,
+                  async function (err, results, fields) {
+                    if (err) {
+                      return res.status(500).json({ error: "Lỗi máy chủ" });
+                    }
+                    const totalPosts = results[0].total;
+                    const pageCount = Math.ceil(totalPosts / 10);
+                    return res.status(200).json({
+                      pageCount: pageCount,
+                      success: "Xóa bài viết thành công",
+                    });
+                  }
+                );
+              }
+            }
+          );
+        } else {
+          return res.status(200).json([]);
+        }
+      }
+    );
+  } else {
+    return res.status(200).json([]);
+  }
+};
 const deletePostImgs = async (req, res) => {
   const uploadDir = path.join(__dirname, "../public/images/");
   const { idPost } = req.body;
@@ -621,6 +754,7 @@ const deletePostImgs = async (req, res) => {
 module.exports = {
   getDataAllUser,
   getDataAllPost,
+  getDataAllAds,
   deleteUser,
   AdjustInformUser,
   createNewUser,
@@ -631,5 +765,7 @@ module.exports = {
   adjustGroupInformContent,
   postImgs,
   deletePost,
+  deleteAds,
   deletePostImgs,
+  createNewAds,
 };
