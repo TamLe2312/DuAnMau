@@ -31,7 +31,26 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
   const [liked, setliked] = useState(false);
   const [like, setlike] = useState(0);
   const [comment, setcomment] = useState("");
+  const [previewLink, setPreviewLink] = useState([]);
+  const [isValidURL, setIsValidURL] = useState(false);
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const urlRegex = /^(ftp|http|https):\/\/[^ "]+$/;
+        if (urlRegex.test(title)) {
+          setIsValidURL(true);
+          const res = await request.post("preview/getLinkPreview", {
+            url: title,
+          });
+          setPreviewLink(res.data);
+        }
+      } catch (error) {
+        /*         console.error('Error getting link preview:', error); */
+      }
+    };
+    fetchData();
+  }, [title]);
   const now = new Date();
   const targetDate = new Date(time);
   const milliseconds = now - targetDate;
@@ -458,7 +477,28 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
               )}
             </>
           ) : (
-            <span style={{ wordBreak: "break-all" }}>{title}</span>
+            <span style={{ wordBreak: "break-all" }}>
+              {isValidURL ? (
+                <div className="previewLink">
+                  <div className="previewLinkImgContainer">
+                    <img src={previewLink.image} />
+                  </div>
+                  <div className="previewLinkContent">
+                    <span className="previewLinkTitle">
+                      {previewLink.title && previewLink.title}
+                    </span>
+                    <span className="previewLinkDesciption">
+                      {previewLink.description && previewLink.description}
+                    </span>
+                    <Link to={previewLink.ogUrl} className="prewviewLinkURL">
+                      {previewLink.ogUrl && previewLink.ogUrl}
+                    </Link>
+                  </div>
+                </div>
+              ) : (
+                title
+              )}
+            </span>
           )}
         </div>
         <div className="post-footer">

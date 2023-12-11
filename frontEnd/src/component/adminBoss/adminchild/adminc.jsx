@@ -22,6 +22,9 @@ function Adminn() {
           <li className="list-group-item admin_children">
             <NavLink to="/home/admin/advertisement">Quảng cáo</NavLink>
           </li>
+          <li className="list-group-item admin_children">
+            <NavLink to="/home/admin/getlink">Get Link</NavLink>
+          </li>
           {/* <li className="list-group-item admin_children">
             <NavLink to="/home/admin/test">Thêm</NavLink>
           </li> */}

@@ -33,6 +33,8 @@ import Commentad from "./component/adminBoss/adminchild/Commentad";
 // import { VietNamToxic } from "./component/vietnamToxic/VietNamToxic";
 import { BaoCao } from "./component/adminBoss/adminchild/BaoCao";
 import AdvertisementAdmin from "./component/adminBoss/adminchild/Advertisement";
+import TestLink from "./component/adminBoss/adminchild/testLink";
+
 function App() {
   return (
     <div>
@@ -62,6 +64,7 @@ function App() {
               path="/home/admin/advertisement"
               element={<AdvertisementAdmin />}
             />
+            <Route path="/home/admin/getlink" element={<TestLink />} />
             <Route
               path="/home/admin/posts/:idpost/baocao"
               element={<BaoCao />}

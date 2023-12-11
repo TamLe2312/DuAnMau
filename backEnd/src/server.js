@@ -14,6 +14,7 @@ const connection = require("./config/database");
 const session = require("express-session");
 const messenger = require("./routes/messengerApi");
 const adminApi = require("./routes/adminApi");
+const linkPreview = require("./routes/linkpreview");
 const notification = require("./routes/notificationApi");
 const app = express();
 const callEnd = require("./routes/callvideoApi");
@@ -167,6 +168,8 @@ app.use("/admin", adminApi);
 app.use("/notification", notification);
 
 app.use("/call", callEnd);
+
+app.use("/preview", linkPreview);
 
 server.listen(port, () => {
   console.log(`Sever app listening on port ${port}`);
