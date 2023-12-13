@@ -13,6 +13,8 @@ import Recoder from "../recoder/recoder";
 import ClearIcon from "@mui/icons-material/Clear";
 import { mirage } from "ldrs";
 import Linkify from "linkify-react";
+import ModalThemeMessage from "../modal/ModalThemeMessage";
+import * as themeMes from "../../services/messageService";
 // Default values shown
 import { useNavigate } from "react-router-dom";
 import { SocketCon } from "../socketio/Socketcontext";
@@ -70,7 +72,6 @@ function DetailMess(props) {
       console.log(e);
     }
   };
-  // console.log(listmess);
   const fetchListMess = async (me, you) => {
     try {
       const res = await request.get(`messenger/listMes/${me}/${you}`);
@@ -90,9 +91,26 @@ function DetailMess(props) {
     };
     fetchApi();
   }, [youID, chay, nhan]);
+  //theme
+  const [imgBG, setimgBG] = useState(null);
+  const [idTheme, setidTheme] = useState(null);
+  const [colorYouMe, setcolorYouMe] = useState(null);
+  useEffect(() => {
+    const fetchApi = async () => {
+      const res = await themeMes.themeMes(youID, myID);
+      if (res.length > 0) {
+        setidTheme(res[0].id);
+        setimgBG(res[0].theme);
+        setcolorYouMe({
+          you: res[0].colorreceiver,
+          me: res[0].colorsender,
+        });
+      }
+    };
+    fetchApi();
+  }, [youID]);
   // --------------------------
   function handleOnEnter() {
-    // setOpenTyping(false);
     handleSendMess();
   }
   // ------------------------------------------
@@ -112,6 +130,7 @@ function DetailMess(props) {
   };
   // ------------------------------------------
   const handleSendMess = async () => {
+    await themeMes.createThemeMes(youID, myID);
     const textMes = text.trim();
     const formData = new FormData();
     try {
@@ -383,6 +402,19 @@ function DetailMess(props) {
       socket.off("typingstop");
     };
   }, []);
+
+  const [modalMessage, setModalMessage] = useState(false);
+  const handleTheme = () => {
+    setModalMessage(true);
+  };
+
+  const handleImg = (img) => {
+    setimgBG(img);
+  };
+  const handleColor = (color) => {
+    setcolorYouMe(color);
+  };
+
   return (
     <>
       {/* {typing && text.length} */}
@@ -401,6 +433,17 @@ function DetailMess(props) {
       {yourID ? (
         user ? (
           <>
+            <ModalThemeMessage
+              show={modalMessage}
+              onHide={() => setModalMessage(false)}
+              onimg={handleImg}
+              oncolor={handleColor}
+              idtheme={idTheme}
+              myid={myID}
+              youid={youID}
+              imgbg={imgBG}
+              coloryoume={colorYouMe}
+            />
             <div className="detailMess-user">
               <img
                 src={
@@ -414,6 +457,9 @@ function DetailMess(props) {
               <span className="detailMess-user-name">
                 {user.name !== null ? user.name : user.username}
               </span>
+              <span className="detailMess_theme" onClick={handleTheme}>
+                <i className="fa-solid fa-cloud"></i>
+              </span>
               <div className="detailMess_call">
                 <span onClick={() => handleCall(user)}>
                   <PhoneIcon sx={{ fontSize: 22 }} />
@@ -422,8 +468,7 @@ function DetailMess(props) {
             </div>
             <div
               style={{
-                backgroundImage:
-                  'url("https://i.pinimg.com/564x/36/a8/ad/36a8ad77bdaad6119e4bcac9fea2c9ea.jpg")',
+                backgroundImage: `url(${imgBG})`,
               }}
               className="detailMess"
             >
@@ -440,12 +485,17 @@ function DetailMess(props) {
                     (mes, index) =>
                       mes.softdelete !== myID && (
                         <div
+                          style={
+                            mes.sender_id === myID
+                              ? { backgroundColor: colorYouMe.me }
+                              : { backgroundColor: colorYouMe.you }
+                          }
                           title={format(mes.created_at)}
                           ref={scroll}
                           className={
                             mes.sender_id === myID
-                              ? "detailMessMe"
-                              : "detailMessYou"
+                              ? `detailMessMe`
+                              : `detailMessYou`
                           }
                           key={index}
                         >
@@ -512,7 +562,6 @@ function DetailMess(props) {
                 <Recoder youID={youID} myID={myID} setBanghi={setBanghi} />
               )}
             </span>
-
             {imgBlob && imgBlob.length > 0 && (
               <div className="detailMess_blob_imgs">
                 {imgBlob.map((img, index) => (
@@ -529,7 +578,6 @@ function DetailMess(props) {
               </div>
             )}
             {/* ----------------------------------- */}
-
             <div className="detailMess-imput">
               <div className="detailMess_imgs">
                 <input

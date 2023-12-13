@@ -11,3 +11,59 @@
 .modal-display {
   display: block;
 }
+/* ------------- */
+
+.modalThemeMessage_body {
+  display: flex;
+  flex-direction: column;
+}
+.modalThemeMessage_theme_bg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  width: 100%;
+}
+.modalThemeMessage_theme_bg_img {
+  width: 187px;
+  height: 120px;
+  border-radius: 8px;
+  object-fit: c;
+}
+.modalThemeMessage_theme_bg_img:hover {
+  cursor: pointer;
+}
+.theme_color_everyone_all {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.theme_color_everyone {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  position: relative;
+  overflow: hidden;
+}
+.theme_color_everyone:hover {
+  cursor: pointer;
+}
+.theme_color_everyone_child {
+  width: 50%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+}
+.theme_color_everyone_child:nth-child(1) {
+  left: 0;
+}
+
+.theme_color_everyone_child:nth-child(2) {
+  right: 0;
+}
+
+.modalThemeMessage_theme_bg_img.them {
+  outline: 2px dashed red;
+}
+.theme_color_everyone.them {
+  outline: 2px dashed red;
+}
