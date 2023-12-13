@@ -403,18 +403,15 @@ function DetailMess(props) {
     };
   }, []);
 
+  // Chủ đề
   const [modalMessage, setModalMessage] = useState(false);
   const handleTheme = () => {
     setModalMessage(true);
   };
-
-  const handleImg = (img) => {
-    setimgBG(img);
+  const [changeDataTheme, setchangeDataTheme] = useState(null);
+  const handlechangeImgBG = (dataTheme) => {
+    setchangeDataTheme(dataTheme);
   };
-  const handleColor = (color) => {
-    setcolorYouMe(color);
-  };
-
   return (
     <>
       {/* {typing && text.length} */}
@@ -436,8 +433,7 @@ function DetailMess(props) {
             <ModalThemeMessage
               show={modalMessage}
               onHide={() => setModalMessage(false)}
-              onimg={handleImg}
-              oncolor={handleColor}
+              onchanceimg={handlechangeImgBG}
               idtheme={idTheme}
               myid={myID}
               youid={youID}
@@ -454,6 +450,7 @@ function DetailMess(props) {
                 alt=""
                 className="messenger-user-img"
               />
+
               <span className="detailMess-user-name">
                 {user.name !== null ? user.name : user.username}
               </span>
@@ -467,9 +464,18 @@ function DetailMess(props) {
               </div>
             </div>
             <div
-              style={{
-                backgroundImage: `url(${imgBG})`,
-              }}
+              //
+              style={
+                changeDataTheme &&
+                (changeDataTheme.myid == youID ||
+                  changeDataTheme.youID == youID)
+                  ? {
+                      backgroundImage: `url(${changeDataTheme.selectBG})`,
+                    }
+                  : {
+                      backgroundImage: `url(${imgBG})`,
+                    }
+              }
               className="detailMess"
             >
               {/* ------------------------------------------ */}
@@ -486,7 +492,19 @@ function DetailMess(props) {
                       mes.softdelete !== myID && (
                         <div
                           style={
-                            mes.sender_id === myID
+                            changeDataTheme &&
+                            (changeDataTheme.myid == youID ||
+                              changeDataTheme.youID == youID)
+                              ? mes.sender_id === myID
+                                ? {
+                                    backgroundColor:
+                                      changeDataTheme.selectColor.me,
+                                  }
+                                : {
+                                    backgroundColor:
+                                      changeDataTheme.selectColor.you,
+                                  }
+                              : mes.sender_id === myID
                               ? { backgroundColor: colorYouMe.me }
                               : { backgroundColor: colorYouMe.you }
                           }

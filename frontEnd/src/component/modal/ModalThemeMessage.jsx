@@ -11,7 +11,7 @@ const ModalThemeMessage = (props) => {
   const socket = value.socket;
   const [selectBG, setselectBG] = useState(null);
   const [selectColor, setselectColor] = useState(null);
-  const { idtheme, coloryoume, imgbg, onimg, oncolor, onHide, youid, myid } =
+  const { idtheme, coloryoume, imgbg, onHide, youid, myid, onchanceimg } =
     props;
   useEffect(() => {
     setselectBG(imgbg);
@@ -60,11 +60,13 @@ const ModalThemeMessage = (props) => {
     setselectBG(null);
     setselectColor(null);
     onHide();
-    if (selectColor) {
-      oncolor(selectColor);
-    }
-    if (selectBG) {
-      onimg(selectBG);
+    if (selectColor && selectBG) {
+      onchanceimg({
+        selectBG: selectBG,
+        selectColor: selectColor,
+        youID: youid,
+        myid: myid,
+      });
     }
   };
   const handleClose = () => {
@@ -74,12 +76,12 @@ const ModalThemeMessage = (props) => {
   };
   useEffect(() => {
     socket.on("changetheme", (data) => {
-      // console.log(data.myid);
-      onimg(data.selectBG);
-      oncolor(data.selectColor);
+      onchanceimg(data);
     });
     return () => {
       socket.off("changetheme");
+      setselectBG(null);
+      setselectColor(null);
     };
   }, [first]);
 
