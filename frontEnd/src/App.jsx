@@ -32,6 +32,9 @@ import Test from "./component/adminBoss/adminchild/Test";
 import Commentad from "./component/adminBoss/adminchild/Commentad";
 // import { VietNamToxic } from "./component/vietnamToxic/VietNamToxic";
 import { BaoCao } from "./component/adminBoss/adminchild/BaoCao";
+import AdvertisementAdmin from "./component/adminBoss/adminchild/Advertisement";
+import TestLink from "./component/adminBoss/adminchild/testLink";
+
 function App() {
   return (
     <div>
@@ -57,6 +60,11 @@ function App() {
             <Route path="/home/admin/account" element={<Account />} />
             <Route path="/home/admin/groups" element={<GroupsTable />} />
             <Route path="/home/admin/posts" element={<Posts />} />
+            <Route
+              path="/home/admin/advertisement"
+              element={<AdvertisementAdmin />}
+            />
+            <Route path="/home/admin/getlink" element={<TestLink />} />
             <Route
               path="/home/admin/posts/:idpost/baocao"
               element={<BaoCao />}
