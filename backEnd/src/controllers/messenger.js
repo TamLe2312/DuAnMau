@@ -48,9 +48,9 @@ const test = async (sender_id, recipient_id) => {
   } else {
     const listImg = await new Promise((resolve, reject) => {
       connection.query(
-        `     SELECT listdata.img
-    FROM listdata
-    INNER JOIN messenger ON listdata.mess_id = messenger.id WHERE ((messenger.sender_id = ? AND messenger.recipient_id = ?) OR (messenger.sender_id = ? AND messenger.recipient_id = ?))`,
+        `SELECT listdata.img
+         FROM listdata
+         INNER JOIN messenger ON listdata.mess_id = messenger.id WHERE ((messenger.sender_id = ? AND messenger.recipient_id = ?) OR (messenger.sender_id = ? AND messenger.recipient_id = ?))`,
         [sender_id, recipient_id, recipient_id, sender_id],
         function (err, results, fields) {
           if (err) {
@@ -109,6 +109,7 @@ const upImgsMes = (req, res) => {
           function (err, results, fields) {
             completed++;
             if (err) {
+              console.log(err);
               return res
                 .status(500)
                 .json({ error: "Có lỗi xảy ra xin thử lại sau 2" });
@@ -460,22 +461,37 @@ const lastedMess = (req, res) => {
 const delMess = (req, res) => {
   const { sender_id, recipient_id } = req.body;
   connection.query(
-    "SELECT DISTINCT  softdelete FROM messenger WHERE (sender_id = ? AND recipient_id = ?) OR (sender_id = ? AND recipient_id = ?)",
+    "SELECT softdelete FROM messenger WHERE ((sender_id = ? AND recipient_id = ?) OR (sender_id = ? AND recipient_id = ?)) AND softdelete IS NOT NULL",
     [sender_id, recipient_id, recipient_id, sender_id],
     function (err, results, fields) {
       if (err) {
         console.log(err);
         return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
       }
-      // return res.status(200).json(results.length);
-      if (results.length > 1) {
-        // update again
-        const del =
-          "DELETE FROM  messenger WHERE ((sender_id = ? AND recipient_id = ?) OR (sender_id = ? AND recipient_id = ?)) AND softdelete IS NOT NULL";
-        const update =
-          "UPDATE messenger SET softdelete = ? WHERE (sender_id = ? AND recipient_id = ?) OR (sender_id = ? AND recipient_id = ?)";
+      if (results.length === 0) {
+        // update
         connection.query(
-          del,
+          "UPDATE messenger SET softdelete = ? WHERE (sender_id = ? AND recipient_id = ?) OR (sender_id = ? AND recipient_id = ?)",
+          [sender_id, sender_id, recipient_id, recipient_id, sender_id],
+          function (err, results, fields) {
+            if (err) {
+              console.log(err);
+              return res
+                .status(500)
+                .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+            }
+            return res
+              .status(200)
+              .json({ success: "Đã xóa tin nhắn phía bạn" });
+          }
+        );
+      } else {
+        // xóa
+        test(sender_id, recipient_id);
+        delRecord(sender_id, recipient_id);
+        // delete
+        connection.query(
+          "DELETE FROM messenger WHERE (sender_id = ? AND recipient_id = ?) OR (sender_id = ? AND recipient_id = ?)",
           [sender_id, recipient_id, recipient_id, sender_id],
           function (err, results, fields) {
             if (err) {
@@ -484,63 +500,11 @@ const delMess = (req, res) => {
                 .status(500)
                 .json({ error: "Có lỗi xảy ra xin thử lại sau" });
             }
-            // return res.status(200).json({ success: "Đã xóa tin nhắn " });
-            connection.query(
-              update,
-              [sender_id, sender_id, recipient_id, recipient_id, sender_id],
-              function (err, results, fields) {
-                if (err) {
-                  console.log(err);
-                  return res
-                    .status(500)
-                    .json({ error: "Có lỗi xảy ra xin thử lại sau" });
-                }
-                return res
-                  .status(200)
-                  .json({ success: "Đã xóa tin nhắn phía bạn và bên đó " });
-              }
-            );
+            if (results) {
+              return res.status(200).json({ success: "Đã xóa tin nhắn" });
+            }
           }
         );
-      } else {
-        if (results && results[0].softdelete === null) {
-          // update - soft delete
-          connection.query(
-            "UPDATE messenger SET softdelete = ? WHERE (sender_id = ? AND recipient_id = ?) OR (sender_id = ? AND recipient_id = ?)",
-            [sender_id, sender_id, recipient_id, recipient_id, sender_id],
-            function (err, results, fields) {
-              if (err) {
-                console.log(err);
-                return res
-                  .status(500)
-                  .json({ error: "Có lỗi xảy ra xin thử lại sau" });
-              }
-              return res
-                .status(200)
-                .json({ success: "Đã xóa tin nhắn phía bạn" });
-            }
-          );
-        } else {
-          //Xóaimg img trong public tại đây
-          test(sender_id, recipient_id);
-          delRecord(sender_id, recipient_id);
-          // delete
-          connection.query(
-            "DELETE FROM messenger WHERE (sender_id = ? AND recipient_id = ?) OR (sender_id = ? AND recipient_id = ?)",
-            [sender_id, recipient_id, recipient_id, sender_id],
-            function (err, results, fields) {
-              if (err) {
-                console.log(err);
-                return res
-                  .status(500)
-                  .json({ error: "Có lỗi xảy ra xin thử lại sau" });
-              }
-              if (results) {
-                return res.status(200).json({ success: "Đã xóa tin nhắn" });
-              }
-            }
-          );
-        }
       }
     }
   );
