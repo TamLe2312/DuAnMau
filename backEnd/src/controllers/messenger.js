@@ -88,6 +88,23 @@ const test = async (sender_id, recipient_id) => {
   }
 };
 
+const delImgListdata = async (sender_id, recipient_id) => {
+  if (sender_id === recipient_id) {
+    return res.status(400).json({ error: "không có tin nhắn với bản thân??" });
+  } else {
+    connection.query(
+      `DELETE FROM listdata WHERE ((user_id_one = ? AND user_id_two = ?) OR (user_id_one = ? AND user_id_two = ?))`,
+      [sender_id, recipient_id, recipient_id, sender_id],
+      function (err, results, fields) {
+        if (err) {
+          console.log(err);
+        }
+        console.log({ success: "Đã xóa hết img tại listdata" });
+      }
+    );
+  }
+};
+
 const upImgsMes = (req, res) => {
   const uploadMiddleware = upload.any();
   uploadMiddleware(req, res, function (err) {
@@ -100,12 +117,14 @@ const upImgsMes = (req, res) => {
     }
     if (req.files) {
       const mesID = req.body.mesID;
+      const youID = req.body.youID;
+      const myID = req.body.myID;
       const files = req.files;
       let completed = 0;
       files.forEach((file) => {
         connection.query(
-          "INSERT INTO listdata (mess_id,img) VALUES (?,?)",
-          [mesID, file.filename],
+          "INSERT INTO listdata (mess_id,img,user_id_one,user_id_two) VALUES (?,?,?,?)",
+          [mesID, file.filename, myID, youID],
           function (err, results, fields) {
             completed++;
             if (err) {
@@ -487,6 +506,7 @@ const delMess = (req, res) => {
         );
       } else {
         // xóa
+        delImgListdata(sender_id, recipient_id);
         test(sender_id, recipient_id);
         delRecord(sender_id, recipient_id);
         // delete
