@@ -14,15 +14,17 @@ const connection = require("./config/database");
 const session = require("express-session");
 const messenger = require("./routes/messengerApi");
 const adminApi = require("./routes/adminApi");
+const linkPreview = require("./routes/linkpreview");
 const notification = require("./routes/notificationApi");
 const app = express();
+const callEnd = require("./routes/callvideoApi");
 // ---------------------------
 // const http = require("http");
 
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "http://localhost:5173",
+    origin: "*",
     methods: ["GET", "POST"],
   },
 });
@@ -30,7 +32,6 @@ let activeUsers = [];
 io.on("connection", (socket) => {
   socket.on("add_new_user", (newUserID) => {
     const userExists = activeUsers.some((user) => user.userId === newUserID);
-
     if (!userExists) {
       activeUsers.push({
         userId: newUserID,
@@ -40,27 +41,104 @@ io.on("connection", (socket) => {
       io.emit("get_user", activeUsers);
     }
   });
+  // --------------------
+  // ------------------
   socket.on("add_message", (data) => {
-    const { youID } = data;
+    const { youID, myID } = data;
     const user = activeUsers.find((user) => user.userId == youID);
     if (user) {
       io.to(user.socketId).emit("get_message", data);
-      console.log("tìm thấy người dùng :", user);
-    } else {
-      // console.log("Không tìm thấy người dùng :", youID);
+      io.to(user.socketId).emit("recibir", { newMessage: myID });
     }
   });
+  // notification
+
+  socket.on("add_notification", (data) => {
+    const { userid, myID } = data;
+    const user = activeUsers.find((user) => user.userId == userid);
+    if (user) {
+      io.to(user.socketId).emit("notification", { newNoti: myID });
+    }
+  });
+
+  // ------------------------
 
   socket.on("disconnect", () => {
     activeUsers = activeUsers.filter((user) => user.socketId !== socket.id);
     io.emit("get_user", activeUsers);
+  });
+
+  // call
+  socket.on("findUserCall", (userCallId) => {
+    const { myID, youID } = userCallId;
+    const userOk = activeUsers.find((user) => user.userId === myID);
+    const conlai = activeUsers.find((user) => user.userId === youID);
+    if (userOk && conlai) {
+      io.emit("isyou", activeUsers);
+      io.to(conlai.socketId).emit("callID", { idcall: userOk.socketId });
+      // socket.broadcast.emit("callID", { idcall: userOk.socketId });
+      io.to(conlai.socketId).emit("calling", userOk);
+    }
+  });
+  socket.on("calluser", (data) => {
+    io.to(data.userToCall).emit("calluser", {
+      signal: data.signalData,
+      from: data.from,
+    });
+  });
+  socket.on("answercall", (data) => {
+    io.to(data.to).emit("callaccepted", data.signal);
+  });
+  socket.on("endcall", (userCallId) => {
+    const userOk = activeUsers.find((user) => user.userId === userCallId);
+    if (userOk) {
+      io.to(userOk.socketId).emit("end", "callend");
+    }
+  });
+  // typing
+  socket.on("typingadd", (data) => {
+    const { youID } = data;
+    const user = activeUsers.find((user) => user.userId == youID);
+    if (user) {
+      io.to(user.socketId).emit("typingok", data);
+    }
+  });
+  socket.on("typingstop", (data) => {
+    const { youID } = data;
+    const user = activeUsers.find((user) => user.userId == youID);
+    if (user) {
+      io.to(user.socketId).emit("typingstop", data);
+    }
+  });
+  // blur
+  socket.on("blurStatus", (data) => {
+    const { youID, blur } = data;
+    const user = activeUsers.find((user) => user.userId == youID);
+    if (user) {
+      io.to(user.socketId).emit("blurStatus", data);
+    }
+  });
+  // like
+  socket.on("likelike", (data) => {
+    const { youID } = data;
+    const user = activeUsers.find((user) => user.userId == youID);
+    if (user) {
+      io.to(user.socketId).emit("likelike", data);
+    }
+  });
+  // change theme
+  socket.on("changetheme", (data) => {
+    const { youID } = data;
+    const user = activeUsers.find((user) => user.userId == youID);
+    if (user) {
+      io.to(user.socketId).emit("changetheme", data);
+    }
   });
 });
 
 // });
 // -----------------------
 app.use(cors());
-
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 app.use(express.static("public"));
@@ -96,6 +174,10 @@ app.use("/messenger", messenger);
 app.use("/admin", adminApi);
 
 app.use("/notification", notification);
+
+app.use("/call", callEnd);
+
+app.use("/preview", linkPreview);
 
 server.listen(port, () => {
   console.log(`Sever app listening on port ${port}`);

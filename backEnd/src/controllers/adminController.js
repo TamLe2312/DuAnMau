@@ -32,6 +32,39 @@ const getDataAllUser = (req, res) => {
     }
   );
 };
+
+const getDataAllAds = (req, res) => {
+  const page = parseInt(req.params.page) || 1; // Trang hiện tại
+  const limit = 10; // Số lượng người dùng hiển thị trên mỗi trang
+  const offset = (page - 1) * limit; // Vị trí bắt đầu lấy dữ liệu
+  connection.query(
+    `SELECT COUNT(*) AS total FROM advertisement`,
+    async function (err, results, fields) {
+      if (err) {
+        return res.status(500).json({ error: "Lỗi máy chủ" });
+      }
+      const totalPosts = results[0].total;
+      const pageCount = Math.ceil(totalPosts / limit);
+      connection.query(
+        `SELECT advertisement.*,brandadvertisement.brand FROM advertisement
+       INNER JOIN brandadvertisement ON advertisement.brand_id = brandadvertisement.id
+        LIMIT ? OFFSET ?`,
+        [limit, offset],
+        async function (err, results, fields) {
+          if (err) {
+            return res.status(500).json({ error: "Lỗi máy chủ" });
+          }
+          if (results.length > 0) {
+            return res.status(200).json({ pageCount: pageCount, results });
+          } else {
+            return res.status(200).json([]);
+          }
+        }
+      );
+    }
+  );
+};
+// số lượng cờ
 const getDataAllPost = (req, res) => {
   const page = parseInt(req.params.page) || 1; // Trang hiện tại
   const limit = 10; // Số lượng người dùng hiển thị trên mỗi trang
@@ -48,6 +81,7 @@ const getDataAllPost = (req, res) => {
         `SELECT posts.*, users.name, users.username
         FROM posts
         INNER JOIN users ON posts.user_id = users.id
+        ORDER BY posts.countflag DESC
         LIMIT ? OFFSET ?`,
         [limit, offset],
         async function (err, results, fields) {
@@ -219,6 +253,89 @@ const deleteUser = (req, res) => {
     }
   );
 };
+const deleteBrand = (req, res) => {
+  const { id } = req.body;
+  if (!id) {
+    return res
+      .status(400)
+      .json({ error: "Id brand không tồn tại hoặc không có" });
+  }
+  connection.query(
+    "SELECT * FROM brandadvertisement WHERE id = ?",
+    [id],
+    async function (err, results, fields) {
+      if (err) {
+        return res.status(500).json({ error: "Lỗi máy chủ" });
+      }
+      if (results.length > 0) {
+        const url = results[0].avatarBrand;
+        connection.query(
+          "DELETE FROM brandadvertisement WHERE id = ?",
+          [id],
+          async function (err, results, fields) {
+            if (err) {
+              return res.status(500).json({ error: "Lỗi máy chủ" });
+            }
+            connection.query(
+              `SELECT COUNT(*) AS total FROM brandadvertisement`,
+              async function (err, results, fields) {
+                if (err) {
+                  return res.status(500).json({ error: "Lỗi máy chủ" });
+                }
+
+                if (url) {
+                  const modifiedUrl = url.replace(
+                    "http://localhost:5173/uploads/",
+                    ""
+                  );
+                  const uploadDir = path.join(
+                    __dirname,
+                    "../../../frontEnd/uploads"
+                  );
+                  const filePath = path.join(uploadDir, modifiedUrl);
+                  fs.access(filePath, fs.constants.F_OK, (err) => {
+                    if (err) {
+                      console.error(err);
+                      return res
+                        .status(404)
+                        .json({ error: "Tệp tin không tồn tại" });
+                    }
+                    // Xóa tệp tin
+                    fs.unlink(filePath, (error) => {
+                      if (error) {
+                        // Lỗi khi xóa tệp tin, trả về lỗi hoặc thông báo lỗi xóa tệp tin
+                        return res
+                          .status(500)
+                          .json({ error: "Lỗi khi xóa tệp tin" });
+                      }
+                    });
+                  });
+                  const TotalBrand = results[0].total;
+                  const pageCount = Math.ceil(TotalBrand / 10);
+                  return res.status(200).json({
+                    pageCount: pageCount,
+                    success: "Xóa thương hiệu thành công",
+                  });
+                } else {
+                  const TotalBrand = results[0].total;
+                  const pageCount = Math.ceil(TotalBrand / 10);
+                  return res.status(200).json({
+                    pageCount: pageCount,
+                    success: "Xóa thương hiệu thành công",
+                  });
+                }
+              }
+            );
+          }
+        );
+      } else {
+        return res
+          .status(400)
+          .json({ error: "Id brand không tồn tại hoặc không có" });
+      }
+    }
+  );
+};
 const deleteGroup = (req, res) => {
   const { idGroup } = req.body;
   if (!idGroup) {
@@ -366,6 +483,82 @@ const AdjustInformUser = (req, res) => {
     );
   }
 };
+const AdjustBrand = (req, res) => {
+  const { brand, id } = req.body;
+  if (brand && !req.file) {
+    connection.query(
+      "SELECT * FROM brandadvertisement WHERE brand = ?",
+      [brand],
+      async function (err, results, fields) {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
+        if (results.length > 0) {
+          return res
+            .status(200)
+            .json({ error: "Tên thương hiệu đã có.Vui lòng nhập tên khác" });
+        } else {
+          connection.query(
+            "UPDATE brandadvertisement SET brand = ? WHERE id = ? ",
+            [brand, id],
+            async function (err, results, fields) {
+              if (err) {
+                console.error(err);
+                return res.status(500).json({ error: "Lỗi máy chủ" });
+              }
+              return res
+                .status(200)
+                .json({ success: "Cập nhật thông tin thành công" });
+            }
+          );
+        }
+      }
+    );
+  } else {
+    const fileName = req.file.filename;
+    const filePath = "/uploads/" + fileName;
+    const baseURL = process.env.APP_URL;
+    const imageURL = `${baseURL.slice(0, -1)}${filePath}`;
+    connection.query(
+      "SELECT * FROM brandadvertisement WHERE id = ?",
+      [id],
+      async function (err, results, fields) {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
+        if (results.length > 0) {
+          const uploadDir = path.join(__dirname, "../../../frontEnd/uploads");
+          const fileName = results[0].avatarBrand.substring(
+            results[0].avatarBrand.lastIndexOf("/") + 1
+          );
+          const filePathOld = path.join(uploadDir, fileName);
+          if (fs.existsSync(filePathOld)) {
+            try {
+              fs.unlinkSync(filePathOld);
+            } catch (error) {
+              return res.status(500).json({ error: "Lỗi khi cập nhật avatar" });
+            }
+          }
+          connection.query(
+            "UPDATE brandadvertisement SET avatarBrand = ? WHERE id = ?",
+            [imageURL, id],
+            async function (err, results, fields) {
+              if (err) {
+                console.error(err);
+                return res.status(500).json({ error: "Lỗi máy chủ" });
+              }
+              return res
+                .status(200)
+                .json({ success: "Cập nhật thông tin thành công" });
+            }
+          );
+        }
+      }
+    );
+  }
+};
 const adjustGroupInformContent = (req, res) => {
   const { name, moTaNhom, idGroup } = req.body;
   if (name && moTaNhom) {
@@ -486,7 +679,107 @@ const createNewUser = (req, res) => {
     }
   });
 };
+const createNewAds = (req, res) => {
+  const { brand, content } = req.body;
+  const files = req.files;
+  if (req.files && brand && content) {
+    connection.query(
+      "INSERT INTO advertisement (content,brand_id) VALUES (?,?)",
+      [content, brand],
+      function (err, results, fields) {
+        if (results) {
+          const lastId = results.insertId;
+          let completed = 0;
+          files.forEach((file) => {
+            const fileName = file.filename;
+            const filePath = "/uploads/" + fileName;
+            const baseURL = process.env.APP_URL;
+            const imageURL = `${baseURL.slice(0, -1)}${filePath}`;
+            connection.query(
+              "INSERT INTO listdata (ad_id,img) VALUES (?,?)",
+              [lastId, imageURL],
+              function (err, results, fields) {
+                completed++;
+                if (err) {
+                  return res
+                    .status(500)
+                    .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+                } else {
+                  if (completed == files.length) {
+                    return res
+                      .status(200)
+                      .json({ success: "Bạn đã tải hình ảnh lên" });
+                  }
+                }
+              }
+            );
+          });
+        }
+      }
+    );
+  }
+};
 
+const createNewBrand = (req, res) => {
+  const { brand } = req.body;
+  if (req.file) {
+    const fileName = req.file.filename;
+    const filePath = "/uploads/" + fileName;
+    const baseURL = process.env.APP_URL;
+    const imageURL = `${baseURL.slice(0, -1)}${filePath}`;
+    connection.query(
+      "SELECT * FROM brandadvertisement WHERE brand = ?",
+      [brand],
+      function (err, results, fields) {
+        if (err) {
+          console.log(err);
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
+        if (results.length > 0) {
+          const uploadDir = path.join(__dirname, "../../../frontEnd/uploads");
+          const filePathOld = path.join(uploadDir, fileName);
+          if (fs.existsSync(filePathOld)) {
+            try {
+              fs.unlinkSync(filePathOld);
+            } catch (error) {
+              return res.status(500).json({ error: "Lỗi khi cập nhật avatar" });
+            }
+          }
+          return res
+            .status(200)
+            .json({ error: "Tên thương hiệu đã có.Vui lòng nhập tên khác" });
+        } else {
+          connection.query(
+            "INSERT INTO brandadvertisement (brand,avatarBrand) VALUES (?,?)",
+            [brand, imageURL],
+            function (err, results, fields) {
+              if (err) {
+                console.log(err);
+                return res.status(500).json({ error: "Lỗi máy chủ" });
+              }
+              return res
+                .status(200)
+                .json({ success: "Thêm thương hiệu thành công" });
+            }
+          );
+        }
+      }
+    );
+  } else {
+    connection.query(
+      `INSERT INTO brandadvertisement (brand) VALUES (?)`,
+      [brand],
+      async function (err, results, fields) {
+        if (err) {
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
+        return res.status(200).json({
+          success: "Thêm thương hiệu thành công",
+        });
+      }
+    );
+  }
+};
 const adjustGroupInform = (req, res) => {
   const { hasAvatar, idGroup, avatar } = req.body;
   const fileName = req.file ? req.file.filename : null;
@@ -573,6 +866,104 @@ const deletePost = (req, res) => {
     return res.status(400).json({ error: "Id Post không tồn tại" });
   }
 };
+const deleteAds = (req, res) => {
+  const idAds = req.body.idAds;
+  if (idAds) {
+    connection.query(
+      "SELECT * FROM advertisement WHERE id = ?",
+      [idAds],
+      async function (err, results, fields) {
+        if (err) {
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
+        if (results.length > 0) {
+          connection.query(
+            "DELETE FROM advertisement WHERE id = ?",
+            [idAds],
+            function (err, results, fields) {
+              if (err) {
+                return res
+                  .status(500)
+                  .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+              }
+              if (results) {
+                connection.query(
+                  `SELECT COUNT(*) AS total FROM advertisement`,
+                  async function (err, results, fields) {
+                    if (err) {
+                      return res.status(500).json({ error: "Lỗi máy chủ" });
+                    }
+                    const totalPosts = results[0].total;
+                    const pageCount = Math.ceil(totalPosts / 10);
+                    return res.status(200).json({
+                      pageCount: pageCount,
+                      success: "Xóa bài viết thành công",
+                    });
+                  }
+                );
+              }
+            }
+          );
+        } else {
+          return res.status(200).json([]);
+        }
+      }
+    );
+  } else {
+    return res.status(200).json([]);
+  }
+};
+const deleteAdImgs = async (req, res) => {
+  const uploadDir = path.join(__dirname, "../../../frontEnd/uploads");
+  const { idAds } = req.body;
+  const listImg = await new Promise((resolve, reject) => {
+    connection.query(
+      "SELECT * FROM listdata WHERE ad_id = ?",
+      [idAds],
+      (err, results, fields) => {
+        if (err) {
+          reject(err);
+        } else {
+          const imgPaths = results.map((re) => {
+            const cleanedPath = re.img.replace(
+              /^http:\/\/localhost:5173\/uploads\//,
+              ""
+            );
+            return path.join(uploadDir, cleanedPath);
+          });
+          resolve(imgPaths);
+        }
+      }
+    );
+  });
+
+  if (listImg.length === 0) {
+    return res.status(200).json({ success: "Quảng cáo không có hình ảnh" });
+  }
+  try {
+    await Promise.all(
+      listImg.map((imgdel) => {
+        return new Promise((resolve, reject) => {
+          fs.unlink(imgdel, (err) => {
+            if (err) {
+              reject(err);
+            } else {
+              resolve();
+            }
+          });
+        });
+      })
+    );
+    return res.status(200).json({
+      successWithImgs:
+        "Bạn đã xóa quảng cáo thành công.Vui lòng cập nhật lại thông tin",
+    });
+  } catch (err) {
+    console.log(err);
+    return res.status(400).json({ error: "Lỗi xóa hình ảnh" });
+  }
+};
+
 const deletePostImgs = async (req, res) => {
   const uploadDir = path.join(__dirname, "../public/images/");
   const { idPost } = req.body;
@@ -617,10 +1008,39 @@ const deletePostImgs = async (req, res) => {
     return res.status(400).json({ error: "Lỗi xóa hình ảnh" });
   }
 };
-
+const getDataBrand = (req, res) => {
+  const page = parseInt(req.params.page) || 1; // Trang hiện tại
+  const limit = 10; // Số lượng người dùng hiển thị trên mỗi trang
+  const offset = (page - 1) * limit; // Vị trí bắt đầu lấy dữ liệu
+  connection.query(
+    `SELECT COUNT(*) AS total FROM brandAdvertisement`,
+    async function (err, results, fields) {
+      if (err) {
+        return res.status(500).json({ error: "Lỗi máy chủ" });
+      }
+      const totalUsers = results[0].total;
+      const pageCount = Math.ceil(totalUsers / limit);
+      connection.query(
+        "SELECT * FROM brandAdvertisement LIMIT ? OFFSET ?",
+        [limit, offset],
+        function (err, results, fields) {
+          if (err) {
+            return res.status(500).json({ error: "Lỗi máy chủ" });
+          }
+          if (results.length > 0) {
+            return res.status(200).json({ results, pageCount: pageCount });
+          } else {
+            return res.status(200).json([]);
+          }
+        }
+      );
+    }
+  );
+};
 module.exports = {
   getDataAllUser,
   getDataAllPost,
+  getDataAllAds,
   deleteUser,
   AdjustInformUser,
   createNewUser,
@@ -631,5 +1051,12 @@ module.exports = {
   adjustGroupInformContent,
   postImgs,
   deletePost,
+  deleteAds,
   deletePostImgs,
+  createNewAds,
+  getDataBrand,
+  createNewBrand,
+  deleteBrand,
+  AdjustBrand,
+  deleteAdImgs,
 };

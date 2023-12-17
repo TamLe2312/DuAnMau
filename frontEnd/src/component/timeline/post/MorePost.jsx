@@ -3,20 +3,21 @@ import "./morepost.css";
 import { useState, useContext, useEffect } from "react";
 import Modal from "react-bootstrap/Modal";
 import Button from "react-bootstrap/Button";
-// import { toast } from "react-toastify";
 import * as request from "../../../utils/request";
 import { Context } from "../../../page/home/home";
-import axios from "axios";
-
+import { useCookies } from "react-cookie";
+import * as postService from "../../../services/AdPostService";
 function MorePost(props) {
+  const [cookies] = useCookies();
+  const myID = cookies.userId;
   const conTent = props.title || props.content;
-  console.log(conTent);
   const againPage = useContext(Context);
   const [modalShow, setModalShow] = useState(false);
   const [edit, setEdit] = useState(false);
   const [contentNew, setcontentNew] = useState(conTent);
   const [dis, setdis] = useState(false);
   const postID = props.id;
+  const userid = props.userid;
   const groupPostId = props.groupPostId;
   // console.log(postID);
   const deletePost = () => {
@@ -60,6 +61,7 @@ function MorePost(props) {
   const handleEditPost = () => {
     setModalShow(true);
     setEdit(true);
+    setbaocao(false);
   };
   const editPost = () => {
     try {
@@ -97,32 +99,59 @@ function MorePost(props) {
     const length = contentNew.trim().length;
     setdis(length === 0 ? true : false);
   }, [contentNew]);
-
+  const [baocao, setbaocao] = useState(false);
+  const baoCao = () => {
+    setModalShow(true);
+    // setEdit(true);
+    setbaocao(true);
+  };
+  const listBaoCao = [
+    "Bán hàng trái phép",
+    "Ảnh khỏa thân",
+    "Spam",
+    "Bạo lực",
+    "Quấy rối",
+    "Khủng bố",
+    "Rối loạn ăn uống",
+    "Ngôn từ gây thù gét",
+    "Vấn đề khác",
+  ];
+  const handleBaoCaoOK = async (data) => {
+    const res = await postService.flagPost(myID, props.id, data);
+    toast.success(res.success);
+    setModalShow(false);
+  };
   return (
     <>
       <div className="morepost">
         <ul className="morepost-list">
-          <li className="morepost-list-item">
-            <span
-              className="morepost-list-item-child-red "
-              onClick={() => {
-                setModalShow(true);
-                setEdit(false);
-              }}
-              onMouseDown={props.handleHide}
-            >
-              Xóa bài viết
-            </span>
+          {userid === myID && (
+            <>
+              <li className="morepost-list-item">
+                <span
+                  className="morepost-list-item-child-red "
+                  onClick={() => {
+                    setModalShow(true);
+                    setEdit(false);
+                  }}
+                  onMouseDown={props.handleHide}
+                >
+                  Xóa bài viết
+                </span>
+              </li>
+              <li
+                className="morepost-list-item-child"
+                id="morepost-list-item-edit"
+                onClick={handleEditPost}
+              >
+                Sửa tiêu đề
+              </li>
+            </>
+          )}
+
+          <li className="morepost-list-item-child" onClick={baoCao}>
+            Báo cáo
           </li>
-          <li
-            className="morepost-list-item-child"
-            id="morepost-list-item-edit"
-            onClick={handleEditPost}
-          >
-            Sửa tiêu đề
-          </li>
-          {/* <li className="morepost-list-item">Hết</li> */}
-          <li></li>
         </ul>
 
         <Modal
@@ -138,7 +167,19 @@ function MorePost(props) {
             </Modal.Title>
           </Modal.Header>
           <Modal.Body>
-            {edit ? (
+            {baocao ? (
+              <ul className="list-group baocaonguoidung">
+                {listBaoCao.map((item, index) => (
+                  <li
+                    onClick={() => handleBaoCaoOK(item)}
+                    key={index}
+                    className="list-group-item"
+                  >
+                    {item}
+                  </li>
+                ))}
+              </ul>
+            ) : edit ? (
               <textarea
                 className="edit-content-post"
                 value={contentNew}
@@ -150,7 +191,9 @@ function MorePost(props) {
           </Modal.Body>
           <Modal.Footer>
             <Button onClick={() => setModalShow(false)}>Hủy</Button>
-            {edit ? (
+            {baocao ? (
+              ""
+            ) : edit ? (
               <Button
                 disabled={dis}
                 className="btn btn-danger"

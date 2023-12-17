@@ -1,7 +1,6 @@
 import "./navigation.css";
-import axios from "axios";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useContext } from "react";
 import Offcanvas from "react-bootstrap/Offcanvas";
 import HomeIcon from "@mui/icons-material/Home";
 import SearchIcon from "@mui/icons-material/Search";
@@ -18,13 +17,16 @@ import DarkModeIcon from "@mui/icons-material/DarkMode";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import MyModal from "../modal/Modal";
 import ImgNews from "../createNews/ImgNews";
-import ContentNews from "../createNews/ContentNews";
 import { useCookies } from "react-cookie";
 import imageLogo from "../../../uploads/Logo1.png";
-import request from "../../utils/request";
-
+import * as request from "../../utils/request";
+import { SocketCon } from "../socketio/Socketcontext";
+import { useLocation, matchPath } from "react-router-dom";
 function Navigation() {
+  const location = useLocation();
   const Navigate = useNavigate();
+  const value = useContext(SocketCon);
+  const socket = value.socket;
   const [userData, setUserData] = useState("");
   const [cookies, , removeCookie] = useCookies(["userId"]);
   const id = cookies.userId;
@@ -32,17 +34,16 @@ function Navigation() {
   const [checkS, setCheckS] = useState("");
   const [showMore, setShowMore] = useState(false);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [mode, setMode] = useState(false);
+  // const [mode, setMode] = useState(false);
   const handleClose = () => setShow(false);
+  const [noti, setnoti] = useState(true);
   const toggleShow = (e) => {
+    setnoti(true);
     setShow((s) => !s);
     setCheckS(e.currentTarget.id);
   };
   const handleShowMore = () => {
     setShowMore(!showMore);
-  };
-  const handleMode = () => {
-    setMode(!mode);
   };
   const closeModal = (data) => {
     setShow(data);
@@ -76,12 +77,12 @@ function Navigation() {
       <AdminPanelSettingsIcon />
     </>
   );
-  const theme = (
-    <>
-      <span className="dropdown-span">Giao diện</span>&nbsp;{" "}
-      {mode ? <WbSunnyIcon /> : <DarkModeIcon />}
-    </>
-  );
+  // const theme = (
+  //   <>
+  //     <span className="dropdown-span">Giao diện</span>&nbsp;{" "}
+  //     {mode ? <WbSunnyIcon /> : <DarkModeIcon />}
+  //   </>
+  // );
   const handleLogout = () => {
     removeCookie("userId", { path: "/" });
     Navigate("/", { replace: true });
@@ -89,7 +90,6 @@ function Navigation() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-
         const response = await request.get(`account/getDataUser/${id}`);
 
         if (response.data[0].role === "admin") {
@@ -102,32 +102,69 @@ function Navigation() {
     };
     fetchData();
 
-    const interval = setInterval(fetchData, 2000); // Chạy hàm fetchData() mỗi 2 giây
+    // const interval = setInterval(fetchData, 2000); // Chạy hàm fetchData() mỗi 2 giây
     return () => {
-      clearInterval(interval); // Xóa bỏ interval khi component bị unmount
+      // clearInterval(interval); // Xóa bỏ interval khi component bị unmount
     };
-
   }, [id]);
-  const [number, setNumber] = useState(0);
+  // time
+  const [mesNoti, setmesNoti] = useState(false);
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:8080/notification/countNotifcation/${id}`
-        );
+        const response = await request.get(`messenger/notimess/${id}`);
         if (response) {
-          const num = response.data[0].countNoti;
-          setNumber(num);
+          // console.log(response.data);
+          // false = Đọc r
+          setmesNoti(response.data.success);
         }
       } catch (error) {
         console.error("Lỗi:", error);
       }
     };
     fetchData();
-  }, [number]);
-  const setNum = () => {
-    setNumber((pre) => pre - 1);
+  }, []);
+  // đọc tin nhắn NAV
+  const handReadMess = async () => {
+    // console.log("Đọc nào ");
+    setmesNoti(false);
   };
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await request.get(`notification/notifcation/${id}`);
+        if (response) {
+          setnoti(response.data.success);
+        }
+      } catch (error) {
+        console.error("Lỗi:", error);
+      }
+    };
+    fetchData();
+  }, []);
+  useEffect(() => {
+    // console.log(location.pathname);
+    socket.on("recibir", (data) => {
+      if (location.pathname === "/home") {
+        setmesNoti(true);
+      }
+    });
+    return () => {
+      socket.off("recibir");
+    };
+  }, [location.pathname]);
+
+  useEffect(() => {
+    socket.on("notification", (data) => {
+      if (data.newNoti != id) {
+        setnoti(false);
+      }
+    });
+    return () => {
+      socket.off("notification");
+    };
+  }, []);
+
   return (
     <div className="navigation">
       <Link to="/home">
@@ -149,10 +186,14 @@ function Navigation() {
         <PeopleIcon />
         <span>Cộng đồng</span>
       </NavLink>
-      <NavLink className="navigation-button" to={"/home/messenger"}>
+      <NavLink
+        className="navigation-button"
+        to={"/home/messenger"}
+        onClick={handReadMess}
+      >
         <ChatBubbleIcon />
         <span>Tin nhắn</span>
-        {/* <div className="navigation-button-number">1</div> */}
+        {mesNoti && <div className="navigation-button-number"> </div>}
       </NavLink>
       <button
         className="navigation-button"
@@ -161,7 +202,7 @@ function Navigation() {
       >
         <FavoriteIcon />
         <span>Thông báo</span>
-        {/* {number > 0 && <div className="navigation-button-number">{number}</div>} */}
+        {!noti && <div className="navigation-button-number"> </div>}
       </button>
       <button
         className="navigation-button"
@@ -186,19 +227,6 @@ function Navigation() {
             alt="Avatar"
           />
         )}
-        {/* {userData && !userData.avatar ? (
-          <img
-            className="navigation-button-img"
-            src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg"
-            alt="Avatar"
-          />
-        ) : (
-          <img
-            className="navigation-button-img"
-            src={userData.avatar}
-            alt="Avatar"
-          />
-        )} */}
         <span>Trang cá nhân</span>
       </NavLink>
       <div ref={menuRef} className="navigation-button-father">
@@ -213,12 +241,11 @@ function Navigation() {
         {/* {showMore && ( */}
         <div className={`dropdown-more ${showMore ? "active" : "inactive"}`}>
           <ul className="dropdown-more-ul">
-            {isAdmin ? <Drop text={admin} path={"home/admin"} /> : <></>}
-
-            {/*  <div onClick={handleMode} className="dropdown-more-title">
-
-              <Drop Title={theme} />
-            </div> */}
+            {isAdmin ? (
+              <Drop text={admin} path={"home/admin/account"} />
+            ) : (
+              <></>
+            )}
             <div onClick={handleLogout} className="dropdown-more-title">
               <Drop Title={logout} path={""} />
             </div>
@@ -238,7 +265,7 @@ function Navigation() {
           {checkS === "tim-kiem" ? (
             <Search />
           ) : (
-            <Notification closeModal={closeModal} setNum={setNum} />
+            <Notification closeModal={closeModal} />
           )}
         </Offcanvas.Body>
       </Offcanvas>

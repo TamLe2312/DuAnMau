@@ -1,19 +1,23 @@
 const connection = require("../config/database");
 const path = require("path");
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
 require("dotenv").config();
 const Mustache = require("mustache");
 const fs = require("fs");
+const schedule = require("node-schedule");
 const moment = require("moment");
 
 const createGroup = (req, res) => {
-  const { name, moTa, idCreatedGroup } = req.body;
+  const { name, moTa, idCreatedGroup, privacy } = req.body;
   const fileName = req.file.filename;
-  if (!name || !moTa || !fileName) {
+  if (!name || !moTa || !fileName || !privacy) {
     return res.status(400).json({ error: "Vui lòng nhập đủ thông tin" });
   }
   const filePath = "/uploads/" + fileName;
   const baseURL = process.env.APP_URL;
   const imageURL = `${baseURL}${filePath}`;
+
   connection.query(
     "SELECT * FROM groupsTable WHERE name = ?",
     [name],
@@ -24,11 +28,11 @@ const createGroup = (req, res) => {
       if (results.length > 0) {
         return res
           .status(400)
-          .json({ error: "Tên nhóm đã tồn tại.Vui lòng nhập tên khác" });
+          .json({ error: "Tên nhóm đã tồn tại. Vui lòng nhập tên khác" });
       } else {
         connection.query(
-          "INSERT INTO groupsTable (name, moTaNhom, avatarGroup,idUserCreatedGroup) VALUES (?, ?, ?,?)",
-          [name, moTa, imageURL, idCreatedGroup],
+          "INSERT INTO groupsTable (name, moTaNhom, avatarGroup, idUserCreatedGroup, privacy) VALUES (?, ?, ?, ?, ?)",
+          [name, moTa, imageURL, idCreatedGroup, privacy],
           function (err, results, fields) {
             if (err) {
               console.error(err);
@@ -36,27 +40,43 @@ const createGroup = (req, res) => {
             }
             const groupId = results.insertId;
             connection.query(
-              "SELECT * FROM groupsTable",
+              "INSERT INTO membergroup (group_id, user_id) VALUES (?, ?)",
+              [groupId, idCreatedGroup],
               async function (err, results, fields) {
                 if (err) {
                   return res.status(500).json({ error: "Lỗi máy chủ" });
                 }
-                if (results.length > 0) {
-                  connection.query(
-                    "INSERT INTO membergroup (group_id,user_id) VALUES (?, ?)",
-                    [groupId, idCreatedGroup],
-                    async function (err, results, fields) {
-                      if (err) {
-                        return res.status(500).json({ error: "Lỗi máy chủ" });
-                      }
+                /* connection.query(
+                  `SELECT * FROM groupsTable 
+                  WHERE idUserCreatedGroup IN (SELECT user_id FROM membergroup WHERE user_id = ?)
+                  AND (privacy = 'private' OR privacy = 'public')`,
+                  [idCreatedGroup],
+                  async function (err, results, fields) {
+                    if (err) {
+                      return res.status(500).json({ error: "Lỗi máy chủ" });
                     }
-                  );
-                  return res
-                    .status(200)
-                    .json({ results, success: "Tạo nhóm thành công" });
-                } else {
-                  return res.status(400).json({ error: "Lỗi máy chủ" });
-                }
+                    if (results.length > 0) {
+                      return res
+                        .status(200)
+                        .json({ results, success: "Tạo nhóm thành công" });
+                    } else {
+                      connection.query(
+                        "SELECT * FROM groupsTable WHERE privacy = 'public'",
+                        function (err, results, fields) {
+                          if (err) {
+                            return res
+                              .status(500)
+                              .json({ error: "Lỗi máy chủ" });
+                          }
+                          return res
+                            .status(200)
+                            .json({ results, success: "Tạo nhóm thành công" });
+                        }
+                      );
+                    }
+                  }
+                ); */
+                return res.status(200).json({ success: "Tạo nhóm thành công" });
               }
             );
           }
@@ -65,9 +85,15 @@ const createGroup = (req, res) => {
     }
   );
 };
+
 const getDataGroup = (req, res) => {
+  const id = req.params.idUser;
   connection.query(
-    "SELECT * FROM groupsTable ORDER BY RAND() LIMIT 10",
+    "SELECT DISTINCT groupsTable.* FROM groupsTable " +
+      "LEFT JOIN membergroup ON groupsTable.id = membergroup.group_id " +
+      "WHERE groupsTable.privacy = 'public' OR (groupsTable.privacy = 'private' AND membergroup.user_id = ?) " +
+      "ORDER BY RAND() LIMIT 10",
+    [id],
     async function (err, results, fields) {
       if (err) {
         return res.status(500).json({ error: "Lỗi máy chủ" });
@@ -80,12 +106,17 @@ const getDataGroup = (req, res) => {
     }
   );
 };
-
-const searchGroup = (req, res) => {
-  const searchValue = req.body.searchGroup;
-  if (!searchValue) {
+const getDataTotalMember = (req, res) => {
+  const groupId = req.params.groupId;
+  if (groupId) {
     connection.query(
-      "SELECT * FROM groupsTable ORDER BY RAND() LIMIT 10",
+      `SELECT membergroup.id,membergroup.group_id, users.username, users.id, users.avatar, users.name, groupsTable.idUserCreatedGroup
+   FROM membergroup 
+   INNER JOIN users ON users.id = membergroup.user_id 
+   INNER JOIN groupsTable ON groupsTable.id = membergroup.group_id
+   WHERE membergroup.group_id = ? 
+   LIMIT 20 OFFSET 0`,
+      [groupId],
       async function (err, results, fields) {
         if (err) {
           return res.status(500).json({ error: "Lỗi máy chủ" });
@@ -93,13 +124,18 @@ const searchGroup = (req, res) => {
         if (results.length > 0) {
           return res.status(200).json(results);
         } else {
-          return res.status(400).json({ error: "Group không tồn tại" });
+          return res.status(200).json([]);
         }
       }
     );
-  } else {
+  }
+};
+
+const searchGroup = (req, res) => {
+  const searchValue = req.body.searchValue;
+  if (searchValue) {
     connection.query(
-      "SELECT * FROM groupsTable WHERE name LIKE CONCAT('%', ?, '%')",
+      "SELECT * FROM groupsTable WHERE name LIKE CONCAT('%', ?, '%') AND privacy = 'public'",
       [searchValue],
       async function (err, results, fields) {
         if (err) {
@@ -108,12 +144,15 @@ const searchGroup = (req, res) => {
         if (results.length > 0) {
           return res.status(200).json(results);
         } else {
-          return res.status(400).json({ error: "Group không tồn tại" });
+          return res.status(200).json({ error: "Không tìm thấy nhóm" });
         }
       }
     );
+  } else {
+    return res.status(200).json([]);
   }
 };
+
 const getDataGroupProfile = (req, res) => {
   const groupIdProfile = req.params.groupId;
   if (!groupIdProfile) {
@@ -200,40 +239,104 @@ const removeAvatarGroup = (req, res) => {
   );
 };
 const UpdateInformationProfileGroup = (req, res) => {
-  const { name, moTaNhom, groupId } = req.body;
-  if (!name || !moTaNhom) {
-    return res.status(400).json({ error: "Vui lòng nhập đủ thông tin" });
-  }
-  connection.query(
-    "SELECT * FROM groupsTable WHERE name = ?",
-    [name],
-    async function (err, results, fields) {
-      if (err) {
-        return res.status(500).json({ error: "Lỗi máy chủ" });
+  const { name, moTaNhom, groupId, privacy } = req.body;
+  if (!moTaNhom && !privacy) {
+    connection.query(
+      "SELECT * FROM groupsTable WHERE name = ?",
+      [name],
+      async function (err, results, fields) {
+        if (err) {
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
+        if (results.length > 0) {
+          return res
+            .status(400)
+            .json({ error: "Tên nhóm đã tồn tại.Vui lòng nhập tên khác" });
+        } else {
+          connection.query(
+            "UPDATE groupsTable SET name = ? WHERE id = ?",
+            [name, groupId],
+            function (err, results, fields) {
+              if (err) {
+                console.error(err);
+                return res.status(500).json({ error: "Lỗi máy chủ" });
+              }
+              connection.query(
+                "SELECT name,moTaNhom FROM groupsTable WHERE id = ?",
+                [groupId],
+                function (err, results, fields) {
+                  if (err) {
+                    console.error(err);
+                    return res.status(500).json({ error: "Lỗi máy chủ" });
+                  }
+                  return res.status(200).json({
+                    name: results[0].name,
+                    moTaNhom: results[0].moTaNhom,
+                    privacy: results[0].privacy,
+                    success: "Cập nhật thông tin thành công",
+                  });
+                }
+              );
+            }
+          );
+        }
       }
-      if (results.length > 0) {
-        return res
-          .status(400)
-          .json({ error: "Tên nhóm đã tồn tại.Vui lòng nhập tên khác" });
-      } else {
+    );
+  } else if (!name && !privacy) {
+    connection.query(
+      "UPDATE groupsTable SET moTaNhom = ? WHERE id = ?",
+      [moTaNhom, groupId],
+      function (err, results, fields) {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
         connection.query(
-          "UPDATE groupsTable SET name = ?,moTaNhom = ? WHERE id = ?",
-          [name, moTaNhom, groupId],
+          "SELECT name,moTaNhom FROM groupsTable WHERE id = ?",
+          [groupId],
           function (err, results, fields) {
             if (err) {
               console.error(err);
               return res.status(500).json({ error: "Lỗi máy chủ" });
             }
             return res.status(200).json({
-              name: name,
-              moTaNhom: moTaNhom,
+              name: results[0].name,
+              moTaNhom: results[0].moTaNhom,
+              privacy: results[0].privacy,
               success: "Cập nhật thông tin thành công",
             });
           }
         );
       }
-    }
-  );
+    );
+  } else {
+    connection.query(
+      "UPDATE groupsTable SET privacy = ? WHERE id = ?",
+      [privacy, groupId],
+      function (err, results, fields) {
+        if (err) {
+          console.error(err);
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
+        connection.query(
+          "SELECT name,moTaNhom,privacy FROM groupsTable WHERE id = ?",
+          [groupId],
+          function (err, results, fields) {
+            if (err) {
+              console.error(err);
+              return res.status(500).json({ error: "Lỗi máy chủ" });
+            }
+            return res.status(200).json({
+              name: results[0].name,
+              moTaNhom: results[0].moTaNhom,
+              privacy: results[0].privacy,
+              success: "Cập nhật thông tin thành công",
+            });
+          }
+        );
+      }
+    );
+  }
 };
 const removeGroup = (req, res) => {
   const { hasAvatarGroup, groupIdProfile } = req.body;
@@ -276,7 +379,7 @@ const getDataGroupJoined = (req, res) => {
       if (results.length > 0) {
         return res.status(200).json(results);
       } else {
-        return res.status(400).json([]);
+        return res.status(200).json([]);
       }
     }
   );
@@ -322,7 +425,7 @@ const outGroup = (req, res) => {
       if (results.length > 0) {
         if (results[0].idUserCreatedGroup === idUser) {
           return res
-            .status(400)
+            .status(200)
             .json({ error: "Bạn là admin không thể rời nhóm" });
         } else {
           connection.query(
@@ -344,7 +447,7 @@ const outGroup = (req, res) => {
                       .json({ results, success: "Rời nhóm thành công" });
                   } else {
                     return res
-                      .status(400)
+                      .status(200)
                       .json({ error: "Không có dữ liệu Member Group" });
                   }
                 }
@@ -353,10 +456,25 @@ const outGroup = (req, res) => {
           );
         }
       } else {
-        return res.status(400).json({ error: "Group không tồn tại" });
+        return res.status(200).json({ error: "Group không tồn tại" });
       }
     }
   );
+};
+const KickMember = (req, res) => {
+  const { groupId, idUser } = req.body;
+  if (groupId && idUser) {
+    connection.query(
+      "DELETE FROM membergroup WHERE group_id = ? AND user_id = ?",
+      [groupId, idUser],
+      async function (err, results, fields) {
+        if (err) {
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
+        return res.status(200).json({ success: "Xóa thành công" });
+      }
+    );
+  }
 };
 const TotalMembers = (req, res) => {
   const groupId = parseInt(req.params.groupId);
@@ -380,16 +498,16 @@ const TotalMembers = (req, res) => {
               if (results1.length > 0) {
                 return res.status(200).json({ hasJoined: true, results });
               } else {
-                return res.status(400).json({
+                return res.status(200).json({
                   hasJoined: false,
-                  error: "Không có dữ liệu Member Group",
+                  results,
                 });
               }
             }
           );
         }
       } else {
-        return res.status(400).json({ error: "Nhóm không tồn tại" });
+        return res.status(200).json({ error: "Nhóm không tồn tại" });
       }
     }
   );
@@ -435,10 +553,138 @@ const postGroupData = (req, res) => {
     }
   );
 };
+const invitationCode = (req, res) => {
+  const groupId = req.params.groupId;
+
+  if (groupId) {
+    connection.query(
+      `SELECT invitationCode, createdCode FROM groupsTable WHERE id = ?`,
+      [groupId],
+      function (err, results, fields) {
+        if (err) {
+          return res
+            .status(500)
+            .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+        }
+        if (results.length > 0) {
+          const invitationCode = results[0].invitationCode;
+          const createdCode = results[0].createdCode;
+
+          // Calculate 24 hours ago
+          const twentyFourHoursAgo = new Date();
+          twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
+
+          if (invitationCode !== null && createdCode > twentyFourHoursAgo) {
+            return res.status(200).json(invitationCode);
+          } else {
+            bcrypt.hash(groupId, saltRounds, function (err, hash) {
+              if (!err) {
+                const alphanumericHash = hash.replace(/[^a-zA-Z0-9]/g, "");
+                let shortCode = alphanumericHash.slice(0, 10);
+                const currentTime = new Date();
+                connection.query(
+                  "UPDATE groupsTable SET invitationCode = ?, createdCode = ? WHERE id = ?",
+                  [shortCode, currentTime, groupId],
+                  function (err, results, fields) {
+                    if (err) {
+                      console.log(err);
+                      return res
+                        .status(500)
+                        .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+                    }
+                    return res.status(200).json(shortCode);
+                  }
+                );
+              }
+            });
+          }
+        }
+      }
+    );
+  }
+};
+
+const getInviteDataGroup = (req, res) => {
+  const { inviteCode, userId } = req.params;
+  if (inviteCode && userId) {
+    connection.query(
+      `SELECT groupsTable.id,groupsTable.name,groupsTable.avatarGroup, COUNT(membergroup.group_id) AS memberCount 
+       FROM groupsTable
+       INNER JOIN membergroup ON groupsTable.id = membergroup.group_id
+       WHERE groupsTable.invitationCode = ?
+       GROUP BY groupsTable.id`,
+      [inviteCode],
+      function (err, results, fields) {
+        if (err) {
+          console.log(err);
+          return res
+            .status(500)
+            .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+        }
+        if (results.length > 0) {
+          return res.status(200).json(results);
+        } else {
+          return res.status(200).json([]);
+        }
+      }
+    );
+  } else {
+    return res.status(200).json([]);
+  }
+};
+const joinInvitationGroup = (req, res) => {
+  const { inviteCode, userId } = req.params;
+  if (inviteCode && userId) {
+    connection.query(
+      `SELECT * FROM groupsTable WHERE invitationCode = ?`,
+      [inviteCode],
+      function (err, results, fields) {
+        if (err) {
+          console.log(err);
+          return res
+            .status(500)
+            .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+        }
+        if (results.length > 0) {
+          const groupId = results[0].id;
+          connection.query(
+            `SELECT * FROM memberGroup WHERE user_id = ? AND group_id = ?`,
+            [userId, groupId],
+            async function (err, results, fields) {
+              if (err) {
+                return res.status(500).json({ error: "Lỗi máy chủ" });
+              }
+              if (results.length > 0) {
+                return res.status(200).json({ error: "Đã tham gia vào nhóm" });
+              }
+              connection.query(
+                "INSERT INTO membergroup (group_id,user_id) VALUES (?,?)",
+                [groupId, userId],
+                async function (err, results, fields) {
+                  if (err) {
+                    return res.status(500).json({ error: "Lỗi máy chủ" });
+                  }
+                  return res
+                    .status(200)
+                    .json({ success: "Vào nhóm thành công" });
+                }
+              );
+            }
+          );
+        } else {
+          return res.status(200).json([]);
+        }
+      }
+    );
+  } else {
+    return res.status(200).json([]);
+  }
+};
 
 module.exports = {
   createGroup,
   getDataGroup,
+  getDataTotalMember,
   searchGroup,
   getDataGroupProfile,
   changeAvatarGroup,
@@ -451,4 +697,8 @@ module.exports = {
   outGroup,
   postGroupData,
   CountPostGroup,
+  invitationCode,
+  getInviteDataGroup,
+  joinInvitationGroup,
+  KickMember,
 };

@@ -45,7 +45,7 @@ function Suggestions() {
           )}
         </Link>
         <div className="suggestions-title">
-          <Link to={`/home/profile/user/${id}`} className="suggestions-link">
+          <Link to={`/home/profile`} className="suggestions-link">
             {userData.name ? (
               <span className="suggestions-title-name">{userData.name}</span>
             ) : (
@@ -54,7 +54,12 @@ function Suggestions() {
               </span>
             )}
           </Link>
-          {userData.moTa ? <span>{userData.moTa}</span> : <span></span>}
+          <span>
+            {userData.moTa && userData.moTa.length > 20
+              ? userData.moTa.slice(0, 20) + "..."
+              : userData.moTa}
+          </span>
+          {/*    {userData.moTa ? <span>{userData.moTa}</span> : <span></span>} */}
         </div>
       </div>
 

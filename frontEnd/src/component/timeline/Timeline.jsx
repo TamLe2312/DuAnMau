@@ -9,6 +9,7 @@ import InfiniteScroll from "react-infinite-scroll-component";
 import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt";
 import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
 import * as request from "../../utils/request";
+import Advertisement from "../advertisement/advertisement";
 function Timeline() {
   const [pageData, setpageData] = useState(2);
 
@@ -47,19 +48,49 @@ function Timeline() {
     };
     fetchDataAndSetChay();
   }, [chay]);
-  const fetchDataNew = () => {
-    setpageData(pageData + 1);
-    const dataNew = async () => {
-      const response = await request.get(`post/datapost/${pageData}`);
-      if (response.status === 200) {
-        const datas = response.data;
-        setPostsData(postsData.concat(datas));
-      } else {
-        console.log("Lỗi rồi");
-      }
-    };
-    dataNew();
+  const [adDisplayed, setAdDisplayed] = useState(false);
+  const addAd = async () => {
+    if (pageData > 2 && !adDisplayed && postsData.length > 4) {
+      const adResponse = await request.get(`account/getDataAd`);
+      const numberOfAdsToAdd = Math.floor(
+        Math.random() * adResponse.data.length
+      );
+      const randomNum =
+        Math.floor(Math.random() * (postsData.length - 5 + 1)) + 5;
+      console.log(adResponse);
+      const adData = {
+        id: adResponse.data[numberOfAdsToAdd].id,
+        isAd: true,
+        avatar: adResponse.data[numberOfAdsToAdd].avatarBrand,
+        content: adResponse.data[numberOfAdsToAdd].content,
+        username: adResponse.data[numberOfAdsToAdd].brand,
+        created_at: adResponse.data[numberOfAdsToAdd].created_at,
+      };
+
+      setPostsData((prevPostsData) => {
+        const updatedPostsData = [...prevPostsData];
+        updatedPostsData.splice(randomNum, 0, adData);
+        return updatedPostsData;
+      });
+
+      setAdDisplayed(true);
+    }
   };
+
+  const fetchDataNew = async () => {
+    setpageData(pageData + 1);
+
+    const response = await request.get(`post/datapost/${pageData}`);
+
+    if (response.status === 200) {
+      const datas = response.data;
+      setPostsData((prevPostsData) => prevPostsData.concat(datas));
+      addAd();
+    } else {
+      console.log("Lỗi rồi");
+    }
+  };
+
   const textEndPost = (
     <>
       Bạn đã xem hết bài viết &nbsp;
@@ -76,9 +107,9 @@ function Timeline() {
   return (
     <div className=" timeline">
       <div className="timeline-post">
-        {/*   <div className="timeline-tin">
+        <div className="timeline-tin">
           <Tin />
-        </div> */}
+        </div>
         <br />
         <div className="timeline-post">
           {postsData
@@ -92,6 +123,7 @@ function Timeline() {
                   time={post.created_at}
                   avatar={post.avatar}
                   title={post.content}
+                  isAd={post.isAd}
                   // like={100}
                 />
               ))
@@ -103,6 +135,7 @@ function Timeline() {
       </div>
       <div className="timeline-suggestions">
         <Suggestions />
+        {/*      <Advertisement /> */}
       </div>
       <InfiniteScroll
         dataLength={postsData.length + 1}

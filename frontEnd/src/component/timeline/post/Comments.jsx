@@ -1,14 +1,15 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import "./comments.css";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import { useCookies } from "react-cookie";
 import Button from "react-bootstrap/Button";
 import Modal from "react-bootstrap/Modal";
-import { Avatar } from "@mui/material";
-// import { Toaster, toast } from "sonner";
 import * as request from "../../../utils/request";
-
+import { SocketCon } from "../../socketio/Socketcontext";
+import * as toxic from "../../vietnamToxic/VietNamToxic";
 function Comments(props) {
+  let value = useContext(SocketCon);
+  const socket = value.socket;
   const handleRun = props.handlerun;
   const [cookies] = useCookies();
   const myID = cookies.userId;
@@ -83,40 +84,47 @@ function Comments(props) {
 
     fetchComments();
   }, [id, doi]);
+  const [viPhamComment, setviPhamComment] = useState(false);
   const handleSend = () => {
     // console.log(content);
-    try {
-      const fetchApi = async () => {
-        if (groupPostId) {
-          const res = await request.post("post/commentPost", {
-            content: content,
-            userID: myID,
-            groupPostId: groupPostId,
-          });
-          if (res) {
-            setcontent("");
-            setdoi((e) => !e);
-            handleRun();
+    const isToxic = toxic.VietNamToxic(content);
+    if (isToxic) {
+      setviPhamComment(true);
+    } else {
+      try {
+        const fetchApi = async () => {
+          if (groupPostId) {
+            const res = await request.post("post/commentPost", {
+              content: content,
+              userID: myID,
+              groupPostId: groupPostId,
+            });
+            if (res) {
+              setcontent("");
+              setdoi((e) => !e);
+              handleRun();
+            }
+          } else {
+            const res = await request.post("post/commentPost", {
+              content: content,
+              userID: myID,
+              postID: id,
+            });
+            if (res) {
+              // console.log(userid);
+              let thongBao = "Đã bình luận bài viết của bạn";
+              await notification(id, myID, thongBao, userid);
+              socket.emit("add_notification", { userid, myID });
+              setcontent("");
+              setdoi((e) => !e);
+              handleRun();
+            }
           }
-        } else {
-          const res = await request.post("post/commentPost", {
-            content: content,
-            userID: myID,
-            postID: id,
-          });
-          if (res) {
-            // console.log(userid);
-            let thongBao = "Đã bình luận bài viết của bạn";
-            await notification(id, myID, thongBao, userid);
-            setcontent("");
-            setdoi((e) => !e);
-            handleRun();
-          }
-        }
-      };
-      fetchApi();
-    } catch (e) {
-      console.log(e);
+        };
+        fetchApi();
+      } catch (e) {
+        console.log(e);
+      }
     }
   };
   const [cmtID, setcmtID] = useState("");
@@ -195,7 +203,11 @@ function Comments(props) {
           {avatar ? (
             <img className="post-avatar" src={avatar} alt="" />
           ) : (
-            <Avatar>{name ? name.charAt(0) : user.charAt(0)}</Avatar>
+            <img
+              className="post-avatar"
+              src="https://i.pinimg.com/564x/13/59/5c/13595cf982c1fa5bd1d16b4627f8ce56.jpg"
+              alt=""
+            />
           )}
           <span>
             <span className="commentschild-usercomment">{name || user}</span>
@@ -203,16 +215,16 @@ function Comments(props) {
           </span>
         </div>
       )}
-
       <div
         className={img.length > 0 ? "commentschild" : "commentschild-notimg"}
       >
+        {/* {console.log(userComment)} */}
         {listComment.length > 0
           ? listComment.map((comment, index) => {
               const user = userComment.find(
                 (user) => user.id === comment.user_id
               );
-              const username = user ? user.username : null;
+              // const username = user ? user.username : null;
 
               return (
                 <div className="commentschild-once" key={index}>
@@ -222,7 +234,7 @@ function Comments(props) {
                   />
                   <span>
                     <span className="commentschild-usercomment">
-                      {username}
+                      {user && (user.name ?? user.username)}
                     </span>
                     &nbsp; {comment.content}
                   </span>
@@ -239,7 +251,6 @@ function Comments(props) {
             })
           : "Không có ai bình luận"}
       </div>
-
       <div className="commentschild-input">
         <div className="input-group">
           <input
@@ -247,8 +258,12 @@ function Comments(props) {
             type="text"
             className="form-control"
             placeholder="Viết bình luận"
-            onChange={(e) => setcontent(e.target.value)}
+            onChange={(e) => {
+              setcontent(e.target.value);
+              setviPhamComment(false);
+            }}
           />
+
           <button
             disabled={!content}
             className={
@@ -261,6 +276,7 @@ function Comments(props) {
             Đăng
           </button>
         </div>
+        {viPhamComment && <span className="text-danger">Lỗi</span>}
       </div>
       <Modal
         show={modalShow}
@@ -288,7 +304,6 @@ function Comments(props) {
           </ul>
         </Modal.Body>
       </Modal>
-
       <Modal
         show={show}
         onHide={() => setShow(false)}

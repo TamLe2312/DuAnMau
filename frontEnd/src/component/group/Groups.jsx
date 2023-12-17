@@ -4,6 +4,7 @@ import GridOnIcon from "@mui/icons-material/GridOn";
 import Validation from "../../component/validation/validation";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import MyModal from "../modal/Modal";
 import FiberManualRecordOutlinedIcon from "@mui/icons-material/FiberManualRecordOutlined";
 import FiberManualRecordIcon from "@mui/icons-material/FiberManualRecord";
 import InfiniteScroll from "react-infinite-scroll-component";
@@ -14,24 +15,27 @@ import { useParams, useNavigate } from "react-router-dom";
 import Post from "../timeline/post/Post";
 import * as request from "../../utils/request";
 import "./Groups.css";
+import InviteGroup from "./inviteGroup";
+import TotalMemberModal from "./totalMembersModal";
 
 function Groups() {
   const Navigate = useNavigate();
   const groupID = useParams();
-  const [selectedImage, setSelectedImage] = useState(null);
   const [loading, setLoading] = useState(false);
   const [showModalAvatar, setShowModalAvatar] = useState(false);
   const [showModalPostGroup, setShowModalPostGroup] = useState(false);
-  const [cookies] = useCookies(["userId"]);
+  const [cookies] = useCookies();
   const [showModalInformationProfile, setShowModalInformationProfile] =
     useState(false);
   const [showModalConfirmDelete, setShowModalConfirmDelete] = useState(false);
-  const [Images, setImages] = useState(null);
+  const [showModalInviteGroup, setShowModalInviteGroup] = useState(false);
+  const [showModalTotalMembers, setShowModalTotalMembers] = useState(false);
   const [hasAvatarGroup, setHasAvatarGroup] = useState(null);
   const [groupDataProfile, setGroupDataProfile] = useState("");
   const [formValues, setFormValues] = useState({
     name: "",
     moTaNhom: "",
+    privacy: "",
   });
   const [error, setError] = useState({});
   const [TotalMembers, setTotalMembers] = useState(0);
@@ -43,6 +47,7 @@ function Groups() {
   const [imgsPostGroup, setImgsPostGroup] = useState([]);
   const [postsDataGroup, setpostsDataGroup] = useState([]);
   const [pageData, setpageData] = useState(2);
+  const [isHaveInform, setIsHaveInform] = useState(false);
   // id account
 
   const fetchDataCountPostGroup = async (groupId) => {
@@ -58,6 +63,11 @@ function Groups() {
       ...formValues,
       [e.target.name]: e.target.value,
     });
+    if (e.target.value !== "") {
+      setIsHaveInform(true);
+    } else {
+      setIsHaveInform(false);
+    }
   };
   const handleChangeContent = (e) => {
     setContent({
@@ -132,7 +142,6 @@ function Groups() {
   };
 
   const handleCloseModalAvatar = () => {
-    setSelectedImage(null);
     setShowModalAvatar(false);
   };
   const handleShowModalPostGroup = () => {
@@ -172,9 +181,8 @@ function Groups() {
       event.target.value = null;
       return;
     }
-    const imageUrl = URL.createObjectURL(selectedFile);
-    setSelectedImage(imageUrl);
-    setImages(selectedFile);
+    handleUploadImage(selectedFile);
+    handleCloseModalAvatar();
   };
   const handleRemoveImage = async () => {
     setLoading(true);
@@ -202,13 +210,12 @@ function Groups() {
       console.error(error);
     }
   };
-  const handleUploadImage = async () => {
+  const handleUploadImage = async (selectedFile) => {
     setLoading(true);
     try {
       const formData = new FormData();
       const groupIdProfile = groupID.groupID;
-      console.log(groupIdProfile);
-      formData.append("avatarGroup", Images);
+      formData.append("avatarGroup", selectedFile);
       formData.append("groupId", groupIdProfile);
       formData.append("hasAvatarGroup", hasAvatarGroup);
 
@@ -237,12 +244,20 @@ function Groups() {
   const handleShowModalInformationProfile = () => {
     setFormValues({
       name: "",
+      privacy: "",
       moTaNhom: "",
     });
     setShowModalInformationProfile(true);
   };
   const handleCloseModalInformationProfile = () => {
+    setIsHaveInform(false);
     setShowModalInformationProfile(false);
+  };
+  const handleModalButtonInviteGroup = () => {
+    setShowModalInviteGroup(!showModalInviteGroup);
+  };
+  const handleModalTotalMembers = () => {
+    setShowModalTotalMembers(!showModalTotalMembers);
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -253,8 +268,9 @@ function Groups() {
       const response = await request.post(
         "groups/UpdateInformationProfileGroup",
         {
-          name: formValues.name.trim(),
-          moTaNhom: formValues.moTaNhom.trim(),
+          name: formValues.name,
+          moTaNhom: formValues.moTaNhom,
+          privacy: formValues.privacy,
           groupId: groupIdProfile,
         }
       );
@@ -461,23 +477,10 @@ function Groups() {
                       show={showModalAvatar}
                       onHide={handleCloseModalAvatar}
                     >
-                      <Modal.Header closeButton>
-                        <Modal.Title>
-                          Thay đổi ảnh đại diện của nhóm
-                        </Modal.Title>
-                      </Modal.Header>
                       <Modal.Body className="ProfileAvatarModalBody">
-                        {selectedImage ? (
-                          <div className="ProfileShowImageContainer">
-                            <img
-                              className="ShowImageWhenUpload"
-                              src={selectedImage}
-                              alt="Avatar"
-                            />
-                          </div>
-                        ) : (
-                          <div></div>
-                        )}
+                        <div className="ProfileTitleChangeAvatar">
+                          <span>Thay đổi ảnh đại diện</span>
+                        </div>
                         <Form encType="multipart/form-data">
                           <Form.Group>
                             <Form.Label
@@ -496,32 +499,25 @@ function Groups() {
                             />
                           </Form.Group>
                         </Form>
-                        {groupDataProfile.avatarGroup ? (
+                        {userData.avatar ? (
                           <label
                             className="HandleButtonProfile ProfileRemoveColor"
                             onClick={handleRemoveImage}
                           >
-                            {loading ? "Remove..." : "Remove Avatar"}
+                            {loading ? "Remove..." : "Xóa ảnh đại diện"}
                           </label>
                         ) : (
                           <div></div>
                         )}
+                        <div className="ProfileButtonHandleClose">
+                          <Button
+                            variant="secondary"
+                            onClick={handleCloseModalAvatar}
+                          >
+                            Close
+                          </Button>
+                        </div>
                       </Modal.Body>
-                      <Modal.Footer>
-                        <Button
-                          variant="secondary"
-                          onClick={handleCloseModalAvatar}
-                        >
-                          Close
-                        </Button>
-                        <Button
-                          variant="primary"
-                          disabled={!selectedImage || loading}
-                          onClick={handleUploadImage}
-                        >
-                          {loading ? "Uploading..." : "Upload Avatar"}
-                        </Button>
-                      </Modal.Footer>
                     </Modal>
                   </div>
                 </div>
@@ -556,48 +552,38 @@ function Groups() {
                       <Modal.Body className="ProfileInformationModalBody">
                         <Form onSubmit={handleSubmit}>
                           <Form.Group controlId="formName">
-                            <Form.Label>Name</Form.Label>
+                            <Form.Label>Tên nhóm</Form.Label>
                             <Form.Control
                               type="text"
                               name="name"
                               value={formValues.name}
                               onChange={handleChange}
-                              className={
-                                error.name
-                                  ? "form-control is-invalid"
-                                  : "form-control"
-                              }
+                              className="form-control"
                             />
-                            {error.name && (
-                              <div
-                                id="validationServerUsernameFeedback"
-                                className="invalid-feedback"
-                              >
-                                {error.name}
-                              </div>
-                            )}
                           </Form.Group>
                           <Form.Group controlId="formDescription">
-                            <Form.Label>Description</Form.Label>
+                            <Form.Label>Mô tả</Form.Label>
                             <Form.Control
                               as="textarea"
                               name="moTaNhom"
                               value={formValues.moTaNhom}
                               onChange={handleChange}
-                              className={
-                                error.moTaNhom
-                                  ? "form-control is-invalid"
-                                  : "form-control"
-                              }
+                              className="form-control"
                             />
-                            {error.moTaNhom && (
-                              <div
-                                id="validationServerUsernameFeedback"
-                                className="invalid-feedback"
-                              >
-                                {error.moTaNhom}
-                              </div>
-                            )}
+                          </Form.Group>
+                          <Form.Group controlId="formPrivacy">
+                            <Form.Label>Quyền riêng tư</Form.Label>
+                            <Form.Control
+                              as="select"
+                              name="privacy"
+                              value={formValues.privacy}
+                              onChange={handleChange}
+                              className="form-control"
+                            >
+                              <option value=""></option>
+                              <option value="public">Công khai</option>
+                              <option value="private">Riêng tư</option>
+                            </Form.Control>
                           </Form.Group>
                           <br />
                           <Modal.Footer>
@@ -612,13 +598,19 @@ function Groups() {
                             ) : (
                               <></>
                             )}
-                            <Button
-                              variant="primary"
-                              type="submit"
-                              onClick={handleSubmit}
-                            >
-                              {loading ? "Submit..." : "Submit"}
-                            </Button>
+                            {isHaveInform ? (
+                              <Button
+                                variant="primary"
+                                type="submit"
+                                onClick={handleSubmit}
+                              >
+                                {loading ? "Submit..." : "Submit"}
+                              </Button>
+                            ) : (
+                              <Button variant="secondary" type="submit">
+                                {loading ? "Submit..." : "Submit"}
+                              </Button>
+                            )}
                             <Modal
                               show={showModalConfirmDelete}
                               onHide={handleCloseModalConfirmDelete}
@@ -646,16 +638,39 @@ function Groups() {
                       </Modal.Body>
                     </Modal>
                   </div>
+                  {hasJoined && (
+                    <div className="ProfileButtonContainer">
+                      <button
+                        className="ProfileButtonInvite"
+                        onClick={handleModalButtonInviteGroup}
+                      >
+                        <p className="ProfileButtonInviteText">Mời</p>
+                      </button>
+                    </div>
+                  )}
+                  <MyModal
+                    text={"Mời bạn bè tham gia nhóm"}
+                    show={showModalInviteGroup}
+                    onHide={handleModalButtonInviteGroup}
+                    childrens={<InviteGroup groupId={groupID.groupID} />}
+                  />
                 </div>
                 <div className="ProfileRow">
-                  <div>
+                  <div className="ProfileInformationContainer">
                     <span style={{ marginRight: 10 }}>
                       <b>{CountPostGroup}</b> bài viết
                     </span>
                     <span>
-                      <a href="#">
+                      <a onClick={handleModalTotalMembers}>
                         Có <b>{TotalMembers}</b> thành viên
                       </a>
+                      <MyModal
+                        text={"Thành viên nhóm"}
+                        show={showModalTotalMembers}
+                        onHide={handleModalTotalMembers}
+                        childrens={<TotalMemberModal />}
+                        display={"block"}
+                      />
                     </span>
                   </div>
                 </div>

@@ -1,6 +1,4 @@
-import { Avatar } from "@mui/material";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
-import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt";
 import FavoriteBorderIcon from "@mui/icons-material/FavoriteBorder";
 import ChatBubbleOutlineIcon from "@mui/icons-material/ChatBubbleOutline";
 import FavoriteIcon from "@mui/icons-material/Favorite";
@@ -8,17 +6,32 @@ import * as request from "../../../utils/request";
 import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import "./post.css";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
 import MyModal from "../../modal/Modal";
 import MorePost from "./MorePost";
 import { useCookies } from "react-cookie";
 import ListComment from "./ListComment";
 import { APP_WEB } from "../../../utils/config";
-function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
+import { SocketCon } from "../../socketio/Socketcontext";
+import * as toxic from "../../vietnamToxic/VietNamToxic";
+
+function Post({
+  user,
+  time,
+  avatar,
+  title,
+  name,
+  id,
+  userid,
+  groupPostId,
+  isAd,
+}) {
   const focusInput = useRef();
   const [cookies] = useCookies();
   const myID = cookies.userId;
+  const value = useContext(SocketCon);
+  const socket = value.socket;
   const [modalShow, setModalShow] = useState(false);
   const [modalShowComment, setModalShowComment] = useState(false);
   const [expanded, setExpanded] = useState(false);
@@ -28,6 +41,45 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
   const [liked, setliked] = useState(false);
   const [like, setlike] = useState(0);
   const [comment, setcomment] = useState("");
+  const [previewLink, setPreviewLink] = useState([]);
+  const [isValidURL, setIsValidURL] = useState(false);
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsValidURL(false);
+      try {
+        const urlRegex = /^(ftp|http|https):\/\/[^ "]+$/;
+        if (urlRegex.test(title)) {
+          setIsValidURL(true);
+          const res = await request.post("preview/getLinkPreview", {
+            url: title,
+          });
+          setPreviewLink((prevData) => ({
+            ...prevData,
+            [title]: res.data,
+          }));
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchData();
+  }, [title]);
+  const [adImgs, setAdImgs] = useState([]);
+  useEffect(() => {
+    const fetchData = async () => {
+      if (isAd) {
+        try {
+          const res = await request.get(`account/getAdImgs/${id}`);
+          setAdImgs(res.data);
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    };
+
+    fetchData();
+  }, [isAd, id]);
 
   const now = new Date();
   const targetDate = new Date(time);
@@ -84,17 +136,6 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
     }
   }, [id, groupPostId]);
 
-  // useEffect(() => {
-  //   const postFooterElement = postFooterRef.current;
-  //   if (
-  //     postFooterElement &&
-  //     postFooterElement.scrollWidth > postFooterElement.offsetWidth
-  //   ) {
-  //     setThem(true);
-  //   } else {
-  //     setThem(false);
-  //   }
-  // }, [id]);
   const handleToggleExpand = () => {
     setExpanded(!expanded);
   };
@@ -229,7 +270,7 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
             otherUserID: myID,
           });
           if (res) {
-            console.log("bạn đã thích Group post: " + groupPostId);
+            // console.log("bạn đã thích Group post: " + groupPostId);
           }
         } else {
           const res = await request.post("post/likePost", {
@@ -240,6 +281,8 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
             // console.log("bạn đã thích post: " + id);
             let thongBao = "Đã thích bài viết của bạn";
             await notification(id, myID, thongBao, userid);
+            // nguời đăng bài
+            socket.emit("add_notification", { userid, myID });
           }
         }
       };
@@ -256,43 +299,50 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
     userID: "",
     groupPostId: "",
   });
-
+  const [vipham2, setvipham2] = useState(false);
   const hanldleSentComment = () => {
-    try {
-      const fetchApi = async () => {
-        if (groupPostId) {
-          const res = await request.post("post/commentPost", {
-            groupPostId: groupPostId,
-            userID: myID,
-            content: comment.trim(),
-          });
-          if (res.status == 200) {
-            setdymanicComment(!dymanicComment);
-            console.log("bạn đã bình luận: " + groupPostId);
-            setcomment("");
+    const isToxic = toxic.VietNamToxic(comment);
+    // console.log(isToxic);
+    if (isToxic) {
+      setvipham2(true);
+    } else {
+      try {
+        const fetchApi = async () => {
+          if (groupPostId) {
+            const res = await request.post("post/commentPost", {
+              groupPostId: groupPostId,
+              userID: myID,
+              content: comment.trim(),
+            });
+            if (res.status == 200) {
+              setdymanicComment(!dymanicComment);
+              console.log("bạn đã bình luận: " + groupPostId);
+              setcomment("");
+            } else {
+              console.log("Có vấn đề gì đó rồi");
+            }
           } else {
-            console.log("Có vấn đề gì đó rồi");
+            const res = await request.post("post/commentPost", {
+              postID: id,
+              userID: myID,
+              content: comment.trim(),
+            });
+            if (res.status == 200) {
+              let thongBao = "Đã bình luận bài viết của bạn";
+              await notification(id, myID, thongBao, userid);
+              setdymanicComment(!dymanicComment);
+              console.log("bạn đã bình luận: " + id);
+              setcomment("");
+              socket.emit("add_notification", { userid, myID });
+            } else {
+              console.log("Có vấn đề gì đó rồi");
+            }
           }
-        } else {
-          const res = await request.post("post/commentPost", {
-            postID: id,
-            userID: myID,
-            content: comment.trim(),
-          });
-          if (res.status == 200) {
-            let thongBao = "Đã bình luận bài viết của bạn";
-            await notification(id, myID, thongBao, userid);
-            setdymanicComment(!dymanicComment);
-            console.log("bạn đã bình luận: " + id);
-            setcomment("");
-          } else {
-            console.log("Có vấn đề gì đó rồi");
-          }
-        }
-      };
-      fetchApi();
-    } catch (error) {
-      console.log(error);
+        };
+        fetchApi();
+      } catch (error) {
+        console.log(error);
+      }
     }
   };
 
@@ -413,20 +463,50 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
                 ? Math.floor(minute / 60 / 24) + " Ngày"
                 : Math.floor(minute / 60) + " Giờ"}
             </span>
+            {isAd && <span className="SponsoredBy">Được tài trợ</span>}
           </div>
           {/* -------------more------------ */}
-          <span className="post-more-delete">
-            {userid === myID && (
+          {!isAd && (
+            <span className="post-more-delete">
               <MoreHorizIcon
                 onClick={() => {
                   handleDELETE(id);
                   setModalShowComment(false);
                 }}
               />
-            )}
-          </span>
+            </span>
+          )}
         </div>
         <div className="post-img">
+          {adImgs && adImgs.length > 0 && (
+            <>
+              <img
+                src={adImgs.length === 1 ? adImgs[0].img : adImgs[run].img}
+                alt=""
+              />
+              {adImgs.length > 1 && (
+                <>
+                  <span
+                    id="post-img-left"
+                    className="post-img-run"
+                    onClick={(e) => handleRun(e)}
+                  >
+                    <ChevronLeftIcon sx={{ fontSize: 28 }} />
+                  </span>
+                  <span
+                    id="post-img-right"
+                    className="post-img-run"
+                    onClick={(e) => handleRun(e)}
+                  >
+                    <ChevronRightIcon sx={{ fontSize: 28 }} />
+                  </span>
+                  <span className="post-img-count">
+                    {run + 1}/{adImgs.length}
+                  </span>
+                </>
+              )}
+            </>
+          )}
           {img && img.length > 0 ? (
             <>
               <img
@@ -459,49 +539,83 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
               )}
             </>
           ) : (
-            title
+            <span style={{ wordBreak: "break-all" }}>
+              {isValidURL ? (
+                <div className="previewLink">
+                  {previewLink[title] ? (
+                    <>
+                      <div className="previewLinkImgContainer">
+                        <img src={previewLink[title].image} alt="Preview" />
+                      </div>
+                      <div className="previewLinkContent">
+                        <span className="previewLinkTitle">
+                          {previewLink[title].title && previewLink[title].title}
+                        </span>
+                        <span className="previewLinkDesciption">
+                          {previewLink[title].description &&
+                            previewLink[title].description}
+                        </span>
+                        <Link
+                          to={previewLink[title].ogUrl}
+                          className="prewviewLinkURL"
+                        >
+                          {previewLink[title].ogUrl && previewLink[title].ogUrl}
+                        </Link>
+                      </div>
+                    </>
+                  ) : (
+                    <p>Loading...</p>
+                  )}
+                </div>
+              ) : (
+                !isAd && title
+              )}
+            </span>
           )}
         </div>
         <div className="post-footer">
-          <div className="post-footer-icon">
-            {liked ? (
-              <span
-                className="post-footer-icon-like-comment"
-                onClick={handleLikePost}
-              >
-                <FavoriteIcon />
-              </span>
-            ) : (
-              <span
-                className="post-footer-icon-like-comment"
-                onClick={handleUnLikePost}
-              >
-                <FavoriteBorderIcon />
-              </span>
-            )}
+          {!isAd && (
+            <>
+              <div className="post-footer-icon">
+                {liked ? (
+                  <span
+                    className="post-footer-icon-like-comment"
+                    onClick={handleLikePost}
+                  >
+                    <FavoriteIcon />
+                  </span>
+                ) : (
+                  <span
+                    className="post-footer-icon-like-comment"
+                    onClick={handleUnLikePost}
+                  >
+                    <FavoriteBorderIcon />
+                  </span>
+                )}
 
-            <span
-              className="post-footer-icon-like-comment"
-              onClick={() => focusInput.current.focus()}
-            >
-              <ChatBubbleOutlineIcon />
-            </span>
-          </div>
-          <b>{like} lượt thích</b>
+                <span
+                  className="post-footer-icon-like-comment"
+                  onClick={() => focusInput.current.focus()}
+                >
+                  <ChatBubbleOutlineIcon />
+                </span>
+              </div>
+              <b>{like} lượt thích</b>
+              <p
+                ref={postFooterRef}
+                className={`post-title ${expanded ? "expanded" : ""}`}
+              >
+                {img && img.length > 0 ? title : ""}
+              </p>
+            </>
+          )}
           <p
             ref={postFooterRef}
-            className={`post-title ${expanded ? "expanded" : ""}`}
+            className={`postAdTitle ${expanded ? "expanded" : ""}`}
           >
-            {img && img.length > 0 ? title : ""}
+            {adImgs && adImgs.length > 0 && title}
           </p>
-          {/* {them ? (
-            <button className="post-title-btn" onClick={handleToggleExpand}>
-              {expanded ? "Thu gọn" : "Xem thêm"}
-            </button>
-          ) : (
-            ""
-          )} */}
-          {hasComment && (
+          {!isAd && hasComment && (
             <span
               className="post-footer-list-comment"
               onClick={() => {
@@ -513,7 +627,7 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
             </span>
           )}
         </div>
-        {commentNew.comment && commentNew.user && (
+        {!isAd && commentNew.comment && commentNew.user && (
           <>
             <div className="post-footer-user-comment">
               <Link
@@ -529,24 +643,35 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
             </div>
           </>
         )}
+        {vipham2 && (
+          <span style={{ fontSize: "0.9rem" }} className="text-danger">
+            Hãy dùng từ lịch sự
+          </span>
+        )}
+        {!isAd && (
+          <div className="post-footer-input">
+            <input
+              ref={focusInput}
+              type="text"
+              placeholder="Thêm bình luận"
+              value={comment}
+              onChange={(e) => {
+                setcomment(e.target.value);
+                setvipham2(false);
+              }}
+            />
+            {/* <SentimentSatisfiedAltIcon /> */}
 
-        <div className="post-footer-input">
-          <input
-            ref={focusInput}
-            type="text"
-            placeholder="Thêm bình luận"
-            value={comment}
-            onChange={(e) => setcomment(e.target.value)}
-          />
-          {/* <SentimentSatisfiedAltIcon /> */}
-          <button
-            disabled={!comment}
-            className={comment && "post-comment"}
-            onClick={hanldleSentComment}
-          >
-            Đăng
-          </button>
-        </div>
+            <button
+              disabled={!comment}
+              className={comment && "post-comment"}
+              onClick={hanldleSentComment}
+            >
+              Đăng
+            </button>
+          </div>
+        )}
+
         <hr />
       </div>
       <MyModal
@@ -572,6 +697,7 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
             />
           ) : (
             <MorePost
+              userid={userid}
               id={id}
               groupPostId={groupPostId}
               title={title}

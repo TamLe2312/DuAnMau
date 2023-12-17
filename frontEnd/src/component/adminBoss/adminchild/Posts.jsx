@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from "react";
 import moment from "moment";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { Modal, Button, Form } from "react-bootstrap";
-import Validation from "../../validation/validation";
 import { toast } from "sonner";
 import * as request from "../../../utils/request";
-
+import { useNavigate } from "react-router-dom";
+import * as postService from "../../../services/AdPostService";
 function Posts() {
+  const Navigate = useNavigate();
   const [AllDataPost, setAllDataPost] = useState([]);
   const [IdPostDelete, setIdPostDelete] = useState(null);
   const [IdPostDetail, setIdPostDetail] = useState(null);
@@ -17,6 +16,7 @@ function Posts() {
   const [showModalMoreDetailPost, setShowModalMoreDetailPost] = useState(false);
   const [TotalPage, setTotalPage] = useState(1);
   const [indexPagination, setIndexPagination] = useState(1);
+  const [ban, setban] = useState(false);
   const handleShowModalConfirmDelete = (id) => {
     setIdPostDelete(id);
     setShowModalConfirmDelete(true);
@@ -29,19 +29,9 @@ function Posts() {
     name: "",
     content: "",
   });
-  const handleShowModalMoreDetailPost = async (id, name, content) => {
-    setFormMoreDetail({
-      name: name,
-      content: content,
-    });
-    try {
-      setIdPostDetail(id); // Cập nhật id trước khi gọi yêu cầu request
-      const response = await request.get(`admin/postImgs/${id}`);
-      setImgs(response.data);
-    } catch (err) {
-      /*       console.error(err); */
-    }
-    setShowModalMoreDetailPost(true);
+  // chi tiết bài viết
+  const handleShowModalMoreDetailPost = (data) => {
+    Navigate(`/home/admin/posts/${data.id}`, { replace: true, state: data });
   };
   const handleCloseModalMoreDetailPost = () => {
     setShowModalMoreDetailPost(false);
@@ -163,7 +153,24 @@ function Posts() {
       }
     };
     fetchData();
-  }, []);
+  }, [ban]);
+  const [showMore, setShowMore] = useState(false);
+  const handleClickShowMore = () => {
+    setShowMore(!showMore);
+  };
+  const handleBanPost = async (data) => {
+    const res = await postService.banPost(data.id);
+    if (res) {
+      setban((pre) => !pre);
+    }
+  };
+  const handleBaoCao = (data) => {
+    // console.log(data);
+    Navigate(`/home/admin/posts/${data.id}/baocao`, {
+      replace: true,
+      state: data,
+    });
+  };
   return (
     <>
       <div>Bài viết</div>
@@ -175,42 +182,82 @@ function Posts() {
             <th scope="col">Người đăng</th>
             <th scope="col">Thời gian</th>
             <th scope="col">Quản lí</th>
+            {/* <th scope="col">Báo cáo</th> */}
           </tr>
         </thead>
         <tbody>
           {AllDataPost && AllDataPost.length > 0 ? (
             AllDataPost.map((dataPost, index) => {
               return (
-                <>
-                  <tr key={index}>
+                <React.Fragment key={index}>
+                  <tr>
                     <th scope="row">{index + 1}</th>
-                    <td>{dataPost.content}</td>
+                    <td className="AdminDescription">
+                      <span>
+                        {dataPost.content &&
+                        dataPost.content.length > 100 &&
+                        !showMore
+                          ? dataPost.content.slice(0, 100) + "..."
+                          : dataPost.content}
+                      </span>
+                      <br />
+                      {dataPost.content && dataPost.content.length > 100 && (
+                        <span
+                          className="read-more"
+                          onClick={handleClickShowMore}
+                        >
+                          {showMore ? "Rút gọn" : "Xem thêm"}
+                        </span>
+                      )}
+                    </td>
                     <td>{dataPost.name ? dataPost.name : dataPost.username}</td>
                     <td>{dataPost.created_at}</td>
                     <td>
                       <button
                         type="button"
-                        className="btn btn-danger"
+                        className="btn btn-danger btn-featureHandle"
                         onClick={() =>
                           handleShowModalConfirmDelete(dataPost.id)
                         }
                       >
-                        Xóa
+                        <i className="fa-solid fa-trash"></i>
                       </button>
                       &nbsp;
                       <button
                         type="button"
-                        className="btn btn-primary"
-                        onClick={() =>
-                          handleShowModalMoreDetailPost(
-                            dataPost.id,
-                            dataPost.name ? dataPost.name : dataPost.username,
-                            dataPost.content
-                          )
-                        }
+                        className="btn btn-primary btn-featureHandle"
+                        onClick={() => handleShowModalMoreDetailPost(dataPost)}
                       >
-                        Chi tiết
+                        <i className="fa-solid fa-info"></i>
                       </button>
+                      &nbsp;
+                      <button
+                        type="button"
+                        className={
+                          dataPost.ban !== null
+                            ? "btn btn-danger"
+                            : "btn btn-warning"
+                        }
+                        onClick={() => handleBanPost(dataPost)}
+                      >
+                        <i className="fa-solid fa-ban"></i>
+                      </button>
+                      &nbsp;
+                      <button
+                        type="button"
+                        className={
+                          dataPost.countflag > 5
+                            ? "btn btn-danger"
+                            : "btn btn-secondary"
+                        }
+                        onClick={() => handleBaoCao(dataPost)}
+                      >
+                        {dataPost.countflag && (
+                          <span>{dataPost.countflag}</span>
+                        )}{" "}
+                        <i className="fa-solid fa-flag"></i>
+                      </button>
+                      &nbsp;
                       <Modal
                         centered
                         show={showModalConfirmDelete}
@@ -231,97 +278,9 @@ function Posts() {
                           </div>
                         </Modal.Body>
                       </Modal>
-                      <Modal
-                        show={showModalMoreDetailPost}
-                        onHide={handleCloseModalMoreDetailPost}
-                      >
-                        <Modal.Header closeButton>
-                          Chi tiết bài viết
-                        </Modal.Header>
-                        <Modal.Body className="ConfirmDeleteModalBody">
-                          {imgs && imgs.length > 0 ? (
-                            <>
-                              <div
-                                style={{
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  alignItems: "center",
-                                }}
-                              >
-                                <div>Người đăng : {formMoreDetail.name}</div>
-                                <div
-                                  style={{
-                                    display: "flex",
-                                    flexDirection: "column",
-                                    alignItems: "center",
-                                  }}
-                                >
-                                  <span>Nội dung</span>
-                                  <span>{formMoreDetail.content}</span>
-                                </div>
-                              </div>
-                              <div
-                                className="MoreDetailContainerImg"
-                                style={{ position: "relative" }}
-                              >
-                                <img
-                                  src={
-                                    "http://localhost:8080/images/" +
-                                    (imgs.length === 1
-                                      ? imgs[0].img
-                                      : imgs[run].img)
-                                  }
-                                  alt=""
-                                />
-                                {imgs.length > 1 && (
-                                  <>
-                                    <span
-                                      id="post-img-left"
-                                      className="post-img-run"
-                                      onClick={(e) => handleRun(e)}
-                                    >
-                                      <ChevronLeftIcon sx={{ fontSize: 28 }} />
-                                    </span>
-                                    <span
-                                      id="post-img-right"
-                                      className="post-img-run"
-                                      onClick={(e) => handleRun(e)}
-                                    >
-                                      <ChevronRightIcon sx={{ fontSize: 28 }} />
-                                    </span>
-                                    <span className="post-img-count">
-                                      {run + 1}/{imgs.length}
-                                    </span>
-                                  </>
-                                )}
-                              </div>
-                            </>
-                          ) : (
-                            <div
-                              style={{
-                                display: "flex",
-                                flexDirection: "column",
-                                alignItems: "center",
-                              }}
-                            >
-                              <div>Người đăng : {formMoreDetail.name}</div>
-                              <div
-                                style={{
-                                  display: "flex",
-                                  flexDirection: "column",
-                                  alignItems: "center",
-                                }}
-                              >
-                                <span>Nội dung</span>
-                                <span>{formMoreDetail.content}</span>
-                              </div>
-                            </div>
-                          )}
-                        </Modal.Body>
-                      </Modal>
                     </td>
                   </tr>
-                </>
+                </React.Fragment>
               );
             })
           ) : (

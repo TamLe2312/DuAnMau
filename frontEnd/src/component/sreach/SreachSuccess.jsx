@@ -28,7 +28,7 @@ function SreachSuccess({ search }) {
 
   return (
     <div>
-      <p>Tìm kiếm gần đây</p>
+      {/*     <p>Tìm kiếm gần đây</p> */}
       {users.length !== 0 ? (
         users.map((user, index) => (
           <div key={index} className="SreachSuccess-parent">
@@ -61,9 +61,9 @@ function SreachSuccess({ search }) {
                 </Link>
               </div>
             </div>
-            <button>
+            {/* <button>
               <ClearIcon />
-            </button>
+            </button> */}
           </div>
         ))
       ) : (

@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { useCookies } from "react-cookie";
+import Select from "react-select";
 import * as request from "../../../utils/request";
+import axios from "axios";
 
 function SuggestFollow() {
   const [cookies] = useCookies(["session"]);
   const [loading, setLoading] = useState(false);
   const [dataSuggestFollow, setDataSuggestFollow] = useState([]);
+  const [dataFindArena, setDataFindArena] = useState([]);
 
   const idUser = cookies.userId;
 
@@ -72,13 +75,159 @@ function SuggestFollow() {
       console.error(error);
     }
   };
+  const [provinceSelect, setProvinceSelect] = useState([]);
+  const [districtSelect, setDistrictSelect] = useState([]);
+  const [wardsSelect, setWardsSelect] = useState([]);
+  const [province, setProvince] = useState(null);
+  const [district, setDistrict] = useState(null);
+  const [wards, setWards] = useState(null);
+  useEffect(() => {
+    const ProvinceSelect = async () => {
+      const res = await axios.get("https://provinces.open-api.vn/api/?depth=3");
+      if (res) {
+        const updateProvinceSelect = res.data.map((item) => ({
+          value: item.name,
+          label: item.name,
+          huyen: item.districts,
+        }));
+        console.log(updateProvinceSelect);
+        setProvinceSelect(updateProvinceSelect);
+      }
+      return () => {};
+    };
+    ProvinceSelect();
+  }, []);
+  useEffect(() => {
+    if (province) {
+      const updateDistrict = province.huyen.map((item) => ({
+        value: item.name,
+        label: item.name,
+        xa: item.wards,
+      }));
+      setDistrictSelect(updateDistrict); // Corrected function name
+    }
+  }, [province]);
 
+  useEffect(() => {
+    if (district) {
+      const updateWards = district.xa.map((item) => ({
+        value: item.name,
+        label: item.name,
+      }));
+      setWardsSelect(updateWards);
+    }
+  }, [district]);
+  const handleFindArena = async () => {
+    let address = "";
+
+    if (wards) {
+      address += wards.value;
+    }
+
+    if (district) {
+      address += " " + district.value;
+    }
+
+    if (province) {
+      address += " " + province.value;
+    }
+    address = address.toLowerCase();
+
+    if (province || district || wards) {
+      try {
+        const res = await request.post(`account/findArena`, {
+          id: idUser,
+          address: address,
+        });
+        if (!res.data.length) {
+          toast.error("Không tìm thấy người dùng ở khu vực bạn đang tìm");
+        } else {
+          toast.success("Tìm thành công");
+        }
+        setDataFindArena(res.data);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+  };
+  const handleResetFind = () => {
+    setProvince(null);
+    setDistrict(null);
+    setWards(null);
+    setDistrictSelect([]);
+    setWardsSelect([]);
+    setDataFindArena([]);
+  };
+  const [ad, setAd] = useState([]);
+  useEffect(() => {
+    const GetDataAd = async () => {
+      try {
+        const res = await request.get(`account/getDataAd`);
+        setAd(res.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+    GetDataAd();
+  }, []);
+  const [currentAdIndex, setCurrentAdIndex] = useState(0);
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setCurrentAdIndex((prevIndex) =>
+        prevIndex === ad.length - 1 ? 0 : prevIndex + 1
+      );
+    }, 5000);
+
+    // Xóa interval khi component unmount
+    return () => clearInterval(intervalId);
+  }, [ad]);
   return (
     <>
-      <div className="container">
+      <div className="container suggestFollowContainer">
+        {ad && ad.length > 0 && (
+          <div className="suggestFollowAdvertisement">
+            <img
+              src={ad[currentAdIndex]?.img}
+              alt={ad[currentAdIndex]?.brand}
+            />
+          </div>
+        )}
         <div className="ProfileFollowSuggestContainer">
           <div className="ProfileFollowSuggestForYou">
             <span>Gợi ý cho bạn</span>
+          </div>
+          <div className="FindArena">
+            <Select
+              options={provinceSelect}
+              value={province}
+              onChange={(e) => setProvince(e)}
+            />
+            <Select
+              options={districtSelect}
+              value={district}
+              onChange={(e) => setDistrict(e)}
+            />
+            <Select
+              options={wardsSelect}
+              value={wards}
+              onChange={(e) => setWards(e)}
+            />
+            {dataFindArena && dataFindArena.length > 0 ? (
+              <button
+                className="btn btn-primary mt-2"
+                onClick={handleResetFind}
+              >
+                <i className="fa-solid fa-arrow-rotate-right"></i>
+              </button>
+            ) : (
+              <button
+                className="btn btn-primary mt-2"
+                onClick={handleFindArena}
+              >
+                <i className="fa-solid fa-magnifying-glass"></i>
+              </button>
+            )}
           </div>
           <div>
             <div style={{ height: "auto", overflow: "hidden auto" }}>
@@ -95,6 +244,33 @@ function SuggestFollow() {
                   <div className="ProfileFollowRowContent">
                     <span>Loading....</span>
                   </div>
+                ) : dataFindArena && dataFindArena.length > 0 ? (
+                  dataFindArena.map((data, index) => {
+                    return (
+                      <div className="ProfileFollowRowContent" key={index}>
+                        <div className="ProfileFollowImgContent">
+                          {data.avatar ? (
+                            <img
+                              src={data.avatar}
+                              alt={data.name ? data.name : data.username}
+                            />
+                          ) : (
+                            <img src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg" />
+                          )}
+                        </div>
+                        <span>{data.name ? data.name : data.username}</span>
+                        {data.isFollow ? (
+                          <button onClick={() => handleRemove(data.id)}>
+                            Unfollow
+                          </button>
+                        ) : (
+                          <button onClick={() => handleAdd(data.id)}>
+                            Follow
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })
                 ) : dataSuggestFollow && dataSuggestFollow.length > 0 ? (
                   dataSuggestFollow.map((data, index) => {
                     return (
@@ -131,6 +307,14 @@ function SuggestFollow() {
             </div>
           </div>
         </div>
+        {ad && ad.length > 0 && (
+          <div className="suggestFollowAdvertisement">
+            <img
+              src={ad[currentAdIndex]?.img}
+              alt={ad[currentAdIndex]?.brand}
+            />
+          </div>
+        )}
       </div>
     </>
   );

@@ -13,7 +13,7 @@ const sendNotifcation = (req, res) => {
         if (results.length > 0) {
           connection.query(
             `UPDATE notification
-            SET view = 0
+            SET view = 0, created_ad = NOW()
             WHERE sender_id =? AND post_id =? AND title =? `,
             [parseInt(userID), parseInt(postID), title],
             function (err, results, fields) {
@@ -115,20 +115,23 @@ const listNotifcation = (req, res) => {
     }
   );
 };
-const countNotifcation = (req, res) => {
+const notifcation = (req, res) => {
   const myID = parseInt(req.params.myID);
   connection.query(
-    `SELECT COUNT(*) as countNoti FROM notification 
-  WHERE recipient_id = ? AND view = 0`,
-    [myID],
+    `SELECT * FROM notification 
+  WHERE recipient_id = ? AND view = 0 AND sender_id <> ?`,
+    [myID, myID],
 
     function (err, results, fields) {
       if (err) {
         console.log(err);
         return res.status(500).json({ err: "Có lỗi xảy ra xin thử lại sau" });
       }
-      if (results) {
-        return res.status(200).json(results);
+      // return res.status(200).json(results);
+      if (results.length === 0) {
+        return res.status(200).json({ success: true });
+      } else {
+        return res.status(200).json({ success: false });
       }
     }
   );
@@ -139,5 +142,5 @@ module.exports = {
   listNotifcation,
   unNotifcation,
   viewNotifcation,
-  countNotifcation,
+  notifcation,
 };

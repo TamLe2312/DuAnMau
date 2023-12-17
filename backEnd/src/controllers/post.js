@@ -497,6 +497,7 @@ const dataPost = (req, res) => {
     `SELECT posts.id,posts.content,posts.created_at,users.id as userid, users.username,users.avatar,users.name
     FROM posts  
     JOIN users ON posts.user_id = users.id
+    WHERE posts.ban IS NULL
     ORDER BY posts.id DESC
     LIMIT ? OFFSET ?
     `,
@@ -520,7 +521,7 @@ const postimgs = (req, res) => {
     [postID], // Use the postID variable here
     function (err, results, fields) {
       if (err) {
-        // console.log(err);
+        console.log(err);
         return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
       }
       if (results.length > 0) {
@@ -595,7 +596,7 @@ const onCommentPostLast = (req, res) => {
   const { postID, groupPostId } = req.body;
   if (groupPostId) {
     connection.query(
-      "SELECT * FROM comments WHERE postGroup_id = ? ORDER BY id DESC LIMIT 1",
+      "SELECT * FROM comments WHERE postGroup_id = ? AND ban IS NULL ORDER BY id DESC LIMIT 1",
       [groupPostId],
       function (err, results, fields) {
         if (err) {
@@ -612,7 +613,7 @@ const onCommentPostLast = (req, res) => {
     );
   } else {
     connection.query(
-      "SELECT * FROM comments WHERE post_id = ? ORDER BY id DESC LIMIT 1",
+      "SELECT * FROM comments WHERE post_id = ? AND ban IS NULL ORDER BY id DESC LIMIT 1",
       [postID],
       function (err, results, fields) {
         if (err) {
@@ -636,7 +637,7 @@ const listCommentPost = (req, res) => {
   const groupPostId = parseInt(req.params.groupPostId);
   if (groupPostId === 0) {
     connection.query(
-      "SELECT * FROM comments WHERE post_id = ? ",
+      "SELECT * FROM comments WHERE post_id = ? AND ban IS NULL",
       [postID],
       function (err, results, fields) {
         if (err) {
@@ -773,6 +774,477 @@ const countCommentPost = (req, res) => {
   }
 };
 
+const storiesImg = (req, res) => {
+  const { id } = req.body;
+  if (req.file) {
+    const fileName = req.file.filename;
+    const filePath = "/uploads/" + fileName;
+    const baseURL = process.env.APP_URL;
+    const imageURL = `${baseURL.slice(0, -1)}${filePath}`;
+    connection.query(
+      "INSERT INTO stories (user_id) VALUES (?)",
+      [id],
+      function (err, results, fields) {
+        if (err) {
+          console.log(err);
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
+        const insertedId = results.insertId;
+        connection.query(
+          "INSERT INTO listdata (stories_id,img) VALUES (?,?)",
+          [insertedId, imageURL],
+          function (err, results, fields) {
+            if (err) {
+              console.log(err);
+              return res.status(500).json({ error: "Lỗi máy chủ" });
+            }
+            return res.status(200).json({ success: "Đăng tin thành công" });
+          }
+        );
+      }
+    );
+  }
+};
+const storiesContent = (req, res) => {
+  const { id, searchValue } = req.body;
+  if (id && searchValue) {
+    connection.query(
+      "INSERT INTO stories (user_id,content) VALUES (?,?)",
+      [id, searchValue],
+      function (err, results, fields) {
+        if (err) {
+          console.log(err);
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
+        return res.status(200).json({ success: "Đăng tin thành công" });
+      }
+    );
+  }
+};
+
+// post admin
+const listCommenOnetPost = (req, res) => {
+  const idpost = parseInt(req.params.postID);
+  const page = parseInt(req.params.page);
+  const sl = 8;
+  const offset = (page - 1) * sl;
+
+  connection.query(
+    `SELECT comments.*, users.name, users.username
+     FROM comments 
+     INNER JOIN users ON comments.user_id = users.id
+     WHERE post_id = ? ORDER BY comments.id DESC LIMIT ? OFFSET ?`,
+    [idpost, sl, offset],
+    function (err, results, fields) {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+      }
+
+      return res.status(200).json(results);
+    }
+  );
+};
+const banComment = (req, res) => {
+  const idcomment = parseInt(req.body.commentID);
+  connection.query(
+    "SELECT ban FROM comments WHERE id = ? ",
+    [idcomment],
+    function (err, results, fields) {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+      }
+      if (results[0].ban != 1) {
+        // chưa ban
+        connection.query(
+          "UPDATE comments SET ban = 1 WHERE id = ? ",
+          [idcomment],
+          function (err, results, fields) {
+            if (err) {
+              console.log(err);
+              return res
+                .status(500)
+                .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+            }
+            return res.status(200).json({ success: "Đã ban" });
+          }
+        );
+      } else {
+        // ban
+        connection.query(
+          "UPDATE comments SET ban = NULL WHERE id = ? ",
+          [idcomment],
+          function (err, results, fields) {
+            if (err) {
+              console.log(err);
+              return res
+                .status(500)
+                .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+            }
+            return res.status(200).json({ success: "Đã hủy ban" });
+          }
+        );
+      }
+    }
+  );
+};
+// flag post
+const flagPost = (req, res) => {
+  const postID = parseInt(req.body.postID);
+  const userID = parseInt(req.body.userID);
+  const contentFlag = req.body.contentFlag;
+  connection.query(
+    "SELECT countflag FROM posts WHERE id =? ",
+    [postID],
+    function (err, results, fields) {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+      }
+      if (results[0].countflag) {
+        // != null
+        connection.query(
+          `UPDATE posts
+            SET countflag = countflag + 1
+            WHERE id =? `,
+          [postID],
+          function (err, results, fields) {
+            if (err) {
+              console.log(err);
+              return res
+                .status(500)
+                .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+            }
+            if (results) {
+              connection.query(
+                `INSERT INTO flagpost (user_id,post_id,flagcontent)
+                VALUES (?, ?, ?) `,
+                [userID, postID, contentFlag],
+                function (err, results, fields) {
+                  if (err) {
+                    console.log(err);
+                    return res
+                      .status(500)
+                      .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+                  }
+                  return res
+                    .status(200)
+                    .json({ success: "Bạn đã spam bài viết" });
+                }
+              );
+            }
+          }
+        );
+      } else {
+        // null
+        connection.query(
+          `UPDATE posts
+            SET countflag = 1
+            WHERE id =? `,
+          [postID],
+          function (err, results, fields) {
+            if (err) {
+              console.log(err);
+              return res
+                .status(500)
+                .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+            }
+            if (results) {
+              connection.query(
+                `INSERT INTO flagpost (user_id,post_id,flagcontent)
+                VALUES (?, ?, ?) `,
+                [userID, postID, contentFlag],
+                function (err, results, fields) {
+                  if (err) {
+                    console.log(err);
+                    return res
+                      .status(500)
+                      .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+                  }
+                  return res.status(200).json({
+                    success: "Bạn đã spam bài viết",
+                  });
+                }
+              );
+            }
+          }
+        );
+      }
+    }
+  );
+};
+// list flag
+const listFlagPost = (req, res) => {
+  const postID = parseInt(req.params.postID);
+  connection.query(
+    `SELECT flagpost.*, users.name, users.username
+    FROM flagpost
+    INNER JOIN users ON flagpost.user_id=users.id
+    WHERE flagpost.post_id = ? 
+    `,
+    [postID],
+    function (err, results, fields) {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+      }
+      return res.status(200).json(results);
+    }
+  );
+};
+
+// ban post
+const banPost = (req, res) => {
+  const postID = parseInt(req.body.postID);
+  connection.query(
+    "SELECT ban FROM posts WHERE id = ? ",
+    [postID],
+    function (err, results, fields) {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+      }
+      if (results[0].ban != 1) {
+        // chưa ban
+        connection.query(
+          "UPDATE posts SET ban = 1 WHERE id = ? ",
+          [postID],
+          function (err, results, fields) {
+            if (err) {
+              console.log(err);
+              return res
+                .status(500)
+                .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+            }
+            return res.status(200).json({ success: "Đã ban post" });
+          }
+        );
+      } else {
+        // ban
+        connection.query(
+          "UPDATE posts SET ban = NULL WHERE id = ? ",
+          [postID],
+          function (err, results, fields) {
+            if (err) {
+              console.log(err);
+              return res
+                .status(500)
+                .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+            }
+            return res.status(200).json({ success: "Đã hủy ban post" });
+          }
+        );
+      }
+    }
+  );
+};
+
+const getDataNews = (req, res) => {
+  // Max lấy giá trị mới nhất của người dùng
+  connection.query(
+    `SELECT
+      users.id AS user_id,
+      users.avatar,
+      users.username,
+      users.name,
+      MAX(stories.id) AS story_id,
+      MAX(stories.content) AS content,
+      MAX(stories.created_at) AS created_at
+    FROM
+      users
+      INNER JOIN stories ON users.id = stories.user_id
+    WHERE
+      stories.isExpired != 1
+    GROUP BY
+      users.id, users.avatar, users.username, users.name;
+    `,
+    function (err, results, fields) {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Lỗi máy chủ" });
+      }
+
+      const twentyFourHoursAgo = new Date();
+      twentyFourHoursAgo.setHours(twentyFourHoursAgo.getHours() - 24);
+
+      connection.query(
+        `UPDATE stories SET isExpired = 1 WHERE created_at < ?`,
+        [twentyFourHoursAgo],
+        function (updateErr, updateResults, updateFields) {
+          if (updateErr) {
+            console.log(updateErr);
+            return res
+              .status(500)
+              .json({ error: "Lỗi máy chủ khi cập nhật trạng thái stories" });
+          }
+
+          return res.status(200).json(results);
+        }
+      );
+    }
+  );
+};
+const getDataNewsUser = (req, res) => {
+  const { idNews } = req.params;
+  if (idNews) {
+    connection.query(
+      `SELECT id, user_id, content, created_at FROM stories WHERE user_id = ? AND isExpired != 1`,
+      [idNews],
+      function (err, results, fields) {
+        if (err) {
+          console.log(err);
+          return res.status(500).json({ error: "Lỗi máy chủ" });
+        }
+
+        // Extract stories with content as null
+        const nullContentStories = results.filter(
+          (story) => story.content === null
+        );
+
+        // Check if there are stories with null content
+        if (nullContentStories.length > 0) {
+          // Extract story IDs with null content
+          const nullContentStoryIds = nullContentStories.map(
+            (story) => story.id
+          );
+
+          connection.query(
+            `SELECT stories_id, img FROM listdata WHERE stories_id IN (?)`,
+            [nullContentStoryIds],
+            function (errListdata, resultsListdata, fieldsListdata) {
+              if (errListdata) {
+                console.log(errListdata);
+                return res.status(500).json({ error: "Lỗi máy chủ" });
+              }
+
+              // Merge the results from stories and listdata
+              const combinedResults = results.map((story) => {
+                const matchingListdata = resultsListdata.find(
+                  (item) => item.stories_id === story.id
+                );
+                return {
+                  ...story,
+                  img: matchingListdata ? matchingListdata.img : null,
+                };
+              });
+
+              return res.status(200).json(combinedResults);
+            }
+          );
+        } else {
+          // No stories with null content, return results as is
+          return res.status(200).json(results);
+        }
+      }
+    );
+  } else {
+    return res.status(200).json([]);
+  }
+};
+
+const storiesDelete = (req, res) => {
+  const { id } = req.body;
+  if (id) {
+    connection.query(
+      "SELECT content FROM stories WHERE id = ?",
+      [id],
+      function (err, results, fields) {
+        if (err) {
+          return res
+            .status(500)
+            .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+        }
+
+        if (results.length > 0) {
+          const storyContent = results[0].content;
+
+          if (storyContent === null) {
+            // Content is null, retrieve img from listdata
+            connection.query(
+              "SELECT img FROM listdata WHERE stories_id = ?",
+              [id],
+              function (err, results, fields) {
+                if (err) {
+                  return res
+                    .status(500)
+                    .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+                }
+
+                if (results.length > 0) {
+                  const img = results[0].img;
+                  const imgPath = img.replace(
+                    "http://localhost:5173/uploads/",
+                    ""
+                  );
+                  connection.query(
+                    "DELETE FROM stories WHERE id = ?",
+                    [id],
+                    function (err, results, fields) {
+                      if (err) {
+                        return res
+                          .status(500)
+                          .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+                      }
+                      if (results) {
+                        const uploadDir = path.join(
+                          __dirname,
+                          "../../../frontEnd/uploads"
+                        );
+                        const filePath = path.join(uploadDir, imgPath);
+                        fs.access(filePath, fs.constants.F_OK, (err) => {
+                          if (err) {
+                            // Tệp tin không tồn tại, trả về lỗi hoặc thông báo không tìm thấy tệp tin
+                            return res
+                              .status(404)
+                              .json({ error: "Tệp tin không tồn tại" });
+                          }
+                          // Xóa tệp tin
+                          fs.unlink(filePath, (error) => {
+                            if (error) {
+                              // Lỗi khi xóa tệp tin, trả về lỗi hoặc thông báo lỗi xóa tệp tin
+                              return res
+                                .status(500)
+                                .json({ error: "Lỗi khi xóa tệp tin" });
+                            }
+
+                            // Xóa thành công, trả về thông báo thành công hoặc mã thành công
+                            return res
+                              .status(200)
+                              .json({ success: "Xóa ảnh thành công" });
+                          });
+                        });
+                      }
+                    }
+                  );
+                }
+              }
+            );
+          } else {
+            connection.query(
+              "DELETE FROM stories WHERE id = ?",
+              [id],
+              function (err, results, fields) {
+                if (err) {
+                  return res
+                    .status(500)
+                    .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+                }
+
+                if (results) {
+                  return res
+                    .status(200)
+                    .json({ success: "Bạn đã xóa tin thành công" });
+                }
+              }
+            );
+          }
+        }
+      }
+    );
+  }
+};
+
 module.exports = {
   createPost,
   createGroupPost,
@@ -796,4 +1268,19 @@ module.exports = {
   countCommentPost,
   oneCommentPost,
   dataPostAndUser,
+
+  // list comment one
+  listCommenOnetPost,
+  banComment,
+  storiesImg,
+  storiesContent,
+  getDataNews,
+
+  // flagposst
+  flagPost,
+  listFlagPost,
+  banPost,
+
+  getDataNewsUser,
+  storiesDelete,
 };

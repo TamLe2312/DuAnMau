@@ -1,0 +1,69 @@
+.invitePageImgBox {
+    width: 100px;
+    height: 100px;
+}
+
+.invitePageImg {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+    cursor: pointer;
+    background-color: white;
+    border-radius: 50%;
+}
+
+.invitePageContainer {
+    width: 500px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 12px;
+    margin: 20px auto;
+}
+
+.invitePageContainer a {
+    text-decoration: none;
+    color: #000;
+}
+
+.invitePageContainer a:hover {
+    color: #3ea6ff;
+}
+
+.LoadingScreen {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 500px;
+    margin: 50px auto;
+    gap: 12px;
+}
+
+.LoadingScreen .spinner-border {
+    width: 50px;
+    height: 50px;
+}
+
+.LoadingScreen span {
+    font-size: 1.5rem;
+    font-weight: 500;
+}
+
+.SomethingWentWrong {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 500px;
+    margin: 50px auto;
+    gap: 12px;
+}
+
+.SomethingWentWrong span {
+    font-size: 1.2rem;
+    font-weight: 500;
+}
+
+.SomethingWentWrong .fa-poo {
+    font-size: 1.5rem;
+}

@@ -196,7 +196,10 @@ function GroupsTable() {
     };
     fetchData();
   }, []);
-
+  const [showMore, setShowMore] = useState(false);
+  const handleClickShowMore = () => {
+    setShowMore(!showMore);
+  };
   return (
     <>
       <table className="table table-sm">
@@ -215,11 +218,30 @@ function GroupsTable() {
             AllDataGroup && AllDataGroup.length > 0 ? (
               AllDataGroup.map((dataGroup, index) => {
                 return (
-                  <>
-                    <tr key={index}>
+                  <React.Fragment key={index}>
+                    <tr>
                       <th scope="row">{index + 1}</th>
                       <td>{dataGroup.name}</td>
-                      <td>{dataGroup.moTaNhom}</td>
+                      <td className="AdminDescription">
+                        {/*   {dataGroup.moTaNhom} */}
+                        <span>
+                          {dataGroup.moTaNhom &&
+                          dataGroup.moTaNhom.length > 100 &&
+                          !showMore
+                            ? dataGroup.moTaNhom.slice(0, 100) + "..."
+                            : dataGroup.moTaNhom}
+                        </span>
+                        <br />
+                        {dataGroup.moTaNhom &&
+                          dataGroup.moTaNhom.length > 100 && (
+                            <span
+                              className="read-more"
+                              onClick={handleClickShowMore}
+                            >
+                              {showMore ? "Rút gọn" : "Xem thêm"}
+                            </span>
+                          )}
+                      </td>
                       <td>
                         {dataGroup.avatarGroup ? (
                           <div className="AdminGroupsContentImg">
@@ -242,7 +264,7 @@ function GroupsTable() {
                       <td>
                         <button
                           type="button"
-                          className="btn btn-primary"
+                          className="btn btn-primary btn-featureHandle"
                           onClick={() =>
                             handleShowModalAdjustGroup(
                               dataGroup.id,
@@ -250,17 +272,17 @@ function GroupsTable() {
                             )
                           }
                         >
-                          Sửa
+                          <i className="fa-solid fa-wrench"></i>
                         </button>
                         &nbsp;
                         <button
                           type="button"
-                          className="btn btn-danger"
+                          className="btn btn-danger btn-featureHandle"
                           onClick={() =>
                             handleShowModalConfirmDelete(dataGroup.id)
                           }
                         >
-                          Xóa
+                          <i className="fa-solid fa-trash"></i>
                         </button>
                         <Modal
                           centered
@@ -359,7 +381,7 @@ function GroupsTable() {
                         </Modal>
                       </td>
                     </tr>
-                  </>
+                  </React.Fragment>
                 );
               })
             ) : (

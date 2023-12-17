@@ -3,8 +3,15 @@
   flex-direction: row;
   /* background-color: rgb(235, 139, 188); */
   width: 100%;
-  overflow: hidden;
+  overflow-x: auto;
   padding: 30px 60px;
+  position: relative;
+  justify-content: center;
+  align-items: center;
+}
+
+.tin-group-new-container a {
+  text-decoration: none;
 }
 
 .tin-group {
@@ -12,23 +19,70 @@
   flex-direction: column;
   margin: 12px;
   text-align: center;
+  cursor: pointer;
 }
+
 .tin-group-img {
-  width: 60px;
-  height: 60px;
+  width: 80px;
+  height: 80px;
   object-fit: cover;
   border-radius: 50%;
   border: 1px solid white;
   padding: 3px;
 }
+
 .tin-group-name {
-  font-size: 0.8rem;
+  font-size: 0.9rem;
 }
+
+.tin .fa-chevron-right,
+.fa-chevron-left {
+  width: 50px;
+  height: 50px;
+  color: white;
+  border-radius: 50%;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #999;
+}
+
+.tin .fa-chevron-right:hover,
+.fa-chevron-left:hover {
+  background-color: #77838A;
+}
+
+.tin .fa-chevron-left {
+  left: 20%;
+}
+
+.tin .fa-chevron-right {
+  right: 20%;
+}
+
+.tin-group .tin-group-new {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 1px solid #000;
+  padding: 3px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.tin-group .tin-group-new .fa-plus {
+  font-size: 1.2rem;
+}
+
 @media (max-width: 1033px) {
   .tin {
     padding: 30px;
   }
 }
+
 @media (max-width: 875px) {
   .tin {
     padding: 10px;

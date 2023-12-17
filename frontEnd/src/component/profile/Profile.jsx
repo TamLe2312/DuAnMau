@@ -3,10 +3,11 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import GridOnIcon from "@mui/icons-material/GridOn";
 import BookmarkIcon from "@mui/icons-material/Bookmark";
 import FavoriteIcon from "@mui/icons-material/Favorite";
+import Select from "react-select";
 import SearchIcon from "@mui/icons-material/Search";
 import InfiniteScroll from "react-infinite-scroll-component";
 import "bootstrap/dist/css/bootstrap.min.css";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Modal, Button, Form } from "react-bootstrap";
 import { useCookies } from "react-cookie";
 import Post from "../timeline/post/Post";
@@ -15,19 +16,18 @@ import { toast } from "sonner";
 import "./Profile.css";
 import { Link, useParams } from "react-router-dom";
 import * as request from "../../utils/request";
+import axios from "axios";
 
 function Profile() {
   // id user khác
   const { userID } = useParams();
   const [postsData, setPostsData] = useState([]);
-
+  const refSearch = useRef();
   const [showModalAvatar, setShowModalAvatar] = useState(false);
   const [showModalFollower, setShowModalFollower] = useState(false);
   const [showModalFollowed, setShowModalFollowed] = useState(false);
   const [showModalInformationProfile, setShowModalInformationProfile] =
     useState(false);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [Images, setImages] = useState(null);
   const [hasAvatar, setHasAvatar] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState({});
@@ -37,25 +37,31 @@ function Profile() {
     moTa: "",
     birthday: "",
   });
-  const [searchValue, setSearchValue] = useState("");
+  const [isHaveInform, setIsHaveInform] = useState(false);
+  const [searchValueFollower, setSearchValueFollower] = useState("");
+  const [searchValueFollowed, setSearchValueFollowed] = useState("");
   const [userData, setUserData] = useState("");
   const [followerData, setFollowerData] = useState([]);
   const [followedData, setFollowedData] = useState([]);
+  const [showMore, setShowMore] = useState(false);
+  const handleClickShowMore = () => {
+    setShowMore(!showMore);
+  };
   // id account
   const id = userID ? userID : cookies.userId;
   const [CountPost, setCountPost] = useState(0);
   const handleCloseModalAvatar = () => {
-    setSelectedImage(null);
     setShowModalAvatar(false);
   };
   const handleShowModalAvatar = () => {
     setShowModalAvatar(true);
   };
   const handleCloseModalFollower = () => {
-    setSearchValue((preSearchValue) => ({
+    /* setSearchValue((preSearchValue) => ({
       ...preSearchValue,
       searchUser: "",
-    }));
+    })); */
+    setSearchValueFollower("");
     setSearchUserFollower([]);
     setShowModalFollower(false);
   };
@@ -63,75 +69,104 @@ function Profile() {
     setShowModalFollower(true);
   };
   const handleCloseModalFollowed = () => {
+    setSearchValueFollowed("");
+    setSearchUserFollowed([]);
     setShowModalFollowed(false);
   };
   const handleShowModalFollowed = () => {
     setShowModalFollowed(true);
   };
   const handleCloseModalInformationProfile = () => {
+    setIsHaveInform(false);
     setShowModalInformationProfile(false);
-  };
-  const handleSearchChange = (e) => {
-    setSearchValue((preSearchValue) => ({
-      ...preSearchValue,
-      [e.target.name]: e.target.value,
-    }));
   };
   const [searchUserFollower, setSearchUserFollower] = useState([]);
   const [searchUserFollowed, setSearchUserFollowed] = useState([]);
-  const handleKeyEnterSearchFollower = async (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
+  useEffect(() => {
+    const fetchData = async () => {
       try {
         const response = await request.post("account/searchUserFollower", {
-          searchUser: searchValue,
+          searchUser: searchValueFollower,
           idUser: id,
         });
-        setSearchUserFollower(response.data);
+        if (response.data.length === 0) {
+          setSearchUserFollower([]);
+        } else {
+          setSearchUserFollower(response.data);
+        }
       } catch (err) {
+        setSearchUserFollower([]);
         console.error(err);
-        toast.error(err.response.data.error);
       }
-    }
-    if (e.key === "Backspace" || e.key === "Delete") {
+    };
+    if (searchValueFollower) {
+      fetchData();
+    } else {
       setSearchUserFollower([]);
     }
-  };
-  const handleKeyEnterSearchFollowed = async (e) => {
-    if (e.key === "Enter") {
-      e.preventDefault();
+  }, [searchValueFollower, id]);
+  useEffect(() => {
+    const fetchData = async () => {
       try {
         const response = await request.post("account/searchUserFollowed", {
-          searchFollowed: searchValue,
+          searchFollowed: searchValueFollowed,
           idUser: id,
         });
-        const updatedData = response.data.map((item) => {
-          return { ...item, isFollow: true };
-        });
-        setSearchUserFollowed(updatedData);
+        if (response.data.length === 0) {
+          setSearchUserFollower([]);
+        } else {
+          /*   const updatedData = response.data.map((item) => {
+            return { ...item, isFollow: true };
+          }); */
+          const updatedData = [];
+          const response1 = await request.get(
+            `account/isFollowed/${cookies.userId}`
+          );
+          for (let i = 0; i < response.data.length; i++) {
+            const item = response.data[i];
+            if (item.follower_id === cookies.userId) {
+              updatedData.push({ ...item, isFollow: true });
+            } else {
+              if (response1.data.find((itemData) => itemData.id === item.id)) {
+                updatedData.push({ ...item, isFollow: true });
+              } else if (item.id === cookies.userId) {
+                console.log("OK");
+                updatedData.push({ ...item, isFollowme: true });
+              } else {
+                updatedData.push({ ...item, isFollow: false });
+              }
+            }
+          }
+          setSearchUserFollowed(updatedData);
+        }
       } catch (err) {
         console.error(err);
-        toast.error(err.response.data.error);
+        setSearchUserFollowed([]);
       }
-    }
-    if (e.key === "Backspace" || e.key === "Delete") {
+    };
+    if (searchValueFollowed) {
+      fetchData();
+    } else {
       setSearchUserFollowed([]);
     }
-  };
+  }, [searchValueFollowed, id]);
   const handleShowModalInformationProfile = () => {
     setFormValues({
       name: "",
       moTa: "",
       birthday: "",
     });
+    setProvince(null);
+    setDistrict(null);
+    setWards(null);
+    setDistrictSelect([]);
+    setWardsSelect([]);
     setShowModalInformationProfile(true);
   };
 
   const handleInputChange = async (event) => {
     const selectedFile = event.target.files[0];
     if (!selectedFile) {
-      setImages(null);
-      setSelectedImage(null);
       toast.error("Chưa có ảnh");
       return; // Dừng việc xử lý nếu không có file được chọn
     }
@@ -149,9 +184,8 @@ function Profile() {
       event.target.value = null;
       return;
     }
-    const imageUrl = URL.createObjectURL(selectedFile);
-    setSelectedImage(imageUrl);
-    setImages(selectedFile);
+    handleUploadImage(selectedFile);
+    handleCloseModalAvatar();
   };
   const handleRemoveImage = async () => {
     setLoading(true);
@@ -179,11 +213,10 @@ function Profile() {
     }
   };
 
-  const handleUploadImage = async () => {
-    setLoading(true);
+  const handleUploadImage = async (selectedFile) => {
     try {
       const formData = new FormData();
-      formData.append("avatar", Images);
+      formData.append("avatar", selectedFile);
       formData.append("id", id);
       formData.append("hasAvatar", hasAvatar);
 
@@ -199,9 +232,7 @@ function Profile() {
       }));
       toast.success(response.data.success);
       handleCloseModalAvatar();
-      setLoading(false);
     } catch (error) {
-      setLoading(false);
       console.error(error);
     }
   };
@@ -211,18 +242,32 @@ function Profile() {
       ...formValues,
       [e.target.name]: e.target.value,
     });
+    if (e.target.value !== "") {
+      setIsHaveInform(true);
+    } else {
+      setIsHaveInform(false);
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(Validation(formValues));
+    const currentDateTime = moment().toISOString();
+    const selectedDateTime = moment(formValues.birthday).toISOString();
+    if (moment(selectedDateTime).isAfter(currentDateTime)) {
+      toast.error("Ngày sinh không thể ở tương lai.");
+      return;
+    }
     try {
       setLoading(true);
       const response = await request.post("account/UpdateInformationProfile", {
-        name: formValues.name.trim(),
-        moTa: formValues.moTa.trim(),
+        name: formValues.name,
+        moTa: formValues.moTa,
         date: moment(formValues.birthday).toISOString(),
         id: id,
+        province: province ? province.value : null,
+        district: district ? district.value : null,
+        wards: wards ? wards.value : null,
       });
       if (response.data.success) {
         toast.success(response.data.success);
@@ -230,13 +275,18 @@ function Profile() {
       setLoading(false);
       const nameUser = response.data.name;
       const moTaUser = response.data.moTa;
+      const usernameU = response.data.username;
       setUserData((prevUserData) => ({
         ...prevUserData,
         name: nameUser,
         moTa: moTaUser,
+        username: usernameU,
       }));
       handleCloseModalInformationProfile();
     } catch (error) {
+      console.error(error);
+      /*       toast.error(error.response.data.error); */
+
       setLoading(false);
     }
   };
@@ -244,7 +294,7 @@ function Profile() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await request.get(`account/getDataUser/${id}`); // Thay đổi ID tùy theo người dùng muốn lấy dữ liệu
+        const response = await request.get(`account/getDataUser/${id}`);
         setUserData(response.data[0]);
       } catch (error) {
         console.error("Error fetching user data:", error);
@@ -263,6 +313,7 @@ function Profile() {
     }
   }, [userData]);
   useEffect(() => {
+    setIsMoreDetailFollower(false);
     const fetchData = async () => {
       try {
         const response = await request.get(`account/followerData/${id}&1`);
@@ -274,32 +325,31 @@ function Profile() {
     fetchData();
   }, [id]);
   useEffect(() => {
+    setIsMoreDetailFollowed(false);
     const fetchData = async () => {
-      if (id === cookies.userId) {
-        try {
-          const response = await request.get(`account/followedData/${id}&1`);
-          const updatedData = response.data.map((item) => {
-            return { ...item, isFollow: true };
-          });
-          setFollowedData(updatedData);
-        } catch (error) {
-          setFollowedData([]);
-        }
-      } else {
-        try {
-          const response = await request.get(`account/followedData/${id}&1`);
-          const updatedData = response.data.map((item) => {
-            if (item.id === cookies.userId) {
-              return { ...item, isFollowme: true };
+      try {
+        const response = await request.get(`account/followedData/${id}&1`);
+        const response1 = await request.get(
+          `account/isFollowed/${cookies.userId}`
+        );
+        const updatedData = [];
+        for (let i = 0; i < response.data.length; i++) {
+          const item = response.data[i];
+          if (item.follower_id === cookies.userId) {
+            updatedData.push({ ...item, isFollow: true });
+          } else {
+            if (response1.data.find((itemData) => itemData.id === item.id)) {
+              updatedData.push({ ...item, isFollow: true });
+            } else if (item.id === cookies.userId) {
+              updatedData.push({ ...item, isFollowme: true });
             } else {
-              return { ...item, isFollow: true };
+              updatedData.push({ ...item, isFollow: false });
             }
-          });
-
-          setFollowedData(updatedData);
-        } catch (error) {
-          setFollowedData([]);
+          }
         }
+        setFollowedData(updatedData);
+      } catch (error) {
+        setFollowedData([]);
       }
     };
     fetchData();
@@ -331,13 +381,28 @@ function Profile() {
   const handleMoreDetailFollowed = async () => {
     try {
       const response = await request.get(`account/followedData/${id}&0`);
-      const updatedData = response.data.map((item) => {
-        return { ...item, isFollow: true };
-      });
+      const response1 = await request.get(
+        `account/isFollowed/${cookies.userId}`
+      );
+      const updatedData = [];
+      for (let i = 0; i < response.data.length; i++) {
+        const item = response.data[i];
+        if (item.follower_id === cookies.userId) {
+          updatedData.push({ ...item, isFollow: true });
+        } else {
+          if (response1.data.find((itemData) => itemData.id === item.id)) {
+            updatedData.push({ ...item, isFollow: true });
+          } else if (item.id === cookies.userId) {
+            updatedData.push({ ...item, isFollowme: true });
+          } else {
+            updatedData.push({ ...item, isFollow: false });
+          }
+        }
+      }
       setFollowedData(updatedData);
       setIsMoreDetailFollowed(true);
     } catch (error) {
-      console.error("Error fetching user data:", error);
+      setFollowedData([]);
     }
   };
   const handleAdd = async (idFollowed) => {
@@ -345,6 +410,30 @@ function Profile() {
       try {
         let res = await request.post("account/followUser", {
           follower_id: id,
+          followed_id: idFollowed,
+        });
+        if (res.data.success) {
+          toast.success(res.data.success);
+          if (searchUserFollowed && searchUserFollowed.length > 0) {
+            setSearchUserFollowed((prevData) =>
+              prevData.map((data) =>
+                data.id === idFollowed ? { ...data, isFollow: true } : data
+              )
+            );
+          }
+          setFollowedData((prevData) =>
+            prevData.map((data) =>
+              data.id === idFollowed ? { ...data, isFollow: true } : data
+            )
+          );
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    } else {
+      try {
+        let res = await request.post("account/followUser", {
+          follower_id: cookies.userId,
           followed_id: idFollowed,
         });
         if (res.data.success) {
@@ -466,6 +555,53 @@ function Profile() {
     };
     fetchDataCountFollow();
   }, [id]);
+  const [provinceSelect, setProvinceSelect] = useState([]);
+  const [districtSelect, setDistrictSelect] = useState([]);
+  const [wardsSelect, setWardsSelect] = useState([]);
+  const [province, setProvince] = useState(null);
+  const [district, setDistrict] = useState(null);
+  const [wards, setWards] = useState(null);
+  useEffect(() => {
+    const ProvinceSelect = async () => {
+      const res = await axios.get("https://provinces.open-api.vn/api/?depth=3");
+      if (res) {
+        const updateProvinceSelect = res.data.map((item) => ({
+          value: item.name,
+          label: item.name,
+          huyen: item.districts,
+        }));
+        setProvinceSelect(updateProvinceSelect);
+      }
+      return () => {};
+    };
+    ProvinceSelect();
+  }, []);
+  useEffect(() => {
+    if (province) {
+      const updateDistrict = province.huyen.map((item) => ({
+        value: item.name,
+        label: item.name,
+        xa: item.wards,
+      }));
+      setDistrictSelect(updateDistrict); // Corrected function name
+    }
+  }, [province]);
+
+  useEffect(() => {
+    if (district) {
+      const updateWards = district.xa.map((item) => ({
+        value: item.name,
+        label: item.name,
+      }));
+      setWardsSelect(updateWards);
+    }
+  }, [district]);
+  useEffect(() => {
+    if (wards) {
+      setIsHaveInform(true);
+    }
+  }, [wards]);
+
   return (
     <>
       <div className="container-fluid" style={{ overflowX: "hidden" }}>
@@ -508,21 +644,13 @@ function Profile() {
                       show={showModalAvatar}
                       onHide={handleCloseModalAvatar}
                     >
-                      <Modal.Header closeButton>
+                      {/*   <Modal.Header closeButton>
                         <Modal.Title>Thay đổi ảnh đại diện</Modal.Title>
-                      </Modal.Header>
+                      </Modal.Header> */}
                       <Modal.Body className="ProfileAvatarModalBody">
-                        {selectedImage ? (
-                          <div className="ProfileShowImageContainer">
-                            <img
-                              className="ShowImageWhenUpload"
-                              src={selectedImage}
-                              alt="Avatar"
-                            />
-                          </div>
-                        ) : (
-                          <div></div>
-                        )}
+                        <div className="ProfileTitleChangeAvatar">
+                          <span>Thay đổi ảnh đại diện</span>
+                        </div>
                         <Form encType="multipart/form-data">
                           <Form.Group>
                             <Form.Label
@@ -551,22 +679,15 @@ function Profile() {
                         ) : (
                           <div></div>
                         )}
+                        <div className="ProfileButtonHandleClose">
+                          <Button
+                            variant="secondary"
+                            onClick={handleCloseModalAvatar}
+                          >
+                            Close
+                          </Button>
+                        </div>
                       </Modal.Body>
-                      <Modal.Footer>
-                        <Button
-                          variant="secondary"
-                          onClick={handleCloseModalAvatar}
-                        >
-                          Close
-                        </Button>
-                        <Button
-                          variant="primary"
-                          disabled={!selectedImage || loading}
-                          onClick={handleUploadImage}
-                        >
-                          {loading ? "Uploading..." : "Upload Avatar"}
-                        </Button>
-                      </Modal.Footer>
                     </Modal>
                   </div>
                 </div>
@@ -604,22 +725,9 @@ function Profile() {
                               name="name"
                               value={formValues.name}
                               onChange={handleChange}
-                              className={
-                                error.name
-                                  ? "form-control is-invalid"
-                                  : "form-control"
-                              }
+                              className="form-control"
                             />
-                            {error.name && (
-                              <div
-                                id="validationServerUsernameFeedback"
-                                className="invalid-feedback"
-                              >
-                                {error.name}
-                              </div>
-                            )}
                           </Form.Group>
-
                           <Form.Group controlId="formDescription">
                             <Form.Label>Description</Form.Label>
                             <Form.Control
@@ -627,22 +735,9 @@ function Profile() {
                               name="moTa"
                               value={formValues.moTa}
                               onChange={handleChange}
-                              className={
-                                error.moTa
-                                  ? "form-control is-invalid"
-                                  : "form-control"
-                              }
+                              className="form-control"
                             />
-                            {error.moTa && (
-                              <div
-                                id="validationServerUsernameFeedback"
-                                className="invalid-feedback"
-                              >
-                                {error.moTa}
-                              </div>
-                            )}
                           </Form.Group>
-
                           <Form.Group controlId="formBirthday">
                             <Form.Label>Birthday</Form.Label>
                             <Form.Control
@@ -650,32 +745,47 @@ function Profile() {
                               name="birthday"
                               value={formValues.birthday}
                               onChange={handleChange}
-                              className={
-                                error.birthday
-                                  ? "form-control is-invalid"
-                                  : "form-control"
-                              }
+                              className="form-control"
                             />
-                            {error.birthday && (
-                              <div
-                                id="validationServerUsernameFeedback"
-                                className="invalid-feedback"
-                              >
-                                {error.birthday}
-                              </div>
-                            )}
+                          </Form.Group>
+                          <Form.Group controlId="formProvince">
+                            <Form.Label>Province</Form.Label>
+                            <Select
+                              options={provinceSelect}
+                              onChange={(e) => setProvince(e)}
+                            />
+                          </Form.Group>
+                          <Form.Group controlId="formDistrict">
+                            <Form.Label>District</Form.Label>
+                            <Select
+                              options={districtSelect}
+                              onChange={(e) => setDistrict(e)}
+                            />
+                          </Form.Group>
+                          <Form.Group controlId="formWards">
+                            <Form.Label>Wards</Form.Label>
+                            <Select
+                              options={wardsSelect}
+                              onChange={(e) => setWards(e)}
+                            />
                           </Form.Group>
                           <br />
                         </Form>
                       </Modal.Body>
                       <Modal.Footer>
-                        <Button
-                          variant="primary"
-                          type="submit"
-                          onClick={handleSubmit}
-                        >
-                          {loading ? "Submit..." : "Submit"}
-                        </Button>
+                        {isHaveInform ? (
+                          <Button
+                            variant="primary"
+                            type="submit"
+                            onClick={handleSubmit}
+                          >
+                            {loading ? "Submit..." : "Submit"}
+                          </Button>
+                        ) : (
+                          <Button variant="secondary" type="submit">
+                            {loading ? "Submit..." : "Submit"}
+                          </Button>
+                        )}
                       </Modal.Footer>
                     </Modal>
                   </div>
@@ -710,12 +820,13 @@ function Profile() {
                             style={{ position: "relative" }}
                           >
                             <Form.Control
+                              ref={refSearch}
                               type="text"
-                              placeholder="Searching Group"
-                              name="searchUser"
-                              value={searchValue.searchUser || ""}
-                              onChange={handleSearchChange}
-                              onKeyDown={handleKeyEnterSearchFollower}
+                              placeholder="Nhập tên follower cần tìm..."
+                              name="searchFollower"
+                              onChange={(e) =>
+                                setSearchValueFollower(e.target.value)
+                              }
                             />
                             <SearchIcon
                               style={{
@@ -750,55 +861,54 @@ function Profile() {
                               searchUserFollower.length > 0 &&
                               followerData ? (
                                 searchUserFollower &&
-                                searchUserFollower.length > 0 ? (
+                                searchUserFollower.length !== 0 ? (
                                   searchUserFollower.map(
                                     (dataSearch, index) => {
                                       return (
                                         <>
-                                          <div
-                                            className="ProfileFollowRowContent"
-                                            key={index}
-                                          >
-                                            <div className="ProfileFollowImgContent">
-                                              {dataSearch.avatar ? (
-                                                <>
-                                                  <Link
-                                                    to={`/home/profile/user/${dataSearch.id}`}
-                                                    className="suggestionFriend-title-link"
-                                                  >
-                                                    <img
-                                                      src={dataSearch.avatar}
-                                                    />
-                                                  </Link>
-                                                </>
-                                              ) : (
-                                                <>
-                                                  <Link
-                                                    to={`/home/profile/user/${dataSearch.id}`}
-                                                    className="ProfileFollowLink"
-                                                    onClick={
-                                                      handleCloseModalFollower
-                                                    }
-                                                  >
-                                                    <img src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg" />
-                                                  </Link>
-                                                </>
-                                              )}
+                                          <React.Fragment key={index}>
+                                            <div className="ProfileFollowRowContent">
+                                              <div className="ProfileFollowImgContent">
+                                                {dataSearch.avatar ? (
+                                                  <>
+                                                    <Link
+                                                      to={`/home/profile/user/${dataSearch.id}`}
+                                                      className="suggestionFriend-title-link"
+                                                    >
+                                                      <img
+                                                        src={dataSearch.avatar}
+                                                      />
+                                                    </Link>
+                                                  </>
+                                                ) : (
+                                                  <>
+                                                    <Link
+                                                      to={`/home/profile/user/${dataSearch.id}`}
+                                                      className="ProfileFollowLink"
+                                                      onClick={
+                                                        handleCloseModalFollower
+                                                      }
+                                                    >
+                                                      <img src="https://i.pinimg.com/564x/64/b9/dd/64b9dddabbcf4b5fb2b885927b7ede61.jpg" />
+                                                    </Link>
+                                                  </>
+                                                )}
+                                              </div>
+                                              <span>
+                                                <Link
+                                                  to={`/home/profile/user/${dataSearch.id}`}
+                                                  className="ProfileFollowLink"
+                                                  onClick={
+                                                    handleCloseModalFollower
+                                                  }
+                                                >
+                                                  {dataSearch.name
+                                                    ? dataSearch.name
+                                                    : dataSearch.username}
+                                                </Link>
+                                              </span>
                                             </div>
-                                            <span>
-                                              <Link
-                                                to={`/home/profile/user/${dataSearch.id}`}
-                                                className="ProfileFollowLink"
-                                                onClick={
-                                                  handleCloseModalFollower
-                                                }
-                                              >
-                                                {dataSearch.name
-                                                  ? dataSearch.name
-                                                  : dataSearch.username}
-                                              </Link>
-                                            </span>
-                                          </div>
+                                          </React.Fragment>
                                         </>
                                       );
                                     }
@@ -811,11 +921,8 @@ function Profile() {
                               ) : followerData && followerData.length > 0 ? (
                                 followerData.map((dataFollower, index) => {
                                   return (
-                                    <>
-                                      <div
-                                        className="ProfileFollowRowContent"
-                                        key={index}
-                                      >
+                                    <React.Fragment key={index}>
+                                      <div className="ProfileFollowRowContent">
                                         <div className="ProfileFollowImgContent">
                                           {dataFollower.avatar ? (
                                             <>
@@ -854,7 +961,7 @@ function Profile() {
                                           </Link>
                                         </span>
                                       </div>
-                                    </>
+                                    </React.Fragment>
                                   );
                                 })
                               ) : (
@@ -905,12 +1012,13 @@ function Profile() {
                             style={{ position: "relative" }}
                           >
                             <Form.Control
+                              ref={refSearch}
                               type="text"
-                              placeholder="Searching Group"
+                              placeholder="Nhập tên người đang theo dõi cần tìm..."
                               name="searchFollowed"
-                              value={searchValue.searchFollowed || ""}
-                              onChange={handleSearchChange}
-                              onKeyDown={handleKeyEnterSearchFollowed}
+                              onChange={(e) =>
+                                setSearchValueFollowed(e.target.value)
+                              }
                             />
                             <SearchIcon
                               style={{
@@ -948,11 +1056,8 @@ function Profile() {
                                   searchUserFollowed.map(
                                     (searchUserFollowed, index) => {
                                       return (
-                                        <>
-                                          <div
-                                            className="ProfileFollowRowContent"
-                                            key={index}
-                                          >
+                                        <React.Fragment key={index}>
+                                          <div className="ProfileFollowRowContent">
                                             <div className="ProfileFollowImgContent">
                                               {searchUserFollowed.avatar ? (
                                                 <>
@@ -994,7 +1099,7 @@ function Profile() {
                                                   : searchUserFollowed.username}
                                               </Link>
                                             </span>
-                                            {searchUserFollowed.isFollow ? (
+                                            {searchUserFollowed.isFollowme ? null : searchUserFollowed.isFollow ? (
                                               <button
                                                 onClick={() =>
                                                   handleRemove(
@@ -1016,7 +1121,7 @@ function Profile() {
                                               </button>
                                             )}
                                           </div>
-                                        </>
+                                        </React.Fragment>
                                       );
                                     }
                                   )
@@ -1028,11 +1133,8 @@ function Profile() {
                               ) : followedData && followedData.length > 0 ? (
                                 followedData.map((followedData, index) => {
                                   return (
-                                    <>
-                                      <div
-                                        className="ProfileFollowRowContent"
-                                        key={index}
-                                      >
+                                    <React.Fragment key={index}>
+                                      <div className="ProfileFollowRowContent">
                                         <div className="ProfileFollowImgContent">
                                           {followedData.avatar ? (
                                             <>
@@ -1088,7 +1190,7 @@ function Profile() {
                                           </button>
                                         )}
                                       </div>
-                                    </>
+                                    </React.Fragment>
                                   );
                                 })
                               ) : (
@@ -1122,10 +1224,21 @@ function Profile() {
                     </span>
                   </div>
                 </div>
-                <div className="ProfileRow">
-                  <p>{userData.moTa}</p>
-                </div>
               </div>
+            </div>
+            <div className="ProfileRowDescription">
+              <p className="ProfileDescriptionUser">
+                <span>
+                  {userData.moTa && userData.moTa.length > 100 && !showMore
+                    ? userData.moTa.slice(0, 100) + "..."
+                    : userData.moTa}
+                </span>
+                {userData.moTa && userData.moTa.length > 100 && (
+                  <span className="read-more" onClick={handleClickShowMore}>
+                    {showMore ? "Rút gọn" : "Xem thêm"}
+                  </span>
+                )}
+              </p>
             </div>
           </header>
           <div className="container containerFeature">
@@ -1136,7 +1249,7 @@ function Profile() {
                   <span>bài viết</span>
                 </a>
               </div>
-              {/*   <div className="col-md-3 ColumnProfileFeature">
+              {/* <div className="col-md-3 ColumnProfileFeature">
                 <a>
                   <BookmarkIcon />
                   <span>đã lưu</span>
@@ -1147,8 +1260,8 @@ function Profile() {
           {postsData.length > 0 ? (
             postsData.map((data, index) => {
               return (
-                <>
-                  <div className="container ProfilePostContent" key={index}>
+                <React.Fragment key={index}>
+                  <div className="container ProfilePostContent">
                     <Post
                       key={index}
                       id={data.id}
@@ -1161,7 +1274,7 @@ function Profile() {
                       // like={100}
                     />
                   </div>
-                </>
+                </React.Fragment>
               );
             })
           ) : (
