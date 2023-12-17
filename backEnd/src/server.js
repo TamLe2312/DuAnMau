@@ -126,6 +126,14 @@ io.on("connection", (socket) => {
       io.to(user.socketId).emit("likelike", data);
     }
   });
+  // change theme
+  socket.on("changetheme", (data) => {
+    const { youID } = data;
+    const user = activeUsers.find((user) => user.userId == youID);
+    if (user) {
+      io.to(user.socketId).emit("changetheme", data);
+    }
+  });
 });
 
 // });

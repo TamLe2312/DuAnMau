@@ -16,6 +16,13 @@ const {
   // deletePostImgsMess,
   // test,
 } = require("../controllers/messenger");
+
+const {
+  thememessage,
+  creatThemeMessage,
+  updateThemeMessage,
+} = require("../controllers/thememessage");
+
 const Router = express.Router();
 
 // api messenger;
@@ -32,5 +39,10 @@ Router.get("/listMes/:sender_id/:recipient_id", listMess);
 Router.get("/lastedMess/:sender_id/:recipient_id", lastedMess);
 Router.get("/isread/:sender_id/:recipient_id", isread);
 Router.get("/notimess/:recipient_id", notimes);
+
+// theme messages
+Router.get("/thememessage/:idone/:idtwo", thememessage);
+Router.post("/creatThemeMessage", creatThemeMessage);
+Router.post("/updateThemeMessage", updateThemeMessage);
 
 module.exports = Router;
