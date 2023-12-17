@@ -108,7 +108,7 @@ function DetailMess(props) {
       }
     };
     fetchApi();
-  }, [youID]);
+  }, [youID, loading]);
   // --------------------------
   function handleOnEnter() {
     handleSendMess();
@@ -496,6 +496,7 @@ function DetailMess(props) {
                       mes.softdelete !== myID && (
                         <div
                           style={
+                            colorYouMe &&
                             changeDataTheme &&
                             (changeDataTheme.myid == youID ||
                               changeDataTheme.youID == youID)
