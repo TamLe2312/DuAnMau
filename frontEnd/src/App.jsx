@@ -34,6 +34,8 @@ import Commentad from "./component/adminBoss/adminchild/Commentad";
 import { BaoCao } from "./component/adminBoss/adminchild/BaoCao";
 import AdvertisementAdmin from "./component/adminBoss/adminchild/Advertisement";
 import TestLink from "./component/adminBoss/adminchild/testLink";
+import BrandAdvertisement from "./component/adminBoss/adminchild/brand";
+import AdvertisementDetail from "./component/adminBoss/adminchild/AdvertisementDetail";
 
 function App() {
   return (
@@ -64,6 +66,7 @@ function App() {
               path="/home/admin/advertisement"
               element={<AdvertisementAdmin />}
             />
+            <Route path="/home/admin/brand" element={<BrandAdvertisement />} />
             <Route path="/home/admin/getlink" element={<TestLink />} />
             <Route
               path="/home/admin/posts/:idpost/baocao"
@@ -73,6 +76,10 @@ function App() {
             {/* <Route path="/home/admin/toxic" element={<VietNamToxic />} /> */}
           </Route>
           <Route path="/home/admin/posts/:idpost" element={<Commentad />} />
+          <Route
+            path="/home/admin/advertisement/:idadv"
+            element={<AdvertisementDetail />}
+          />
           {/* ---- */}
           <Route path="/stories/:idStory" element={<Stories />} />
 

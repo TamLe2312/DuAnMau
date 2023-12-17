@@ -7,6 +7,7 @@
   padding: 30px 60px;
   position: relative;
   justify-content: center;
+  align-items: center;
 }
 
 .tin-group-new-container a {
@@ -34,33 +35,30 @@
   font-size: 0.9rem;
 }
 
-.NewsNextButton {
-  color: #fff;
-  background-color: #3e4042;
-  right: 20% !important;
-  width: 40px !important;
-  height: 40px !important;
-}
-
-.NewsPrevButton {
-  color: #fff;
-  background-color: #3e4042;
+.tin .fa-chevron-right,
+.fa-chevron-left {
+  width: 50px;
+  height: 50px;
+  color: white;
   border-radius: 50%;
   position: absolute;
-  width: 40px;
-  height: 40px;
-  top: 50%;
-  left: 20%;
-  transform: translateY(-50%);
   display: flex;
   align-items: center;
   justify-content: center;
+  background-color: #999;
 }
 
-.NewsPrevButton:hover {
-  transition: 0.5s;
-  cursor: pointer;
-  background-color: rgba(128, 128, 128, 0.8);
+.tin .fa-chevron-right:hover,
+.fa-chevron-left:hover {
+  background-color: #77838A;
+}
+
+.tin .fa-chevron-left {
+  left: 20%;
+}
+
+.tin .fa-chevron-right {
+  right: 20%;
 }
 
 .tin-group .tin-group-new {

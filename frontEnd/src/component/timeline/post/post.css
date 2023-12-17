@@ -26,6 +26,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  position: relative;
 }
 
 .post-img {
@@ -194,4 +195,16 @@
 .post-comment {
   color: rgb(1, 114, 116);
   font-weight: 500;
+}
+
+.SponsoredBy {
+  font-size: 0.8rem;
+  color: #77838A;
+  position: absolute;
+  bottom: -2px;
+  left: 31%;
+}
+
+.postAdTitle {
+  margin: 12px 0;
 }
