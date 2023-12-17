@@ -16,7 +16,17 @@ import { APP_WEB } from "../../../utils/config";
 import { SocketCon } from "../../socketio/Socketcontext";
 import * as toxic from "../../vietnamToxic/VietNamToxic";
 
-function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
+function Post({
+  user,
+  time,
+  avatar,
+  title,
+  name,
+  id,
+  userid,
+  groupPostId,
+  isAd,
+}) {
   const focusInput = useRef();
   const [cookies] = useCookies();
   const myID = cookies.userId;
@@ -33,9 +43,9 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
   const [comment, setcomment] = useState("");
   const [previewLink, setPreviewLink] = useState([]);
   const [isValidURL, setIsValidURL] = useState(false);
-
   useEffect(() => {
     const fetchData = async () => {
+      setIsValidURL(false);
       try {
         const urlRegex = /^(ftp|http|https):\/\/[^ "]+$/;
         if (urlRegex.test(title)) {
@@ -43,14 +53,34 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
           const res = await request.post("preview/getLinkPreview", {
             url: title,
           });
-          setPreviewLink(res.data);
+          setPreviewLink((prevData) => ({
+            ...prevData,
+            [title]: res.data,
+          }));
         }
       } catch (error) {
-        /*         console.error('Error getting link preview:', error); */
+        console.error(error);
       }
     };
+
     fetchData();
   }, [title]);
+  const [adImgs, setAdImgs] = useState([]);
+  useEffect(() => {
+    const fetchData = async () => {
+      if (isAd) {
+        try {
+          const res = await request.get(`account/getAdImgs/${id}`);
+          setAdImgs(res.data);
+        } catch (err) {
+          console.error(err);
+        }
+      }
+    };
+
+    fetchData();
+  }, [isAd, id]);
+
   const now = new Date();
   const targetDate = new Date(time);
   const milliseconds = now - targetDate;
@@ -433,18 +463,50 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
                 ? Math.floor(minute / 60 / 24) + " Ngày"
                 : Math.floor(minute / 60) + " Giờ"}
             </span>
+            {isAd && <span className="SponsoredBy">Được tài trợ</span>}
           </div>
           {/* -------------more------------ */}
-          <span className="post-more-delete">
-            <MoreHorizIcon
-              onClick={() => {
-                handleDELETE(id);
-                setModalShowComment(false);
-              }}
-            />
-          </span>
+          {!isAd && (
+            <span className="post-more-delete">
+              <MoreHorizIcon
+                onClick={() => {
+                  handleDELETE(id);
+                  setModalShowComment(false);
+                }}
+              />
+            </span>
+          )}
         </div>
         <div className="post-img">
+          {adImgs && adImgs.length > 0 && (
+            <>
+              <img
+                src={adImgs.length === 1 ? adImgs[0].img : adImgs[run].img}
+                alt=""
+              />
+              {adImgs.length > 1 && (
+                <>
+                  <span
+                    id="post-img-left"
+                    className="post-img-run"
+                    onClick={(e) => handleRun(e)}
+                  >
+                    <ChevronLeftIcon sx={{ fontSize: 28 }} />
+                  </span>
+                  <span
+                    id="post-img-right"
+                    className="post-img-run"
+                    onClick={(e) => handleRun(e)}
+                  >
+                    <ChevronRightIcon sx={{ fontSize: 28 }} />
+                  </span>
+                  <span className="post-img-count">
+                    {run + 1}/{adImgs.length}
+                  </span>
+                </>
+              )}
+            </>
+          )}
           {img && img.length > 0 ? (
             <>
               <img
@@ -480,60 +542,80 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
             <span style={{ wordBreak: "break-all" }}>
               {isValidURL ? (
                 <div className="previewLink">
-                  <div className="previewLinkImgContainer">
-                    <img src={previewLink.image} />
-                  </div>
-                  <div className="previewLinkContent">
-                    <span className="previewLinkTitle">
-                      {previewLink.title && previewLink.title}
-                    </span>
-                    <span className="previewLinkDesciption">
-                      {previewLink.description && previewLink.description}
-                    </span>
-                    <Link to={previewLink.ogUrl} className="prewviewLinkURL">
-                      {previewLink.ogUrl && previewLink.ogUrl}
-                    </Link>
-                  </div>
+                  {previewLink[title] ? (
+                    <>
+                      <div className="previewLinkImgContainer">
+                        <img src={previewLink[title].image} alt="Preview" />
+                      </div>
+                      <div className="previewLinkContent">
+                        <span className="previewLinkTitle">
+                          {previewLink[title].title && previewLink[title].title}
+                        </span>
+                        <span className="previewLinkDesciption">
+                          {previewLink[title].description &&
+                            previewLink[title].description}
+                        </span>
+                        <Link
+                          to={previewLink[title].ogUrl}
+                          className="prewviewLinkURL"
+                        >
+                          {previewLink[title].ogUrl && previewLink[title].ogUrl}
+                        </Link>
+                      </div>
+                    </>
+                  ) : (
+                    <p>Loading...</p>
+                  )}
                 </div>
               ) : (
-                title
+                !isAd && title
               )}
             </span>
           )}
         </div>
         <div className="post-footer">
-          <div className="post-footer-icon">
-            {liked ? (
-              <span
-                className="post-footer-icon-like-comment"
-                onClick={handleLikePost}
-              >
-                <FavoriteIcon />
-              </span>
-            ) : (
-              <span
-                className="post-footer-icon-like-comment"
-                onClick={handleUnLikePost}
-              >
-                <FavoriteBorderIcon />
-              </span>
-            )}
+          {!isAd && (
+            <>
+              <div className="post-footer-icon">
+                {liked ? (
+                  <span
+                    className="post-footer-icon-like-comment"
+                    onClick={handleLikePost}
+                  >
+                    <FavoriteIcon />
+                  </span>
+                ) : (
+                  <span
+                    className="post-footer-icon-like-comment"
+                    onClick={handleUnLikePost}
+                  >
+                    <FavoriteBorderIcon />
+                  </span>
+                )}
 
-            <span
-              className="post-footer-icon-like-comment"
-              onClick={() => focusInput.current.focus()}
-            >
-              <ChatBubbleOutlineIcon />
-            </span>
-          </div>
-          <b>{like} lượt thích</b>
+                <span
+                  className="post-footer-icon-like-comment"
+                  onClick={() => focusInput.current.focus()}
+                >
+                  <ChatBubbleOutlineIcon />
+                </span>
+              </div>
+              <b>{like} lượt thích</b>
+              <p
+                ref={postFooterRef}
+                className={`post-title ${expanded ? "expanded" : ""}`}
+              >
+                {img && img.length > 0 ? title : ""}
+              </p>
+            </>
+          )}
           <p
             ref={postFooterRef}
-            className={`post-title ${expanded ? "expanded" : ""}`}
+            className={`postAdTitle ${expanded ? "expanded" : ""}`}
           >
-            {img && img.length > 0 ? title : ""}
+            {adImgs && adImgs.length > 0 && title}
           </p>
-          {hasComment && (
+          {!isAd && hasComment && (
             <span
               className="post-footer-list-comment"
               onClick={() => {
@@ -545,7 +627,7 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
             </span>
           )}
         </div>
-        {commentNew.comment && commentNew.user && (
+        {!isAd && commentNew.comment && commentNew.user && (
           <>
             <div className="post-footer-user-comment">
               <Link
@@ -566,27 +648,30 @@ function Post({ user, time, avatar, title, name, id, userid, groupPostId }) {
             Hãy dùng từ lịch sự
           </span>
         )}
-        <div className="post-footer-input">
-          <input
-            ref={focusInput}
-            type="text"
-            placeholder="Thêm bình luận"
-            value={comment}
-            onChange={(e) => {
-              setcomment(e.target.value);
-              setvipham2(false);
-            }}
-          />
-          {/* <SentimentSatisfiedAltIcon /> */}
+        {!isAd && (
+          <div className="post-footer-input">
+            <input
+              ref={focusInput}
+              type="text"
+              placeholder="Thêm bình luận"
+              value={comment}
+              onChange={(e) => {
+                setcomment(e.target.value);
+                setvipham2(false);
+              }}
+            />
+            {/* <SentimentSatisfiedAltIcon /> */}
 
-          <button
-            disabled={!comment}
-            className={comment && "post-comment"}
-            onClick={hanldleSentComment}
-          >
-            Đăng
-          </button>
-        </div>
+            <button
+              disabled={!comment}
+              className={comment && "post-comment"}
+              onClick={hanldleSentComment}
+            >
+              Đăng
+            </button>
+          </div>
+        )}
+
         <hr />
       </div>
       <MyModal

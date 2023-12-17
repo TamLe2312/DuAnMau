@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
-import moment from "moment";
+import { useNavigate } from "react-router-dom";
 import Validation from "../../validation/validation";
 import { Modal, Button, Form } from "react-bootstrap";
+import Select from "react-select";
 import { toast } from "sonner";
 import * as request from "../../../utils/request";
-import { useNavigate } from "react-router-dom";
 
 function AdvertisementAdmin() {
+  const Navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [allDataAds, setAllDataAds] = useState([]);
   const [idAdsDelete, setIdAdsDelete] = useState(null);
@@ -16,7 +17,7 @@ function AdvertisementAdmin() {
   const [TotalPage, setTotalPage] = useState(1);
   const [indexPagination, setIndexPagination] = useState(1);
   const [formValuesCreateAds, setFormValuesCreateAds] = useState({
-    brand: "",
+    content: "",
   });
   const [imageFiles, setImageFiles] = useState([]);
   const [indexImg, setIndexImg] = useState(0);
@@ -36,10 +37,19 @@ function AdvertisementAdmin() {
   };
   const handleShowModalCreateAds = () => {
     setImageFiles([]);
+    setError({});
     setFormValuesCreateAds({
-      brand: "",
+      content: "",
     });
+    setBrand(null);
+
     setShowModalCreateAds(true);
+  };
+  const handleShowModalMoreDetailAdv = (data) => {
+    Navigate(`/home/admin/advertisement/${data.id}`, {
+      replace: true,
+      state: data,
+    });
   };
   const handleCloseModalConfirmDelete = () => {
     setShowModalConfirmDelete(false);
@@ -49,7 +59,6 @@ function AdvertisementAdmin() {
   };
   const handleImageUpload = (event) => {
     const selectedFiles = event.target.files;
-
     if (!selectedFiles || selectedFiles.length === 0) {
       toast.error("Chưa có ảnh");
       return;
@@ -71,29 +80,50 @@ function AdvertisementAdmin() {
     });
 
     setImageFiles([...imageFiles, ...newImageFiles]);
-
     event.target.value = null;
   };
   const handleSubmitCreateAds = async (e) => {
     e.preventDefault();
-    setError(Validation(formValuesCreateAds));
+    const updatedFormValues = {
+      ...formValuesCreateAds,
+      brand: brand,
+    };
+    const validateError = Validation(updatedFormValues);
+    setError(validateError);
+
+    let toastError = "";
+
+    if (validateError.brand) {
+      toastError += "Không được bỏ trống thương hiệu";
+    }
+
+    if (imageFiles.length === 0) {
+      if (toastError !== "") {
+        toastError += ", ";
+      }
+      toastError += "Không được bỏ trống ảnh";
+    }
+
+    if (toastError !== "") {
+      toast.error(toastError);
+    }
     try {
-      setLoading(true);
+      /*   setLoading(true); */
       const formData = new FormData();
-      formData.append("brand", formValuesCreateAds.brand.trim());
+      formData.append("content", formValuesCreateAds.content.trim());
+      formData.append("brand", brand.id);
 
       imageFiles.forEach((file, index) => {
-        formData.append(`images`, file);
+        formData.append("images", file);
       });
+
       // Use the FormData object in the request.post call
       const response = await request.post("admin/createNewAds", formData);
-      console.log(response);
       if (response.data.success) {
         toast.success(response.data.success);
       } else {
         toast.error(response.data.error);
       }
-
       fetchDataAllAds(indexPagination);
       setLoading(false);
       handleCloseModalCreateAds();
@@ -151,6 +181,10 @@ function AdvertisementAdmin() {
   const handleDeleteAds = async () => {
     setLoading(true);
     try {
+      const res1 = await request.post("admin/deleteAdImgs", {
+        idAds: idAdsDelete,
+      });
+      console.log(res1);
       const res = await request.post("admin/deleteAds", {
         idAds: idAdsDelete,
       });
@@ -182,6 +216,26 @@ function AdvertisementAdmin() {
     };
     fetchData();
   }, []);
+  const [brandSelect, setBrandSelect] = useState([]);
+  const [brand, setBrand] = useState(null);
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await request.get(`account/getDataBrand`);
+        if (response) {
+          const updateBrandSelect = response.data.map((item) => ({
+            value: item.brand,
+            label: item.brand,
+            id: item.id,
+          }));
+          setBrandSelect(updateBrandSelect);
+        }
+      } catch (error) {
+        /*     console.error(error); */
+      }
+    };
+    fetchData();
+  }, []);
   return (
     <>
       <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -202,36 +256,46 @@ function AdvertisementAdmin() {
               <Modal.Title>Tạo mới quảng cáo</Modal.Title>
             </Modal.Header>
             <Modal.Body className="ProfileInformationModalBody">
-              <Form onSubmit={handleSubmitCreateAds}>
-                <Form.Group controlId="formUsername">
+              <Form
+                onSubmit={handleSubmitCreateAds}
+                encType="multipart/form-data"
+              >
+                <Form.Group controlId="formBrand">
                   <Form.Label>Thương hiệu</Form.Label>
+                  <Select
+                    options={brandSelect}
+                    value={brand}
+                    onChange={(e) => setBrand(e)}
+                  />
+                </Form.Group>
+                <Form.Group controlId="formContent">
+                  <Form.Label>Nội dung</Form.Label>
                   <Form.Control
                     type="text"
-                    name="brand"
-                    value={formValuesCreateAds.brand}
+                    name="content"
+                    value={formValuesCreateAds.content}
                     onChange={handleChangeCreateAds}
                     className={
-                      error.brand ? "form-control is-invalid" : "form-control"
+                      error.content ? "form-control is-invalid" : "form-control"
                     }
                   />
-                  {error.brand && (
+                  {error.content && (
                     <div
                       id="validationServerBrandFeedback"
                       className="invalid-feedback"
                     >
-                      {error.brand}
+                      {error.content}
                     </div>
                   )}
                 </Form.Group>
                 <Form.Group controlId="formImageUpload">
-                  <Form.Label>Ảnh</Form.Label>
+                  <Form.Label>Ảnh nội dung</Form.Label>
                   <Form.Control
                     type="file"
                     name="images"
                     onChange={handleImageUpload}
                     multiple
                   />
-                  {/* You can add error handling for image upload if needed */}
                 </Form.Group>
                 <br />
               </Form>
@@ -295,6 +359,7 @@ function AdvertisementAdmin() {
           <tr>
             <th scope="col">#</th>
             <th scope="col">Thương hiệu</th>
+            <th scope="col">Nội dung</th>
             <th scope="col">Quản lí</th>
             {/* <th scope="col">Báo cáo</th> */}
           </tr>
@@ -324,6 +389,24 @@ function AdvertisementAdmin() {
                         </span>
                       )}
                     </td>
+                    <td className="AdminDescription">
+                      <span>
+                        {dataAds.content &&
+                        dataAds.content.length > 100 &&
+                        !showMore
+                          ? dataAds.content.slice(0, 100) + "..."
+                          : dataAds.content}
+                      </span>
+                      <br />
+                      {dataAds.content && dataAds.content.length > 100 && (
+                        <span
+                          className="read-more"
+                          onClick={handleClickShowMore}
+                        >
+                          {showMore ? "Rút gọn" : "Xem thêm"}
+                        </span>
+                      )}
+                    </td>
                     <td>
                       <button
                         type="button"
@@ -336,7 +419,7 @@ function AdvertisementAdmin() {
                       <button
                         type="button"
                         className="btn btn-primary btn-featureHandle"
-                        /*             onClick={() => handleShowModalMoreDetailPost(dataAds)} */
+                        onClick={() => handleShowModalMoreDetailAdv(dataAds)}
                       >
                         <i className="fa-solid fa-info"></i>
                       </button>

@@ -35,10 +35,7 @@ function Tin() {
 
   return (
     <div className="tin">
-      <i
-        className="fa-solid fa-chevron-left NewsPrevButton"
-        onClick={handlePrev}
-      ></i>
+      <i className="fa-solid fa-chevron-left" onClick={handlePrev}></i>
       {currentIndex === 0 && (
         <div className="tin-group-new-container">
           <Link to="/stories/create">
@@ -71,10 +68,7 @@ function Tin() {
             </div>
           ))
         : null}
-      <i
-        className="fa-solid fa-chevron-right NewsNextButton"
-        onClick={handleNext}
-      ></i>
+      <i className="fa-solid fa-chevron-right" onClick={handleNext}></i>
     </div>
   );
 }
