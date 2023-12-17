@@ -907,7 +907,7 @@ const FindArena = (req, res) => {
 };
 const getDataAd = (req, res) => {
   connection.query(
-    "SELECT * FROM advertisement",
+    "SELECT *,advertisement.id, brandadvertisement.brand, brandadvertisement.avatarBrand FROM advertisement INNER JOIN brandadvertisement ON advertisement.brand_id = brandadvertisement.id",
     async function (err, results, fields) {
       if (err) {
         return res.status(500).json({ error: "Lỗi máy chủ" });
@@ -916,6 +916,47 @@ const getDataAd = (req, res) => {
         return res.status(200).json(results);
       } else {
         return res.status(200).json([]);
+      }
+    }
+  );
+};
+
+const advImgs = (req, res) => {
+  const adId = parseInt(req.params.adId);
+  if (adId) {
+    connection.query(
+      `SELECT img
+    FROM listdata  
+   WHERE ad_id = ? `,
+      [adId],
+      function (err, results, fields) {
+        if (err) {
+          console.log(err);
+          return res
+            .status(500)
+            .json({ error: "Có lỗi xảy ra xin thử lại sau" });
+        }
+        if (results.length > 0) {
+          return res.status(200).json(results);
+        } else {
+          return res.status(200).json(results);
+        }
+      }
+    );
+  }
+};
+const getDataBrand = (req, res) => {
+  connection.query(
+    `SELECT * FROM brandadvertisement`,
+    function (err, results, fields) {
+      if (err) {
+        console.log(err);
+        return res.status(500).json({ error: "Có lỗi xảy ra xin thử lại sau" });
+      }
+      if (results.length > 0) {
+        return res.status(200).json(results);
+      } else {
+        return res.status(200).json(results);
       }
     }
   );
@@ -947,4 +988,6 @@ module.exports = {
   searchUserProfile,
   FindArena,
   getDataAd,
+  advImgs,
+  getDataBrand,
 };

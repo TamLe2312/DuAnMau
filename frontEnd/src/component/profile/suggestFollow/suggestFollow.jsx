@@ -90,6 +90,7 @@ function SuggestFollow() {
           label: item.name,
           huyen: item.districts,
         }));
+        console.log(updateProvinceSelect);
         setProvinceSelect(updateProvinceSelect);
       }
       return () => {};

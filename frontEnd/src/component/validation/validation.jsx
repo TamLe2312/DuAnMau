@@ -44,8 +44,11 @@ const Validation = (value) => {
   if (!value.moTaNhom) {
     error.moTaNhom = "Không bỏ trống mô tả";
   }
+  if (!value.content) {
+    error.content = "Không bỏ trống nội dung";
+  }
   if (!value.brand) {
-    error.brand = "Không bỏ trống tên thương hiệu";
+    error.brand = "Không bỏ trống thương hiệu";
   }
 
   return error;
