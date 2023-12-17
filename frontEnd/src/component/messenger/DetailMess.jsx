@@ -174,11 +174,15 @@ function DetailMess(props) {
         }
         const data = res.data.results[0];
         // console.log(imgsMes);
+        // console.log(myID);
+        // console.log(youID);
         if (imgsMes.length > 0) {
           imgsMes.forEach((img, index) => {
             formData.append(`image${index}`, img);
           });
           formData.append("mesID", res.data.lastID);
+          formData.append("myID", myID);
+          formData.append("youID", youID);
           await request.post("messenger/upImgMess", formData);
         }
         // console.log(res.data.lastID);

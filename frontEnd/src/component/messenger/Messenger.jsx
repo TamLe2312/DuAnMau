@@ -1,9 +1,8 @@
 import { useParams, NavLink } from "react-router-dom";
 import DetailMess from "./DetailMess";
 import "./messenger.css";
-import React, { useRef } from "react";
 import { useCookies } from "react-cookie";
-import { useContext, useEffect, useState } from "react";
+import React, { useContext, useEffect, useState, useRef } from "react";
 import * as request from "../../utils/request";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
 import Button from "react-bootstrap/Button";
@@ -81,6 +80,7 @@ function Messenger() {
     };
     fetchDel();
   };
+  //
   const delRef = useRef();
   useEffect(() => {
     const handleOutMore = (e) => {
@@ -93,7 +93,6 @@ function Messenger() {
       document.removeEventListener("mousedown", handleOutMore);
     };
   }, []);
-
   const [isread, setisread] = useState([]);
   const [read, setread] = useState(null);
   const handleRead = (user) => {
