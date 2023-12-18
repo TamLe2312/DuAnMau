@@ -701,6 +701,7 @@ const createNewAds = (req, res) => {
               function (err, results, fields) {
                 completed++;
                 if (err) {
+                  console.error(err);
                   return res
                     .status(500)
                     .json({ error: "Có lỗi xảy ra xin thử lại sau" });

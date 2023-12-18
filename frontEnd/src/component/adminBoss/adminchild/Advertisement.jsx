@@ -181,10 +181,9 @@ function AdvertisementAdmin() {
   const handleDeleteAds = async () => {
     setLoading(true);
     try {
-      const res1 = await request.post("admin/deleteAdImgs", {
+      await request.post("admin/deleteAdImgs", {
         idAds: idAdsDelete,
       });
-      console.log(res1);
       const res = await request.post("admin/deleteAds", {
         idAds: idAdsDelete,
       });
