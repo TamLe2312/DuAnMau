@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { useLocation, Link, useNavigate } from "react-router-dom";
 import Logo from "../../../uploads/Logo1.png";
 import * as request from "../../utils/request";
+import video from "../../../public/video/bg2.mp4";
 
 function VerifyToken() {
   const Navigate = useNavigate();
@@ -72,7 +73,8 @@ function VerifyToken() {
 
   return (
     <>
-      <div style={{ background: "#4070f4" }}>
+      <div className="login_big">
+        <video src={video} className="login_video" autoPlay loop muted></video>
         <div className="FormUser">
           <div className="FormContainerRoot">
             <div className="TitleLogoContainerForm">
