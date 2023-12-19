@@ -45,7 +45,9 @@ function ForgotPassword() {
   };
   return (
     <>
-      <div className="login_big">
+
+      <div>
+
         <video src={video} className="login_video" autoPlay loop muted></video>
         <div className="FormUser">
           <div className="FormContainerRoot">
