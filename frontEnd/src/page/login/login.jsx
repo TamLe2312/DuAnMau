@@ -51,7 +51,6 @@ function Login() {
       setCheckLogin(error.response.data.error);
     }
   };
-  // console.log(error);
   return (
     <div className="login_big">
       <video src={video} className="login_video" autoPlay loop muted></video>

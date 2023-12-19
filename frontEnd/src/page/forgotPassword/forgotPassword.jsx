@@ -5,6 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import Logo from "../../../uploads/Logo1.png";
 import * as request from "../../utils/request";
+import video from "../../../public/video/bg2.mp4";
 
 function ForgotPassword() {
   const style = {
@@ -42,7 +43,8 @@ function ForgotPassword() {
   };
   return (
     <>
-      <div style={{ background: "#4070f4" }}>
+      <div>
+        <video src={video} className="login_video" autoPlay loop muted></video>
         <div className="FormUser">
           <div className="FormContainerRoot">
             <div className="TitleLogoContainerForm">

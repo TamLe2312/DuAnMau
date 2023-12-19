@@ -6,7 +6,7 @@ import Validation from "../../component/validation/validation";
 import Logo from "../../../uploads/Logo1.png";
 import * as request from "../../utils/request";
 import "./register.css";
-
+import video from "../../../public/video/bg2.mp4";
 function Register() {
   const navigate = useNavigate();
   const style = {
@@ -51,7 +51,9 @@ function Register() {
   };
   return (
     <>
-      <div style={{ background: "#4070f4" }}>
+      <div>
+        <video src={video} className="login_video" autoPlay loop muted></video>
+
         <div className="FormUser">
           <div className="FormContainerRoot">
             <div className="TitleLogoContainerForm">
@@ -59,83 +61,7 @@ function Register() {
                 <img src={Logo} alt="LogoFPLHub" />
               </div>
             </div>
-            {/*  <form style={style} className="mt-4">
-              <div className="mb-3">
-                <input
-                  name="username"
-                  placeholder="Tài khoản"
-                  value={values.username}
-                  onChange={(e) => {
-                    handleChange(e);
-                  }}
-                  type="text"
-                  className={
-                    error.username ? "form-control is-invalid" : "form-control"
-                  }
-                />
-                <div
-                  id="validationServerUsernameFeedback"
-                  className="invalid-feedback"
-                ></div>
-                {error.username && (
-                  <div
-                    id="validationServerUsernameFeedback"
-                    className="invalid-feedback"
-                  >
-                    {error.username}
-                  </div>
-                )}
-              </div>
-              <div className="mb-3">
-                <input
-                  placeholder="Mật khẩu"
-                  name="password"
-                  value={values.password}
-                  onChange={(e) => {
-                    handleChange(e);
-                  }}
-                  type="password"
-                  className={
-                    error.password ? "form-control is-invalid" : "form-control"
-                  }
-                />
-                {error.password && (
-                  <div
-                    id="validationServerUsernameFeedback"
-                    className="invalid-feedback"
-                  >
-                    {error.password}
-                  </div>
-                )}
-              </div>
-              <div className="mt-2 highlightLinkButton">
-                <Link className="mt-4" to="/forgotPassword">
-                  Quên mật khẩu?
-                </Link>
-              </div>
-              <button
-                onClick={handleClick}
-                type="submit"
-                className="btn btn-primary buttonFieldFormUser"
-                disabled={loading}
-              >
-                {loading && (
-                  <div
-                    className="spinner-border spinner-border-sm mr-2"
-                    role="status"
-                  >
-                    <span className="visually-hidden">Loading...</span>
-                  </div>
-                )}
-                Đăng nhập
-              </button>
-              <div className="highlightLinkButton">
-                <span>Không có tài khoản?</span>
-                <Link className="mt-4" to="/register">
-                  Đăng kí
-                </Link>
-              </div>
-            </form> */}
+
             <form style={style} className="mt-4">
               <div className="mb-3">
                 <input
