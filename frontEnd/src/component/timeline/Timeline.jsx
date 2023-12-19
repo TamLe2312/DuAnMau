@@ -57,7 +57,6 @@ function Timeline() {
       );
       const randomNum =
         Math.floor(Math.random() * (postsData.length - 5 + 1)) + 5;
-      console.log(adResponse);
       const adData = {
         id: adResponse.data[numberOfAdsToAdd].id,
         isAd: true,
