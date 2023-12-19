@@ -510,8 +510,15 @@ function DetailMess(props) {
                                       changeDataTheme.selectColor.you,
                                   }
                               : mes.sender_id === myID
-                              ? { backgroundColor: colorYouMe.me }
-                              : { backgroundColor: colorYouMe.you }
+                              ? {
+                                  backgroundColor:
+                                    colorYouMe.me ?? "rgba(55, 151, 240, 0.8)",
+                                }
+                              : {
+                                  backgroundColor:
+                                    colorYouMe.you ??
+                                    "rgba(173, 173, 173, 0.6)",
+                                }
                           }
                           title={format(mes.created_at)}
                           ref={scroll}
