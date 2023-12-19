@@ -5,6 +5,7 @@ const themeMes = async (userone, usertwo) => {
     const res = await request.get(
       `messenger/thememessage/${userone}/${usertwo}`
     );
+
     if (res) {
       return res.data;
     }
