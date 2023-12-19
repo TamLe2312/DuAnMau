@@ -59,6 +59,7 @@
 
 .tin .fa-chevron-right {
   right: 20%;
+  transform: none;
 }
 
 .tin-group .tin-group-new {
