@@ -98,6 +98,7 @@ const forgotPassword = (req, res) => {
     [username, email],
     async function (err, results, fields) {
       if (err) {
+        console.error(err);
         return res.status(500).json({ error: "Lỗi máy chủ" });
       }
       if (results.length > 0) {
@@ -111,7 +112,7 @@ const forgotPassword = (req, res) => {
               }
               let data = {
                 name: username,
-                action_url: `${process.env.APP_URL}/verifyToken?email=${email}&token=${hash}`,
+                action_url: `${process.env.APP_URL}verifyToken?email=${email}&token=${hash}`,
               };
               let htmlContent = Mustache.render(content, data);
               mailer.sendMail(

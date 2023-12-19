@@ -34,16 +34,20 @@ function ForgotPassword() {
         username: values.username.trim(),
         email: values.email,
       });
+      console.log(response);
       toast.success(response.data.success);
       setLoading(false);
     } catch (error) {
+      console.error(error);
       setLoading(false);
       toast.error(error.response.data.error);
     }
   };
   return (
     <>
+
       <div>
+
         <video src={video} className="login_video" autoPlay loop muted></video>
         <div className="FormUser">
           <div className="FormContainerRoot">

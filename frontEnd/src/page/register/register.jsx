@@ -4,6 +4,7 @@ import { toast } from "sonner";
 import { Link, useNavigate } from "react-router-dom";
 import Validation from "../../component/validation/validation";
 import Logo from "../../../uploads/Logo1.png";
+import video from "../../../public/video/bg2.mp4";
 import * as request from "../../utils/request";
 import "./register.css";
 import video from "../../../public/video/bg2.mp4";
@@ -53,7 +54,6 @@ function Register() {
     <>
       <div>
         <video src={video} className="login_video" autoPlay loop muted></video>
-
         <div className="FormUser">
           <div className="FormContainerRoot">
             <div className="TitleLogoContainerForm">
@@ -61,7 +61,6 @@ function Register() {
                 <img src={Logo} alt="LogoFPLHub" />
               </div>
             </div>
-
             <form style={style} className="mt-4">
               <div className="mb-3">
                 <input
