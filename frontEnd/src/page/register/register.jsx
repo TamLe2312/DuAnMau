@@ -7,7 +7,6 @@ import Logo from "../../../uploads/Logo1.png";
 import video from "../../../public/video/bg2.mp4";
 import * as request from "../../utils/request";
 import "./register.css";
-import video from "../../../public/video/bg2.mp4";
 function Register() {
   const navigate = useNavigate();
   const style = {
