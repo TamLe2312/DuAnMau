@@ -37,6 +37,7 @@ function Post({
   const [expanded, setExpanded] = useState(false);
   const postFooterRef = useRef(null);
   const [run, setRun] = useState(0);
+  const [runAd, setRunAd] = useState(0);
   const [img, setImg] = useState([]);
   const [liked, setliked] = useState(false);
   const [like, setlike] = useState(0);
@@ -150,6 +151,17 @@ function Post({
         setRun((pre) => (pre === 0 ? length - 1 : pre - 1));
       } else {
         setRun((pre) => (pre === length - 1 ? 0 : pre + 1));
+      }
+    }
+  };
+  const handleRunAd = (e) => {
+    if (adImgs) {
+      const id = e.currentTarget.id;
+      const length = adImgs.length;
+      if (id === "post-img-left") {
+        setRunAd((pre) => (pre === 0 ? length - 1 : pre - 1));
+      } else {
+        setRunAd((pre) => (pre === length - 1 ? 0 : pre + 1));
       }
     }
   };
@@ -481,7 +493,7 @@ function Post({
           {adImgs && adImgs.length > 0 && (
             <>
               <img
-                src={adImgs.length === 1 ? adImgs[0].img : adImgs[run].img}
+                src={adImgs.length === 1 ? adImgs[0].img : adImgs[runAd].img}
                 alt=""
               />
               {adImgs.length > 1 && (
@@ -489,19 +501,19 @@ function Post({
                   <span
                     id="post-img-left"
                     className="post-img-run"
-                    onClick={(e) => handleRun(e)}
+                    onClick={(e) => handleRunAd(e)}
                   >
                     <ChevronLeftIcon sx={{ fontSize: 28 }} />
                   </span>
                   <span
                     id="post-img-right"
                     className="post-img-run"
-                    onClick={(e) => handleRun(e)}
+                    onClick={(e) => handleRunAd(e)}
                   >
                     <ChevronRightIcon sx={{ fontSize: 28 }} />
                   </span>
                   <span className="post-img-count">
-                    {run + 1}/{adImgs.length}
+                    {runAd + 1}/{adImgs.length}
                   </span>
                 </>
               )}

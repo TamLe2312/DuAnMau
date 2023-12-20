@@ -98,6 +98,7 @@ function DetailMess(props) {
   useEffect(() => {
     const fetchApi = async () => {
       const res = await themeMes.themeMes(youID, myID);
+      console.log(res);
       if (res.length > 0) {
         setidTheme(res[0].id);
         setimgBG(res[0].theme);

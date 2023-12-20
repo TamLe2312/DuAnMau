@@ -38,6 +38,17 @@ function SuggestFollow() {
       });
       if (res.data.success) {
         toast.success(res.data.success);
+        if (dataFindArena.length > 0) {
+          setDataFindArena((prevData) =>
+            prevData.map((data) => {
+              if (data.id === id) {
+                return { ...data, isFollow: true };
+              } else {
+                return data;
+              }
+            })
+          );
+        }
         setDataSuggestFollow((prevData) =>
           prevData.map((data) => {
             if (data.id === id) {
@@ -61,6 +72,17 @@ function SuggestFollow() {
       });
       if (res.data.success) {
         toast.success(res.data.success);
+        if (dataFindArena.length > 0) {
+          setDataFindArena((prevData) =>
+            prevData.map((data) => {
+              if (data.id === id) {
+                return { ...data, isFollow: false };
+              } else {
+                return data;
+              }
+            })
+          );
+        }
         setDataSuggestFollow((prevData) =>
           prevData.map((data) => {
             if (data.id === id) {
@@ -141,10 +163,15 @@ function SuggestFollow() {
         });
         if (!res.data.length) {
           toast.error("Không tìm thấy người dùng ở khu vực bạn đang tìm");
+          setDataFindArena([]);
         } else {
           toast.success("Tìm thành công");
+          const updatedData = res.data.map((item) => ({
+            ...item,
+            isFollow: false,
+          }));
+          setDataFindArena(updatedData);
         }
-        setDataFindArena(res.data);
       } catch (err) {
         console.error(err);
       }
